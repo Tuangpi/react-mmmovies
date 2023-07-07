@@ -2,7 +2,7 @@ import "../../style/cardlist.scss";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db } from "../../configs/firebase";
 
 const GenreLists = () => {
   const [data, setData] = useState([]);
@@ -58,7 +58,7 @@ const GenreLists = () => {
     <div className="datatable">
       <div className="datatableTitle">
         All Genres
-        <Link to="/actors/new" className="link">
+        <Link to="/genres/new" className="link">
           Add New
         </Link>
       </div>

@@ -1,6 +1,6 @@
-import Sidebar from "../components/sidebar/Sidebar";
-import Navbar from "../components/navbar/Navbar";
-import TvSeriesLists from "./list/TvSeriesLists";
+import Sidebar from "../../components/sidebar/Sidebar";
+import Navbar from "../../components/navbar/Navbar";
+import TvSeriesLists from "./TvSeriesLists";
 
 const TvSeries = () => {
   return (

@@ -12,16 +12,16 @@ import {
   serverTimestamp,
   where,
 } from "firebase/firestore";
-import { db, storage } from "../../firebase";
+import { db, storage } from "../../configs/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { GetData } from "./NewMovieHelper/GetData";
-import { ForActors } from "./NewMovieHelper/ForActors";
-import { ForDirectors } from "./NewMovieHelper/ForDirectors";
-import { ForGenres } from "./NewMovieHelper/ForGenres";
+import { GetData } from "../new/NewMovieHelper/GetData";
+import { ForActors } from "../new/NewMovieHelper/ForActors";
+import { ForDirectors } from "../new/NewMovieHelper/ForDirectors";
+import { ForGenres } from "../new/NewMovieHelper/ForGenres";
 import { CustomModal } from "../../components/widget/CustomModal";
-import { SearchObjects } from "./NewMovieHelper/FetchObjects";
+import { SearchObjects } from "../new/NewMovieHelper/FetchObjects";
 
 const NewMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);

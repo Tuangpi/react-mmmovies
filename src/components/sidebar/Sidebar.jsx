@@ -14,7 +14,7 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import { Link, useLocation } from "react-router-dom";
 import { DarkModeContext } from "../../context/darkModeContext";
 import { useContext, useEffect, useState } from "react";
-import { auth } from "../../firebase";
+import { auth } from "../../configs/firebase";
 import {
   DashboardCustomize,
   Menu,
@@ -26,7 +26,6 @@ import {
   SettingsApplications,
   Tv,
 } from "@mui/icons-material";
-import classNames from "classnames";
 
 const Sidebar = () => {
   const { dispatch } = useContext(DarkModeContext);
@@ -128,38 +127,51 @@ const Sidebar = () => {
           )}
 
           <p className="title">SETTINGS</p>
-          <li>
-            <DashboardCustomize className="icon" />
-            <span>Site-Customization</span>
-          </li>
-          <li>
-            <Settings className="icon" />
-            <span>Site-Setting</span>
-          </li>
-          <li>
-            <PlayCircleRounded className="icon" />
-            <span>Player Setting</span>
-          </li>
-          <li>
-            <Payment className="icon" />
-            <span>Payment Gateway</span>
-          </li>
-          <li>
-            <SettingsApplications className="icon" />
-            <span>App Setting</span>
-          </li>
+          <Link to="/site-customization" style={{ textDecoration: "none" }}>
+            <li>
+              <DashboardCustomize className="icon" />
+              <span>Site-Customization</span>
+            </li>
+          </Link>
+          <Link to="/site-setting" style={{ textDecoration: "none" }}>
+            <li>
+              <Settings className="icon" />
+              <span>Site-Setting</span>
+            </li>
+          </Link>
+          <Link to="/player-setting" style={{ textDecoration: "none" }}>
+            <li>
+              <PlayCircleRounded className="icon" />
+              <span>Player Setting</span>
+            </li>
+          </Link>
+          <Link to="/payment-gateway" style={{ textDecoration: "none" }}>
+            <li>
+              <Payment className="icon" />
+              <span>Payment Gateway</span>
+            </li>
+          </Link>
+          <Link to="/app-setting" style={{ textDecoration: "none" }}>
+            <li>
+              <SettingsApplications className="icon" />
+              <span>App Setting</span>
+            </li>
+          </Link>
+
           <p className="title">SUPPORT</p>
-          <li>
-            <Settings className="icon" />
-            <span>Help And Support</span>
-          </li>
+          <Link to="/help-and-support" style={{ textDecoration: "none" }}>
+            <li>
+              <Settings className="icon" />
+              <span>Help And Support</span>
+            </li>
+          </Link>
           <li onClick={handleLogout}>
             <ExitToAppIcon className="icon" />
             <span>Logout</span>
           </li>
         </ul>
       </div>
-      <div className="bottom">
+      {/* <div className="bottom">
         <div
           className="colorOption"
           onClick={() => dispatch({ type: "LIGHT" })}
@@ -168,7 +180,7 @@ const Sidebar = () => {
           className="colorOption"
           onClick={() => dispatch({ type: "DARK" })}
         ></div>
-      </div>
+      </div> */}
     </div>
   );
 };

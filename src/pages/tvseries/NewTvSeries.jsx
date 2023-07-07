@@ -5,12 +5,12 @@ import Navbar from "../../components/navbar/Navbar";
 import { useState } from "react";
 import Loading from "react-loading";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db, storage } from "../../firebase";
+import { db, storage } from "../../configs/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { ForGenres } from "./NewMovieHelper/ForGenres";
-import { GetData } from "./NewMovieHelper/GetData";
+import { ForGenres } from "../new/NewMovieHelper/ForGenres";
+import { GetData } from "../new/NewMovieHelper/GetData";
 
 const NewTvSeries = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);

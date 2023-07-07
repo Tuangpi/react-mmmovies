@@ -1,6 +1,6 @@
-import Navbar from "../components/navbar/Navbar";
-import Sidebar from "../components/sidebar/Sidebar";
-import DirectorLists from "./list/DirectorLists";
+import Navbar from "../../components/navbar/Navbar";
+import Sidebar from "../../components/sidebar/Sidebar";
+import DirectorLists from "./DirectorLists";
 
 const Directors = () => {
   return (

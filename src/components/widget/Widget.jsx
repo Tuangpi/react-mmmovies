@@ -7,7 +7,8 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
 import { useEffect, useState } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db } from "../../configs/firebase";
+import { MovieFilterSharp, TvOutlined } from "@mui/icons-material";
 
 const Widget = ({ type }) => {
   const [amount, setAmount] = useState(null);
@@ -20,7 +21,7 @@ const Widget = ({ type }) => {
         title: "USERS",
         isMoney: false,
         link: "See all users",
-        query:"users",
+        query: "users",
         icon: (
           <PersonOutlinedIcon
             className="icon"
@@ -32,13 +33,13 @@ const Widget = ({ type }) => {
         ),
       };
       break;
-    case "order":
+    case "movies":
       data = {
-        title: "ORDERS",
+        title: "MOVIES",
         isMoney: false,
-        link: "View all orders",
+        link: "View all Movies",
         icon: (
-          <ShoppingCartOutlinedIcon
+          <MovieFilterSharp
             className="icon"
             style={{
               backgroundColor: "rgba(218, 165, 32, 0.2)",
@@ -61,13 +62,13 @@ const Widget = ({ type }) => {
         ),
       };
       break;
-    case "product":
+    case "tvseries":
       data = {
-        title: "PRODUCTS",
-        query:"products",
-        link: "See details",
+        title: "TV Series",
+        query: "tvseries",
+        link: "View all Movies",
         icon: (
-          <AccountBalanceWalletOutlinedIcon
+          <TvOutlined
             className="icon"
             style={{
               backgroundColor: "rgba(128, 0, 128, 0.2)",
@@ -103,7 +104,8 @@ const Widget = ({ type }) => {
 
       setAmount(lastMonthData.docs.length);
       setDiff(
-        ((lastMonthData.docs.length - prevMonthData.docs.length) / prevMonthData.docs.length) *
+        ((lastMonthData.docs.length - prevMonthData.docs.length) /
+          prevMonthData.docs.length) *
           100
       );
     };
@@ -121,7 +123,7 @@ const Widget = ({ type }) => {
       </div>
       <div className="right">
         <div className={`percentage ${diff < 0 ? "negative" : "positive"}`}>
-          {diff < 0 ? <KeyboardArrowDownIcon/> : <KeyboardArrowUpIcon/> }
+          {diff < 0 ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
           {diff} %
         </div>
         {data.icon}

@@ -7,7 +7,7 @@ import {
   serverTimestamp,
   where,
 } from "firebase/firestore";
-import { db, storage } from "../../../firebase";
+import { db, storage } from "../../../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 export const ForActors = async (TMDB_API_KEY, credits) => {

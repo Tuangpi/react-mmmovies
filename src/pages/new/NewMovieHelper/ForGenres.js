@@ -8,7 +8,7 @@ import {
   serverTimestamp,
   where,
 } from "firebase/firestore";
-import { db } from "../../../firebase";
+import { db } from "../../../configs/firebase";
 
 export const ForGenres = async (data) => {
   let genreIds = [];

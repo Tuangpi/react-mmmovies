@@ -2,19 +2,15 @@ import "../../style/cardlist.scss";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { db } from "../../firebase";
-import { motion } from "framer-motion";
-import Loading from "react-loading";
-import ImageComponent from "../../components/widget/ImageComponent";
+import { db } from "../../configs/firebase";
 
-const MovieLists = () => {
+const TvSeriesLists = () => {
   const [data, setData] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
       let list = [];
       try {
-        const querySnapshot = await getDocs(collection(db, "movies"));
+        const querySnapshot = await getDocs(collection(db, "tvseries"));
         querySnapshot.forEach((doc) => {
           list.push(doc.data());
         });
@@ -23,13 +19,12 @@ const MovieLists = () => {
         console.log(err);
       }
     };
-
     fetchData();
   }, []);
 
   const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, "movies", id));
+      await deleteDoc(doc(db, "tvseries", id));
       setData(data.filter((item) => item.id !== id));
     } catch (err) {
       console.log(err);
@@ -62,28 +57,20 @@ const MovieLists = () => {
   return (
     <div className="datatable">
       <div className="datatableTitle">
-        All Movie
-        <Link to="/movies/new" className="link">
+        All TVSeries
+        <Link to="/tvseries/new" className="link">
           Add New
         </Link>
       </div>
       <div className="movie-card">
         {data.length > 0 ? (
           data.map((item, id) => (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="card"
-              key={id}
-            >
-              <ImageComponent
-                alter="movie poster"
+            <div className="card" key={id}>
+              <img
                 src={item.poster}
+                alt="Movie Poster"
                 className="card-image"
               />
-
               <div className="card-details">
                 <h2 className="card-title">{item.title}</h2>
                 <div className="card-info">
@@ -121,7 +108,7 @@ const MovieLists = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))
         ) : (
           <div className="nodata">nodata</div>
@@ -131,4 +118,4 @@ const MovieLists = () => {
   );
 };
 
-export default MovieLists;
+export default TvSeriesLists;

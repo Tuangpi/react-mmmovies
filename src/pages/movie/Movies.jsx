@@ -1,6 +1,6 @@
-import Sidebar from "../components/sidebar/Sidebar";
-import Navbar from "../components/navbar/Navbar";
-import MovieLists from "./list/MovieLists";
+import Sidebar from "../../components/sidebar/Sidebar";
+import Navbar from "../../components/navbar/Navbar";
+import MovieLists from "./MovieLists";
 
 const Movies = () => {
   return (

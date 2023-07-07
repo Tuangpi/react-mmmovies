@@ -1,5 +1,5 @@
 import { S3 } from "aws-sdk";
-import awsConfig, { myBucket } from "../../../wasabi";
+import awsConfig, { myBucket } from "../../../configs/wasabi";
 import moment from "moment";
 
 export const SearchObjects = (searchPattern) => {

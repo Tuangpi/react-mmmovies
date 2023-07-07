@@ -1,6 +1,6 @@
-import Navbar from "../components/navbar/Navbar";
-import Sidebar from "../components/sidebar/Sidebar";
-import ActorLists from "./list/ActorLists";
+import Navbar from "../../components/navbar/Navbar";
+import Sidebar from "../../components/sidebar/Sidebar";
+import ActorLists from "./ActorLists";
 
 const Actors = () => {
   return (

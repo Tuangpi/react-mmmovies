@@ -1,6 +1,6 @@
-import Navbar from "../components/navbar/Navbar";
-import Sidebar from "../components/sidebar/Sidebar";
-import GenreLists from "./list/GenreLists";
+import Navbar from "../../components/navbar/Navbar";
+import Sidebar from "../../components/sidebar/Sidebar";
+import GenreLists from "./GenreLists";
 
 const Genres = () => {
   return (

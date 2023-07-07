@@ -2,16 +2,15 @@ import "../../style/cardlist.scss";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { db } from "../../firebase";
-import ImageComponent from "../../components/widget/ImageComponent";
+import { db } from "../../configs/firebase";
 
-const DirectorLists = () => {
+const ActorLists = () => {
   const [data, setData] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       let list = [];
       try {
-        const querySnapshot = await getDocs(collection(db, "directors"));
+        const querySnapshot = await getDocs(collection(db, "actors"));
         querySnapshot.forEach((doc) => {
           list.push(doc.data());
         });
@@ -25,7 +24,7 @@ const DirectorLists = () => {
 
   const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, "directors", id));
+      await deleteDoc(doc(db, "actors", id));
       setData(data.filter((item) => item.id !== id));
     } catch (err) {
       console.log(err);
@@ -58,7 +57,7 @@ const DirectorLists = () => {
   return (
     <div className="datatable">
       <div className="datatableTitle">
-        All Director
+        All Actor
         <Link to="/actors/new" className="link">
           Add New
         </Link>
@@ -66,11 +65,7 @@ const DirectorLists = () => {
       <div className="movie-card">
         {data.map((item, id) => (
           <div className="card" key={id}>
-            <ImageComponent
-              alt="Director Poster"
-              src={item.image}
-              className="card-image"
-            />
+            <img src={item.image} alt="Actor Poster" className="card-image" />
             <div className="card-details">
               <h2 className="card-title">{item.name}</h2>
               <div className="card-info">
@@ -100,4 +95,4 @@ const DirectorLists = () => {
   );
 };
 
-export default DirectorLists;
+export default ActorLists;
