@@ -1,0 +1,73 @@
+.movie-card {
+  width: 100%;
+  display: flex;
+  row-gap: 1rem;
+  column-gap: 1rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: auto;
+  margin-left: 0.5rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 190px;
+  background-color: rgb(236, 236, 236);
+  padding: 0.4rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.card-image {
+  /* Add styling properties for the image */
+  width: 98%;
+}
+
+.card-details {
+  /* Add styling properties for the card details container */
+}
+
+.card-title {
+  /* Add styling properties for the movie title */
+}
+
+.card-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  /* Add styling properties for the card info container */
+}
+
+.card-year,
+.card-length {
+  /* Add styling properties for the year and length elements */
+}
+
+.card-ratings {
+  /* Add styling properties for the ratings */
+}
+
+.star-rating {
+  /* Add styling properties for the star rating */
+}
+
+.card-genre {
+  /* Add styling properties for the genre */
+}
+
+.card-creator-status {
+  display: flex;
+  justify-content: space-between;
+  /* Add styling properties for the creator and status elements */
+}
+
+.card-creator,
+.card-status {
+  /* Add styling properties for the creator and status elements */
+}
+
+.nodata {
+  margin: auto;
+  margin-top: 30dvh;
+}

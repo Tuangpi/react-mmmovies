@@ -1,0 +1,65 @@
+.modal-card {
+  position: relative;
+  width: 180px;
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  &:hover {
+    scale: 1.05;
+    cursor: pointer;
+    // &::before {
+    //   content: "select";
+    //   position: relative;
+    //   top: 0;
+    //   left: 50%;
+    //   width: 100%;
+    //   height: 4rem;
+    //   background-color: black;
+    //   color: white;
+    //   cursor: pointer;
+    //   opacity: 1;
+    //   z-index: 3405;
+    // }
+  }
+}
+.modal-card-extension {
+  margin: 0.5rem;
+  padding: 3rem 0;
+  background-color: rgb(209, 209, 209);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  text-transform: uppercase;
+  color: rgb(78, 78, 78);
+  font-weight: 800;
+  font-family: sans-serif;
+}
+.modal-card-title {
+  padding: 0.3rem 0.5rem;
+  font-size: smaller;
+  font-weight: 600;
+  color: rgb(94, 94, 94);
+}
+.modal-meta-data {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.2rem 0.5rem 0.6rem 0.5rem;
+  font-size: xx-small;
+  font-weight: 600;
+  color: rgb(153, 153, 153);
+}
+.modal-search {
+  align-self: flex-end;
+  margin-top: 2rem;
+  margin-right: 2rem;
+}
+.show {
+  position: absolute;
+  z-index: 104;
+  top: 125px;
+  left: 24px;
+  height: 14.5vh;
+  width: 15%;
+  opacity: 0.1;
+  background-color: rgb(70, 70, 70);
+}
