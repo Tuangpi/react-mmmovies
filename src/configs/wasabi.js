@@ -1,9 +1,9 @@
 const awsConfig = {
-  accessKeyId: "3895T1ZCZMZC7WFVZEG0",
-  secretAccessKey: "Lma7hDlgdJ8PuyjXeSgRdvhbNCYElVXYsd2zS7rk",
-  endpoint: "https://s3.ap-southeast-1.wasabisys.com", // Set the Wasabi service endpoint
+  accessKeyId: process.env.REACT_APP_WASABI_ACCESS_KEY,
+  secretAccessKey: process.env.REACT_APP_SECRET_KEY,
+  endpoint: process.env.REACT_APP_ENDPOINT,
   s3ForcePathStyle: true, // Required for Wasabi
 };
-export const myBucket = "mmmovies";
+export const myBucket = process.env.REACT_APP_BUCKET_NAME;
 
 export default awsConfig;
