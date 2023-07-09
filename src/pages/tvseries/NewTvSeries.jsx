@@ -139,13 +139,14 @@ const NewTvSeries = ({ title }) => {
               </div>
               <div className="form-block">
                 <div className="form-block-inside">
-                  <label>
+                  <div>Search TVSeries By TMDB ID</div>
+                  <label className="toggle-switch">
                     <input
                       type="checkbox"
                       checked={searchByToggle}
                       onChange={handleSearchByToggle}
                     />
-                    Search TvSeries By TMDB ID
+                    <span className="slider"></span>
                   </label>
                 </div>
                 {searchByToggle ? (
@@ -183,37 +184,56 @@ const NewTvSeries = ({ title }) => {
                 </div>
                 <div className="form-block-inside">
                   <label htmlFor="metaDescription">Meta Description:</label>
-                  <input type="text" id="metaDescription" />
+                  <textarea name="" id="metaDescription" cols="30"></textarea>
                 </div>
               </div>
               <div className="form-block">
                 <div className="form-block-inside">
-                  <label htmlFor="featured">Featured:</label>
-                  <input type="checkbox" id="featured" />
+                  <div>Featured:</div>
+                  <label htmlFor="featured" className="toggle-switch">
+                    <input type="checkbox" id="featured" />
+                    <span className="slider"></span>
+                  </label>
                 </div>
                 <div className="form-block-inside">
                   <label htmlFor="selectMenu">Select Menu*:</label>
-                  <input type="text" id="selectMenu" />
+                  <input type="checkbox" id="selectMenu" />
                 </div>
               </div>
 
               <div className="form-block">
                 <div className="form-block-inside">
-                  <label>More Details:</label>
+                  <label>More Details: TMDB Or Custom?</label>
                   <div className="radio-group">
-                    <input type="radio" id="tmdb" name="details" value="tmdb" />
-                    <label htmlFor="tmdb">TMDB</label>
-                    <input
-                      type="radio"
-                      id="custom"
-                      name="details"
-                      value="custom"
-                    />
-                    <label htmlFor="custom">Custom</label>
+                    <div>
+                      <input
+                        type="radio"
+                        id="tmdb"
+                        name="details"
+                        value="tmdb"
+                        className="hidden-radio"
+                        checked
+                      />
+                      <label htmlFor="tmdb" className="button-style">
+                        TMDB
+                      </label>
+                    </div>
+                    <div>
+                      <input
+                        type="radio"
+                        id="custom"
+                        name="details"
+                        value="custom"
+                        className="hidden-radio"
+                      />
+                      <label htmlFor="custom" className="button-style">
+                        Custom
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="form-block">
+              <div className="form-block-myanmar">
                 <div className="form-block-inside">
                   <label htmlFor="descriptionSource">
                     Get Description From:
@@ -224,7 +244,11 @@ const NewTvSeries = ({ title }) => {
                   <label htmlFor="descriptionMyanmar">
                     Description in Myanmar:
                   </label>
-                  <input type="text" id="descriptionMyanmar" />
+                  <textarea
+                    name=""
+                    id="descriptionMyanmar"
+                    cols="30"
+                  ></textarea>
                 </div>
               </div>
 

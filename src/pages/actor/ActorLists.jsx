@@ -6,6 +6,8 @@ import { db } from "../../configs/firebase";
 
 const ActorLists = () => {
   const [data, setData] = useState([]);
+  const [jsonData, setJsonData] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       let list = [];
@@ -21,6 +23,20 @@ const ActorLists = () => {
     };
     fetchData();
   }, []);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const fileContent = event.target.result;
+      const parsedData = JSON.parse(fileContent);
+      console.log(parsedData);
+      setJsonData(parsedData);
+    };
+
+    reader.readAsText(file);
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -58,6 +74,8 @@ const ActorLists = () => {
     <div className="datatable">
       <div className="datatableTitle">
         All Actor
+        <input type="file" onChange={handleFileUpload} />
+        Import From CSV
         <Link to="/actors/new" className="link">
           Add New
         </Link>

@@ -54,22 +54,22 @@ export const CustomModal = ({
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (searchQuery && searchQuery !== "") {
-        setIsLoading(true);
-        try {
-          const fetchedObjects = await SearchObjects(searchQuery);
-          setObjects(fetchedObjects);
-        } catch (error) {
-          console.error("Error fetching objects:", error);
-        }
-        setIsLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (searchQuery && searchQuery !== "") {
+  //       setIsLoading(true);
+  //       try {
+  //         const fetchedObjects = await SearchObjects(searchQuery);
+  //         setObjects(fetchedObjects);
+  //       } catch (error) {
+  //         console.error("Error fetching objects:", error);
+  //       }
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-    fetchData();
-  }, [searchQuery]);
+  //   fetchData();
+  // }, [searchQuery]);
 
   console.log(objects);
   // Backdrop JSX code

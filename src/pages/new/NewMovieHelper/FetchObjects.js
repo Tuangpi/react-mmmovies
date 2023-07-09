@@ -37,14 +37,12 @@ export const ListObjects = async (abortSignal) => {
   // do {
   const params1 = {
     Bucket: myBucket,
-    MaxKeys: 500,
+    MaxKeys: 50,
     // ContinuationToken: continuationToken,
   };
 
   try {
-    const response = await s3
-      .listObjectsV2(params1)
-      .promise({ signal: abortSignal });
+    const response = await s3.listObjectsV2(params1).promise();
     objects.push(...response.Contents);
     // continuationToken = response.NextContinuationToken;
   } catch (error) {
@@ -54,33 +52,31 @@ export const ListObjects = async (abortSignal) => {
   // } while (continuationToken && objects.length < 10);
   return await prepareDisplay(s3, objects, abortSignal);
 };
-const prepareDisplay = async (s3, objects, abortSignal) => {
+const prepareDisplay = async (s3, objects) => {
   let resultObj = [];
   objects.map(async (obj) => {
     const params2 = {
       Bucket: myBucket,
       Key: obj.Key,
     };
-    const metaData = await s3.headObject(params2);
-    if (obj.Key) {
-      if (metaData.ContentLength > 0) {
-        if (metaData.ContentType.includes("video/")) {
-          const newObj = {
-            fileTime: moment(metaData.LastModified).calendar(null, {
-              sameDay: "[Today]",
-              nextDay: "[Tomorrow]",
-              nextWeek: "dddd",
-              lastDay: "[Yesterday]",
-              lastWeek: "[Last] dddd",
-              sameElse: "DD/MM/YYYY",
-            }),
-            size: formatBytes(metaData.ContentLength),
-            name: obj.Key.replace(/^movies_upload_wasabi\//, ""),
-            extension: metaData.ContentType.replace(/^video\//, ""),
-            path: obj.Key,
-          };
-          resultObj.push(newObj);
-        }
+    const metaData = await s3.headObject(params2).promise();
+    if (metaData.ContentLength > 0) {
+      if (metaData.ContentType.includes("video/")) {
+        const newObj = {
+          fileTime: moment(metaData.LastModified).calendar(null, {
+            sameDay: "[Today]",
+            nextDay: "[Tomorrow]",
+            nextWeek: "dddd",
+            lastDay: "[Yesterday]",
+            lastWeek: "[Last] dddd",
+            sameElse: "DD/MM/YYYY",
+          }),
+          size: formatBytes(metaData.ContentLength),
+          name: obj.Key.replace(/^movies_upload_wasabi\//, ""),
+          extension: metaData.ContentType.replace(/^video\//, ""),
+          path: obj.Key,
+        };
+        resultObj.push(newObj);
       }
     }
   });

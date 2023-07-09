@@ -31,7 +31,7 @@ const NewMovie = ({ title }) => {
   const [isUpcoming, setIsUpcoming] = useState(false);
   const [upcomingDate, setUpcomingDate] = useState("");
   const [videoUpload, setVideoUpload] = useState("");
-  const [selectedOption, setSelectedOption] = useState("");
+  const [selectedOption, setSelectedOption] = useState("url");
   const [movieSlug, setMovieSlug] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectKey, setSelectKey] = useState(null);
@@ -241,13 +241,15 @@ const NewMovie = ({ title }) => {
             </div>
             <div className="form-block">
               <div className="form-block-inside">
-                <label>
+                <div>Search Movie By TMDB ID</div>
+                <label className="toggle-switch">
                   <input
                     type="checkbox"
                     checked={searchByToggle}
                     onChange={handleSearchByToggle}
                   />
-                  Search Movie By TMDB ID
+
+                  <span className="slider"></span>
                 </label>
               </div>
               {searchByToggle ? (
@@ -258,6 +260,7 @@ const NewMovie = ({ title }) => {
                     id="movieName"
                     value={movieTitle}
                     onChange={handleMovieTitleChange}
+                    placeholder="Enter Movie Title"
                   />
                 </div>
               ) : (
@@ -268,24 +271,34 @@ const NewMovie = ({ title }) => {
                     type="text"
                     value={movieTitle}
                     onChange={handleMovieTitleChange}
+                    placeholder="Enter TMDB ID"
                   />
                 </div>
               )}
 
               <div className="form-block-inside">
                 <label htmlFor="movieSlug">Movie Slug:</label>
-                <input type="text" id="movieSlug" onChange={handleMovieSlug} />
+                <input
+                  type="text"
+                  id="movieSlug"
+                  onChange={handleMovieSlug}
+                  placeholder="Enter Movie Slug"
+                />
               </div>
             </div>
             <div className="form-block">
               <div className="form-block-inside">
-                <label htmlFor="upcomingMovie">Upcoming Movie:</label>
-                <input
-                  type="checkbox"
-                  id="upcomingMovie"
-                  checked={isUpcoming}
-                  onChange={handleUpcomingToggle}
-                />
+                <div>Upcoming Movie?:</div>
+                <label htmlFor="upcomingMovie" className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    id="upcomingMovie"
+                    checked={isUpcoming}
+                    onChange={handleUpcomingToggle}
+                  />
+
+                  <span className="slider"></span>
+                </label>
               </div>
               {isUpcoming ? (
                 <div className="form-block-inside">
@@ -297,37 +310,131 @@ const NewMovie = ({ title }) => {
                   />
                 </div>
               ) : (
-                <div className="form-block-inside">
-                  <label htmlFor="videoType">Video Type:</label>
-                  <select
-                    id="videoType"
-                    // value={videoUpload}
-                    // onChange={handleVideoUploadChange}
-                    value={selectedOption}
-                    onChange={handleSelectChange}
-                  >
-                    <option value="">-- Select an option --</option>
-                    <option value="option1">Option 1</option>
-                    <option value="option2">Option 2</option>
-                    <option value="option3">Option 3</option>
-                  </select>
-                </div>
+                <>
+                  <div className="form-block-inside">
+                    <label htmlFor="videoType">Video Type:</label>
+                    <select
+                      id="videoType"
+                      // value={videoUpload}
+                      // onChange={handleVideoUploadChange}
+                      value={selectedOption}
+                      onChange={handleSelectChange}
+                    >
+                      <option value="url">
+                        Customer URL/Youtube URL/Vimeo URL
+                      </option>
+                      <option value="upload">Upload Video</option>
+                      <option value="multi">
+                        Multi Quality Custom URL & URL Upload
+                      </option>
+                    </select>
+                  </div>
+                  {selectedOption === "url" ? (
+                    <div className="form-block-inside">
+                      <label htmlFor="iframeUrl">
+                        Enter Custom URL or Vimeo or Youtube URL:
+                      </label>
+                      <input
+                        type="text"
+                        id="iframeUrl"
+                        placeholder="Enter Custom URL or Vimeo or Youtube URL"
+                      />
+                    </div>
+                  ) : selectedOption === "upload" ? (
+                    <>
+                      <div className="form-block-inside">
+                        <label htmlFor="upload">Upload Video:</label>
+                        <input
+                          type="text"
+                          id="upload"
+                          value={selectKey}
+                          placeholder="Choose A Video"
+                        />
+                      </div>
+                      <div className="form-block-inside">
+                        <button
+                          type="button"
+                          onClick={() => setShowModal(true)}
+                        >
+                          Choose A Video
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="form-block-inside">
+                        <label htmlFor="url_360">Upload Video in 360p:</label>
+                        <input
+                          type="text"
+                          id="url_360"
+                          placeholder="Choose A Video"
+                        />
+                      </div>
+                      <div className="form-block-inside">
+                        <button
+                          type="button"
+                          onClick={() => setShowModal(true)}
+                        >
+                          Choose A Video
+                        </button>
+                      </div>
+                      <div className="form-block-inside">
+                        <label htmlFor="url_480">Upload Video in 480p:</label>
+                        <input
+                          type="text"
+                          id="url_480"
+                          placeholder="Choose A Video"
+                        />
+                      </div>
+                      <div className="form-block-inside">
+                        <button
+                          type="button"
+                          onClick={() => setShowModal(true)}
+                        >
+                          Choose A Video
+                        </button>
+                      </div>
+                      <div className="form-block-inside">
+                        <label htmlFor="url_720">Upload Video in 720p:</label>
+                        <input
+                          type="text"
+                          id="url_720"
+                          placeholder="Choose A Video"
+                        />
+                      </div>
+                      <div className="form-block-inside">
+                        <button
+                          type="button"
+                          onClick={() => setShowModal(true)}
+                        >
+                          Choose A Video
+                        </button>
+                      </div>
+                      <div className="form-block-inside">
+                        <label htmlFor="url_1080">Upload Video in 1080p:</label>
+                        <input
+                          type="text"
+                          id="url_1080"
+                          placeholder="Choose A Video"
+                        />
+                      </div>
+                      <div className="form-block-inside">
+                        <button
+                          type="button"
+                          onClick={() => setShowModal(true)}
+                        >
+                          Choose A Video
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </>
               )}
-
-              <div className="form-block-inside">
-                <label htmlFor="iframeUrl">Iframe URL and Embedded URL:</label>
-                <input type="text" id="iframeUrl" />
-              </div>
-              <div className="form-block-inside">
-                <button type="button" onClick={() => setShowModal(true)}>
-                  Choose
-                </button>
-              </div>
             </div>
             <div className="form-block">
               <div className="form-block-inside">
                 <label htmlFor="audioLanguages">Audio Languages:</label>
-                <input type="text" id="audioLanguages" />
+                <input type="text" id="audioLanguages" placeholder="" />
               </div>
               <div className="form-block-inside">
                 <label htmlFor="maturityRating">Maturity Rating:</label>
@@ -343,55 +450,84 @@ const NewMovie = ({ title }) => {
               </div>
               <div className="form-block-inside">
                 <label htmlFor="metaDescription">Meta Description:</label>
-                <input type="text" id="metaDescription" />
+                <textarea name="" id="metaDescription" cols="30"></textarea>
               </div>
             </div>
             <div className="form-block">
               <div className="form-block-inside">
-                <label htmlFor="series">Series:</label>
-                <input type="checkbox" id="series" />
-              </div>
-              <div className="form-block-inside">
-                <label htmlFor="featured">Featured:</label>
-                <input type="checkbox" id="featured" />
-              </div>
-              <div className="form-block-inside">
-                <label htmlFor="subtitle">Subtitle:</label>
-                <input type="checkbox" id="subtitle" />
-              </div>
-              <div className="form-block-inside">
-                <label htmlFor="protectedVideo">Protected Video?:</label>
-                <input type="checkbox" id="protectedVideo" />
-              </div>
-              <div className="form-block-inside">
-                <label htmlFor="customThumbnail">
-                  Choose Custom Thumbnail and Poster:
+                <div>Series:</div>
+                <label htmlFor="series" className="toggle-switch">
+                  <input type="checkbox" id="series" />
+                  <span className="slider"></span>
                 </label>
-                <input type="checkbox" id="customThumbnail" />
+              </div>
+              <div className="form-block-inside">
+                <div>Featured:</div>
+                <label htmlFor="featured" className="toggle-switch">
+                  <input type="checkbox" id="featured" />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <div className="form-block-inside">
+                <div>Subtitle:</div>
+                <label htmlFor="subtitle" className="toggle-switch">
+                  <input type="checkbox" id="subtitle" />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <div className="form-block-inside">
+                <div>Protected Video?:</div>
+                <label htmlFor="protectedVideo" className="toggle-switch">
+                  <input type="checkbox" id="protectedVideo" />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <div className="form-block-inside">
+                <div>Choose Custom Thumbnail and Poster:</div>
+                <label htmlFor="customThumbnail" className="toggle-switch">
+                  <input type="checkbox" id="customThumbnail" />
+                  <span className="slider"></span>
+                </label>
               </div>
               <div className="form-block-inside">
                 <label htmlFor="selectMenu">Select Menu*:</label>
-                <input type="text" id="selectMenu" />
+                <input type="checkbox" id="selectMenu" />
               </div>
             </div>
 
             <div className="form-block">
               <div className="form-block-inside">
-                <label>More Details:</label>
+                <label>More Details: TMDB Or Custom?</label>
                 <div className="radio-group">
-                  <input type="radio" id="tmdb" name="details" value="tmdb" />
-                  <label htmlFor="tmdb">TMDB</label>
-                  <input
-                    type="radio"
-                    id="custom"
-                    name="details"
-                    value="custom"
-                  />
-                  <label htmlFor="custom">Custom</label>
+                  <div>
+                    <input
+                      type="radio"
+                      id="tmdb"
+                      name="details"
+                      value="tmdb"
+                      className="hidden-radio"
+                      checked
+                    />
+                    <label htmlFor="tmdb" className="button-style">
+                      TMDB
+                    </label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      id="custom"
+                      name="details"
+                      value="custom"
+                      className="hidden-radio"
+                    />
+                    <label htmlFor="custom" className="button-style">
+                      Custom
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="form-block">
+            <div className="form-block-myanmar">
               <div className="form-block-inside">
                 <label htmlFor="descriptionSource">Get Description From:</label>
                 <input type="text" id="descriptionSource" />
@@ -400,16 +536,16 @@ const NewMovie = ({ title }) => {
                 <label htmlFor="descriptionMyanmar">
                   Description in Myanmar:
                 </label>
-                <input type="text" id="descriptionMyanmar" />
+                <textarea name="" id="descriptionMyanmar" cols="30"></textarea>
               </div>
             </div>
-            {/* <CustomModal
-                showModal={showModal}
-                handleClose={handleClose}
-                handleSuccess={handleSuccess}
-                handleSelect={handleSelect}
-                handleSearch={handleSearch}
-              /> */}
+            <CustomModal
+              showModal={showModal}
+              handleClose={handleClose}
+              handleSuccess={handleSuccess}
+              handleSelect={handleSelect}
+              // handleSearch={handleSearch}
+            />
             <div className="form-block">
               <button type="submit">Create</button>
             </div>
