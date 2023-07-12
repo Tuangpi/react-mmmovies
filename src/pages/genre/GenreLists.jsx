@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import ImportData from "../../components/import/ImportData";
+import { STATIC_WORDS } from "../../assets/STATICWORDS";
 
 const GenreLists = () => {
   const [data, setData] = useState([]);
@@ -58,12 +59,17 @@ const GenreLists = () => {
   return (
     <div className="datatable">
       <div className="datatableTitle">
-        All Genres
-        <ImportData docName="genres" />
-        Import From CSV
-        <Link to="/genres/new" className="link">
-          Add New
-        </Link>
+        <div>All Genres</div>
+        <div className="title-right">
+          <div className="title-right-first">
+            <ImportData docName={STATIC_WORDS.GENRES} />
+          </div>
+          <div>
+            <Link to="/genres/new" className="link">
+              Add New
+            </Link>
+          </div>
+        </div>
       </div>
       <div className="movie-card">
         {data.map((item, id) => (

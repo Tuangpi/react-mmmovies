@@ -23,6 +23,7 @@ import { ForGenres } from "../new/NewMovieHelper/ForGenres";
 import { CustomModal } from "../../components/widget/CustomModal";
 import { SearchObjects } from "../new/NewMovieHelper/FetchObjects";
 import { fromURL } from "image-resize-compress";
+import { STATIC_WORDS } from "../../assets/STATICWORDS";
 
 const NewMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -84,11 +85,11 @@ const NewMovie = ({ title }) => {
 
   async function fetchDataAndStore() {
     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
-    const movieSnapShot = await getDocs(collection(db, "movies"));
+    const movieSnapShot = await getDocs(collection(db, STATIC_WORDS.MOVIES));
 
     if (!movieSnapShot.empty) {
       const q = query(
-        collection(db, "movies"),
+        collection(db, STATIC_WORDS.MOVIES),
         where("tmdb_id", "==", movieTitle)
       );
       const querySnapshot = await getDocs(q);
@@ -150,11 +151,9 @@ const NewMovie = ({ title }) => {
       console.log(err);
     }
 
-    console.log(posterURL);
-
     let movieRef = null;
     try {
-      const docRef = await addDoc(collection(db, "movies"), {
+      const docRef = await addDoc(collection(db, STATIC_WORDS.MOVIES), {
         tmdb_id: String(data["id"]),
         title: data["title"],
         slug: movieSlug,
@@ -194,7 +193,7 @@ const NewMovie = ({ title }) => {
       console.log(error);
     }
     try {
-      await addDoc(collection(db, "videolinks"), {
+      await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
         movie_id: movieRef,
         episode_id: null,
         type: "upload_video",

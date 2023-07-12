@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import { db, storage } from "../../../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { STATIC_WORDS } from "../../../assets/STATICWORDS";
 
 export const ForDirectors = async (TMDB_API_KEY, credits) => {
   let directorIds = [];
@@ -38,7 +39,9 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
       console.log(error);
     }
     if (directors.length > 0) {
-      const directorSnapShot = await getDocs(collection(db, "directors"));
+      const directorSnapShot = await getDocs(
+        collection(db, STATIC_WORDS.DIRECTORS)
+      );
       const isDirectorSnapShotEmpty = directorSnapShot.empty;
 
       if (isDirectorSnapShotEmpty) {
@@ -67,16 +70,19 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
 
         try {
           if (directorURL) {
-            const docRef = await addDoc(collection(db, "directors"), {
-              name: directors[0].data.name,
-              image: directorURL,
-              biography: directors[0].data.biography,
-              place_of_birth: directors[0].data.place_of_birth,
-              DOB: directors[0].data.birthday,
-              created_at: serverTimestamp(),
-              updated_at: serverTimestamp(),
-              slug: null,
-            });
+            const docRef = await addDoc(
+              collection(db, STATIC_WORDS.DIRECTORS),
+              {
+                name: directors[0].data.name,
+                image: directorURL,
+                biography: directors[0].data.biography,
+                place_of_birth: directors[0].data.place_of_birth,
+                DOB: directors[0].data.birthday,
+                created_at: serverTimestamp(),
+                updated_at: serverTimestamp(),
+                slug: null,
+              }
+            );
             directorIds.push(docRef);
           }
         } catch (error) {
@@ -92,7 +98,7 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
         .slice(initial, directors.length)
         .map((item) => item.data.name);
       const q = query(
-        collection(db, "directors"),
+        collection(db, STATIC_WORDS.DIRECTORS),
         where("name", "in", directorNames)
       );
 
@@ -158,7 +164,7 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
 
         for (let i = initial; i < directors.length; i++) {
           if (directorsURL[initial === 1 ? i - 1 : i]) {
-            const docRef = addDoc(collection(db, "directors"), {
+            const docRef = addDoc(collection(db, STATIC_WORDS.DIRECTORS), {
               name: directors[i].data.name,
               image: directorsURL[initial === 1 ? i - 1 : i],
               biography: directors[i].data.biography,

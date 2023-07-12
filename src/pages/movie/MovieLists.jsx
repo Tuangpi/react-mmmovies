@@ -6,6 +6,7 @@ import { db } from "../../configs/firebase";
 import { motion } from "framer-motion";
 import ImageComponent from "../../components/widget/ImageComponent";
 import ImportData from "../../components/import/ImportData";
+import { STATIC_WORDS } from "../../assets/STATICWORDS";
 
 const MovieLists = () => {
   const [data, setData] = useState([]);
@@ -14,7 +15,9 @@ const MovieLists = () => {
     const fetchData = async () => {
       let list = [];
       try {
-        const querySnapshot = await getDocs(collection(db, "movies"));
+        const querySnapshot = await getDocs(
+          collection(db, STATIC_WORDS.MOVIES)
+        );
         querySnapshot.forEach((doc) => {
           list.push(doc.data());
         });
@@ -62,12 +65,15 @@ const MovieLists = () => {
   return (
     <div className="datatable">
       <div className="datatableTitle">
-        All Movie
-        <ImportData docName="movies" />
-        Import From CSV
-        <Link to="/movies/new" className="link">
-          Add New
-        </Link>
+        <div>All Movie</div>
+        <div className="title-right">
+          <div className="title-right-first">
+            <ImportData docName={STATIC_WORDS.MOVIES} />
+          </div>
+          <Link to="/movies/new" className="link">
+            Add New
+          </Link>
+        </div>
       </div>
       <div className="movie-card">
         {data.length > 0 ? (

@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import { db, storage } from "../../../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { STATIC_WORDS } from "../../../assets/STATICWORDS";
 
 export const ForActors = async (TMDB_API_KEY, credits) => {
   let actorIds = [];
@@ -31,7 +32,7 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
       console.error(error);
     }
     if (actors.length > 0) {
-      const actorSnapShot = await getDocs(collection(db, "actors"));
+      const actorSnapShot = await getDocs(collection(db, STATIC_WORDS.ACTORS));
       const isActorSnapShotEmpty = actorSnapShot.empty;
 
       if (isActorSnapShotEmpty) {
@@ -57,7 +58,7 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
         }
 
         try {
-          const docRef = await addDoc(collection(db, "actors"), {
+          const docRef = await addDoc(collection(db, STATIC_WORDS.ACTORS), {
             name: actors[0].data.name,
             image: actorURL,
             biography: actors[0].data.biography,
@@ -81,7 +82,7 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
         .slice(initial, actors.length)
         .map((item) => item.data.name);
       const q = query(
-        collection(db, "actors"),
+        collection(db, STATIC_WORDS.ACTORS),
         where("name", "in", actorNames)
       );
 
@@ -145,7 +146,7 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
         let actorDocsRefs = [];
 
         for (let i = initial; i < actors.length; i++) {
-          const docRef = addDoc(collection(db, "actors"), {
+          const docRef = addDoc(collection(db, STATIC_WORDS.ACTORS), {
             name: actors[i].data.name,
             image: actorsURL[initial === 1 ? i - 1 : i] ?? null,
             biography: actors[i].data.biography,

@@ -9,16 +9,17 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../../../configs/firebase";
+import { STATIC_WORDS } from "../../../assets/STATICWORDS";
 
 export const ForGenres = async (data) => {
   let genreIds = [];
-  const genreQuerySnapshot = await getDocs(collection(db, "genres"));
+  const genreQuerySnapshot = await getDocs(collection(db, STATIC_WORDS.GENRES));
   const isGenreQuerySnapshotEmpty = genreQuerySnapshot.empty;
 
   if (data.genres.length > 0) {
     if (genreQuerySnapshot.empty) {
       try {
-        const docRef = await addDoc(collection(db, "genres"), {
+        const docRef = await addDoc(collection(db, STATIC_WORDS.GENRES), {
           name: data.genres[0].name,
           image: null,
           position: 1,
@@ -38,7 +39,10 @@ export const ForGenres = async (data) => {
       .slice(initial, data.genres.length)
       .map((item) => item.name);
 
-    const q = query(collection(db, "genres"), where("name", "in", genreNames));
+    const q = query(
+      collection(db, STATIC_WORDS.GENRES),
+      where("name", "in", genreNames)
+    );
 
     const querySnapshot = await getDocs(q);
 
@@ -48,7 +52,7 @@ export const ForGenres = async (data) => {
     } else {
       let increment = 0;
       const q = query(
-        collection(db, "genres"),
+        collection(db, STATIC_WORDS.GENRES),
         orderBy("position", "desc"),
         limit(1)
       );
@@ -62,7 +66,7 @@ export const ForGenres = async (data) => {
       for (let i = initial; i < data.genres.length; i++) {
         increment++;
         try {
-          const docRef = await addDoc(collection(db, "genres"), {
+          const docRef = await addDoc(collection(db, STATIC_WORDS.GENRES), {
             name: data.genres[i].name,
             image: null,
             position: increment,
