@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../configs/firebase";
+import ImportData from "../../components/import/ImportData";
 
 const GenreLists = () => {
   const [data, setData] = useState([]);
@@ -58,6 +59,8 @@ const GenreLists = () => {
     <div className="datatable">
       <div className="datatableTitle">
         All Genres
+        <ImportData docName="genres" />
+        Import From CSV
         <Link to="/genres/new" className="link">
           Add New
         </Link>

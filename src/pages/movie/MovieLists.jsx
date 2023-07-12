@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import { motion } from "framer-motion";
-import Loading from "react-loading";
 import ImageComponent from "../../components/widget/ImageComponent";
+import ImportData from "../../components/import/ImportData";
 
 const MovieLists = () => {
   const [data, setData] = useState([]);
@@ -63,6 +63,8 @@ const MovieLists = () => {
     <div className="datatable">
       <div className="datatableTitle">
         All Movie
+        <ImportData docName="movies" />
+        Import From CSV
         <Link to="/movies/new" className="link">
           Add New
         </Link>
@@ -80,7 +82,7 @@ const MovieLists = () => {
             >
               <ImageComponent
                 alter="movie poster"
-                src={item.poster}
+                src={item.thumbnail}
                 className="card-image"
               />
 

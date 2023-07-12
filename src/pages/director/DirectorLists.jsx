@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import ImageComponent from "../../components/widget/ImageComponent";
+import ImportData from "../../components/import/ImportData";
 
 const DirectorLists = () => {
   const [data, setData] = useState([]);
@@ -59,6 +60,8 @@ const DirectorLists = () => {
     <div className="datatable">
       <div className="datatableTitle">
         All Director
+        <ImportData docName="directors" />
+        Import From CSV
         <Link to="/directors/new" className="link">
           Add New
         </Link>

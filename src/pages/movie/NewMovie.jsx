@@ -22,6 +22,7 @@ import { ForDirectors } from "../new/NewMovieHelper/ForDirectors";
 import { ForGenres } from "../new/NewMovieHelper/ForGenres";
 import { CustomModal } from "../../components/widget/CustomModal";
 import { SearchObjects } from "../new/NewMovieHelper/FetchObjects";
+import { fromURL } from "image-resize-compress";
 
 const NewMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -88,7 +89,7 @@ const NewMovie = ({ title }) => {
     if (!movieSnapShot.empty) {
       const q = query(
         collection(db, "movies"),
-        where("tmdb_id", "==", Number(movieTitle))
+        where("tmdb_id", "==", movieTitle)
       );
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
@@ -108,47 +109,53 @@ const NewMovie = ({ title }) => {
       return;
     }
 
-    const [actor_id, director_id, genre_id, poster, thumbnail] =
-      await Promise.all([
-        ForActors(TMDB_API_KEY, credits),
-        ForDirectors(TMDB_API_KEY, credits),
-        ForGenres(data),
-        axios.get(
-          `https://image.tmdb.org/t/p/original/${data["poster_path"]}`,
-          {
-            responseType: "arraybuffer",
-          }
-        ),
-        await axios.get(
-          `https://image.tmdb.org/t/p/original/${data["backdrop_path"]}`,
-          { responseType: "arraybuffer" }
-        ),
-      ]);
+    const [actor_id, director_id, genre_id] = await Promise.all([
+      ForActors(TMDB_API_KEY, credits),
+      ForDirectors(TMDB_API_KEY, credits),
+      ForGenres(data),
+    ]);
 
-    console.log("done");
+    const poster = `https://image.tmdb.org/t/p/original/${data["poster_path"]}`;
+    const thumnail = `https://image.tmdb.org/t/p/original/${data["backdrop_path"]}`;
+    let blob1 = null;
+    let blob2 = null;
+    try {
+      [blob1, blob2] = await Promise.all([
+        fromURL(poster, 1, 0, 0, "webp"),
+        fromURL(thumnail, 1, 0, 0, "webp"),
+      ]);
+    } catch (err) {
+      console.log(err);
+    }
+    const posterRef = ref(storage, `posters/${data["poster_path"]}`);
+    const thumbnailRef = ref(storage, `thumbnail/${data["backdrop_path"]}`);
+
     let posterURL = null;
     let thumbnailURL = null;
 
     try {
-      const posterRef = ref(storage, `posters/${data["poster_path"]}`);
-      const thumbnailRef = ref(storage, `thumbnail/${data["backdrop_path"]}`);
-
       await Promise.all([
-        uploadBytesResumable(posterRef, poster.data),
-        uploadBytesResumable(thumbnailRef, thumbnail.data),
+        uploadBytesResumable(thumbnailRef, blob1),
+        uploadBytesResumable(posterRef, blob2),
       ]);
-
+    } catch (err) {
+      console.log(err);
+    }
+    try {
       [posterURL, thumbnailURL] = await Promise.all([
         getDownloadURL(posterRef),
         getDownloadURL(thumbnailRef),
       ]);
-    } catch (error) {
-      console.log(error, "poster and thumnail");
+    } catch (err) {
+      console.log(err);
     }
+
+    console.log(posterURL);
+
     let movieRef = null;
     try {
       const docRef = await addDoc(collection(db, "movies"), {
-        tmdb_id: data["id"],
+        tmdb_id: String(data["id"]),
         title: data["title"],
         slug: movieSlug,
         duration: 'data["runtime"]',
@@ -187,7 +194,7 @@ const NewMovie = ({ title }) => {
       console.log(error);
     }
     try {
-      const docRef = await addDoc(collection(db, "videolinks"), {
+      await addDoc(collection(db, "videolinks"), {
         movie_id: movieRef,
         episode_id: null,
         type: "upload_video",

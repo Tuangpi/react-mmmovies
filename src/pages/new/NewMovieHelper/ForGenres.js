@@ -77,6 +77,5 @@ export const ForGenres = async (data) => {
       }
     }
   }
-  console.log(genreIds.flat());
   return genreIds.flat();
 };
