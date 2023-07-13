@@ -12,13 +12,15 @@ import Loading from "react-loading";
 const MovieLists = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
-  const handleIsLoading = (data) => {
-    setIsLoading(data);
+  const handleIsLoading = (value) => {
+    setIsLoading(value);
   };
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsFetching(true);
       let list = [];
       try {
         const querySnapshot = await getDocs(
@@ -31,6 +33,7 @@ const MovieLists = () => {
       } catch (err) {
         console.log(err);
       }
+      setIsFetching(false);
     };
     fetchData();
   }, []);
@@ -88,9 +91,17 @@ const MovieLists = () => {
           </Link>
         </div>
       </div>
-      <div className="movie-card">
-        {data.length > 0 ? (
-          data.map((item, id) => (
+      {isFetching ? (
+        <Loading
+          type="bars"
+          color="#017BFE"
+          height={"4%"}
+          width={"4%"}
+          className="loading-container-1"
+        />
+      ) : data.length > 0 ? (
+        <div className="movie-card">
+          {data.map((item, id) => (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -143,11 +154,20 @@ const MovieLists = () => {
                 </div>
               </div>
             </motion.div>
-          ))
-        ) : (
-          <div className="nodata">nodata</div>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          key="0"
+          className="nodata"
+        >
+          No Data
+        </motion.div>
+      )}
     </div>
   );
 };

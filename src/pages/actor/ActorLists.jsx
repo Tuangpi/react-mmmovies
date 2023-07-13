@@ -6,10 +6,13 @@ import { db } from "../../configs/firebase";
 import ImportCSV from "../../components/import/ImportCSV";
 import { STATIC_WORDS } from "../../assets/STATICWORDS";
 import Loading from "react-loading";
+import { motion } from "framer-motion";
+import ImageComponent from "../../components/widget/ImageComponent";
 
 const ActorLists = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const handleIsLoading = (data) => {
     setIsLoading(data);
@@ -17,6 +20,7 @@ const ActorLists = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsFetching(true);
       let list = [];
       try {
         const querySnapshot = await getDocs(collection(db, "actors"));
@@ -27,6 +31,7 @@ const ActorLists = () => {
       } catch (err) {
         console.log(err);
       }
+      setIsFetching(false);
     };
     fetchData();
   }, []);
@@ -86,35 +91,60 @@ const ActorLists = () => {
           </div>
         </div>
       </div>
-      <div className="movie-card">
-        {data.map((item, id) => (
-          <div className="card" key={id}>
-            <img src={item.image} alt="Actor Poster" className="card-image" />
-            <div className="card-details">
-              <h2 className="card-title">{item.name}</h2>
-              <div className="card-info">
-                <div className="card-year">
-                  DOB
+      {isFetching ? (
+        <Loading
+          type="bars"
+          color="#017BFE"
+          height={"4%"}
+          width={"4%"}
+          className="loading-container-1"
+        />
+      ) : data.length > 0 ? (
+        <div className="movie-card">
+          {data.map((item, id) => (
+            <div className="card" key={id}>
+              <ImageComponent
+                alter="Actor Poster"
+                src={item.image}
+                className="card-image"
+              />
+              <div className="card-details">
+                <h2 className="card-title">{item.name}</h2>
+                <div className="card-info">
+                  <div className="card-year">
+                    DOB
+                    <br />
+                    {item.DOB}
+                  </div>
+                </div>
+                <div className="card-ratings">
+                  PLACE OF BIRTH
                   <br />
-                  {item.DOB}
+                  {item.place_of_birth}
+                </div>
+                <div className="card-genre">
+                  BIOGRAPHY
+                  <br />
+                  {item.biography
+                    ? item.biography.split(" ").slice(0, 6).join(" ") + " ..."
+                    : item.biography}
                 </div>
               </div>
-              <div className="card-ratings">
-                PLACE OF BIRTH
-                <br />
-                {item.place_of_birth}
-              </div>
-              <div className="card-genre">
-                BIOGRAPHY
-                <br />
-                {item.biography
-                  ? item.biography.split(" ").slice(0, 6).join(" ") + " ..."
-                  : item.biography}
-              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          key="0"
+          className="nodata"
+        >
+          No Data
+        </motion.div>
+      )}
     </div>
   );
 };

@@ -5,11 +5,13 @@ import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import ImportCSV from "../../components/import/ImportCSV";
 import { STATIC_WORDS } from "../../assets/STATICWORDS";
+import { motion } from "framer-motion";
 import Loading from "react-loading";
 
 const GenreLists = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const handleIsLoading = (data) => {
     setIsLoading(data);
@@ -17,6 +19,7 @@ const GenreLists = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsFetching(true);
       let list = [];
       try {
         const querySnapshot = await getDocs(collection(db, "genres"));
@@ -27,6 +30,7 @@ const GenreLists = () => {
       } catch (err) {
         console.log(err);
       }
+      setIsFetching(false);
     };
     fetchData();
   }, []);
@@ -86,16 +90,41 @@ const GenreLists = () => {
           </div>
         </div>
       </div>
-      <div className="movie-card">
-        {data.map((item, id) => (
-          <div className="card" key={id}>
-            <img src={item.image} alt="Genre Thumnail" className="card-image" />
-            <div className="card-details">
-              <h2 className="card-title">{item.name}</h2>
+      {isFetching ? (
+        <Loading
+          type="bars"
+          color="#017BFE"
+          height={"5%"}
+          width={"4%"}
+          className="loading-container-1"
+        />
+      ) : data.length > 0 ? (
+        <div className="movie-card">
+          {data.map((item, id) => (
+            <div className="card" key={id}>
+              <img
+                src={item.image}
+                alt="Genre Thumnail"
+                className="card-image"
+              />
+              <div className="card-details">
+                <h2 className="card-title">{item.name}</h2>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="nodata"
+          key="0"
+        >
+          No Data
+        </motion.div>
+      )}
     </div>
   );
 };

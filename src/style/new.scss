@@ -190,6 +190,15 @@
   justify-content: center;
   align-items: center;
 }
+.nodata {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.loading-container-1 {
+  margin: auto;
+  margin-top: 30vh;
+}
 input,
 select {
   border: none;
