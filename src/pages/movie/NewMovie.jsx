@@ -24,6 +24,7 @@ import { CustomModal } from "../../components/widget/CustomModal";
 import { SearchObjects } from "../new/NewMovieHelper/FetchObjects";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATICWORDS";
+import { isDocumentEmpty } from "../../helper/isDocumentEmpty";
 
 const NewMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,12 +32,19 @@ const NewMovie = ({ title }) => {
   const [searchBy, setSearchBy] = useState("");
   const [movieTitle, setMovieTitle] = useState("");
   const [isUpcoming, setIsUpcoming] = useState(false);
+  const [isSeries, setIsSeries] = useState(false);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [hasSubTitle, setHasSubTitle] = useState(false);
+  const [isProtected, setIsProtected] = useState(false);
+  const [checkMenuAll, setCheckMenuAll] = useState(false);
+  const [hasCustomThumbnail, setHasCustomThumbnail] = useState(false);
   const [upcomingDate, setUpcomingDate] = useState("");
   const [videoUpload, setVideoUpload] = useState("");
   const [selectedOption, setSelectedOption] = useState("url");
   const [movieSlug, setMovieSlug] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectKey, setSelectKey] = useState(null);
+  const [selectTMDB, setSelectTMDB] = useState("tmdb");
 
   var handleClose = () => setShowModal(false);
   const handleSearch = (data, e) => {
@@ -85,9 +93,8 @@ const NewMovie = ({ title }) => {
 
   async function fetchDataAndStore() {
     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
-    const movieSnapShot = await getDocs(collection(db, STATIC_WORDS.MOVIES));
 
-    if (!movieSnapShot.empty) {
+    if (!(await isDocumentEmpty(STATIC_WORDS.MOVIES))) {
       const q = query(
         collection(db, STATIC_WORDS.MOVIES),
         where("tmdb_id", "==", movieTitle)
@@ -463,41 +470,65 @@ const NewMovie = ({ title }) => {
               <div className="form-block-inside">
                 <div>Series:</div>
                 <label htmlFor="series" className="toggle-switch">
-                  <input type="checkbox" id="series" />
+                  <input
+                    type="checkbox"
+                    id="series"
+                    onChange={() => setIsSeries(!isSeries)}
+                  />
                   <span className="slider"></span>
                 </label>
               </div>
               <div className="form-block-inside">
                 <div>Featured:</div>
                 <label htmlFor="featured" className="toggle-switch">
-                  <input type="checkbox" id="featured" />
+                  <input
+                    type="checkbox"
+                    id="featured"
+                    onChange={() => setIsFeatured(!isFeatured)}
+                  />
                   <span className="slider"></span>
                 </label>
               </div>
               <div className="form-block-inside">
                 <div>Subtitle:</div>
                 <label htmlFor="subtitle" className="toggle-switch">
-                  <input type="checkbox" id="subtitle" />
+                  <input
+                    type="checkbox"
+                    id="subtitle"
+                    onChange={() => setHasSubTitle(!hasSubTitle)}
+                  />
                   <span className="slider"></span>
                 </label>
               </div>
               <div className="form-block-inside">
                 <div>Protected Video?:</div>
                 <label htmlFor="protectedVideo" className="toggle-switch">
-                  <input type="checkbox" id="protectedVideo" />
+                  <input
+                    type="checkbox"
+                    id="protectedVideo"
+                    onChange={() => setIsProtected(!isProtected)}
+                  />
                   <span className="slider"></span>
                 </label>
               </div>
               <div className="form-block-inside">
                 <div>Choose Custom Thumbnail and Poster:</div>
                 <label htmlFor="customThumbnail" className="toggle-switch">
-                  <input type="checkbox" id="customThumbnail" />
+                  <input
+                    type="checkbox"
+                    id="customThumbnail"
+                    onChange={() => setHasCustomThumbnail(!hasCustomThumbnail)}
+                  />
                   <span className="slider"></span>
                 </label>
               </div>
               <div className="form-block-inside">
                 <label htmlFor="selectMenu">Select Menu*:</label>
-                <input type="checkbox" id="selectMenu" />
+                <input
+                  type="checkbox"
+                  id="selectMenu"
+                  onChange={() => setCheckMenuAll(!checkMenuAll)}
+                />
               </div>
             </div>
 
@@ -512,7 +543,8 @@ const NewMovie = ({ title }) => {
                       name="details"
                       value="tmdb"
                       className="hidden-radio"
-                      checked
+                      onChange={(e) => setSelectTMDB(e.target.value)}
+                      checked={selectTMDB === "tmdb"}
                     />
                     <label htmlFor="tmdb" className="button-style">
                       TMDB
@@ -525,6 +557,8 @@ const NewMovie = ({ title }) => {
                       name="details"
                       value="custom"
                       className="hidden-radio"
+                      onChange={(e) => setSelectTMDB(e.target.value)}
+                      checked={selectTMDB === "custom"}
                     />
                     <label htmlFor="custom" className="button-style">
                       Custom

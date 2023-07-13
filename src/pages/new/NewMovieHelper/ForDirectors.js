@@ -10,6 +10,7 @@ import {
 import { db, storage } from "../../../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { STATIC_WORDS } from "../../../assets/STATICWORDS";
+import { isDocumentEmpty } from "../../../helper/isDocumentEmpty";
 
 export const ForDirectors = async (TMDB_API_KEY, credits) => {
   let directorIds = [];
@@ -39,12 +40,7 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
       console.log(error);
     }
     if (directors.length > 0) {
-      const directorSnapShot = await getDocs(
-        collection(db, STATIC_WORDS.DIRECTORS)
-      );
-      const isDirectorSnapShotEmpty = directorSnapShot.empty;
-
-      if (isDirectorSnapShotEmpty) {
+      if (await isDocumentEmpty(STATIC_WORDS.DIRECTORS)) {
         let directorURL = null;
         if (directors[0].data.profile_path != null) {
           const directorImage = await axios.get(
@@ -90,7 +86,7 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
         }
       }
 
-      const initial = isDirectorSnapShotEmpty ? 1 : 0;
+      const initial = (await isDocumentEmpty(STATIC_WORDS.DIRECTORS)) ? 1 : 0;
 
       if (initial >= directors.length) return null;
 
@@ -132,7 +128,7 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
         } catch (error) {
           console.error(error);
         }
-        console.log(directorImages);
+
         let uploadPromises = [];
         let downloadULPromises = [];
         let directorsURL = [];
@@ -158,7 +154,6 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
         } catch (error) {
           console.log(error);
         }
-        console.log(directorsURL, directors.length);
 
         let directorDocsRefs = [];
 
@@ -176,6 +171,19 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
             });
             directorDocsRefs.push(docRef);
           }
+        }
+        if (directors && directorDocsRefs.length === 0) {
+          const docRef = addDoc(collection(db, STATIC_WORDS.DIRECTORS), {
+            name: directors[initial].data.name,
+            image: null,
+            biography: directors[initial].data.biography,
+            place_of_birth: directors[initial].data.place_of_birth,
+            DOB: directors[initial].data.birthday,
+            created_at: serverTimestamp(),
+            updated_at: serverTimestamp(),
+            slug: null,
+          });
+          directorDocsRefs.push(docRef);
         }
         try {
           const docRefs = await Promise.all(directorDocsRefs);

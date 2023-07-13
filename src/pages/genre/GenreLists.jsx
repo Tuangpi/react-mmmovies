@@ -3,11 +3,18 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../configs/firebase";
-import ImportData from "../../components/import/ImportData";
+import ImportCSV from "../../components/import/ImportCSV";
 import { STATIC_WORDS } from "../../assets/STATICWORDS";
+import Loading from "react-loading";
 
 const GenreLists = () => {
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleIsLoading = (data) => {
+    setIsLoading(data);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       let list = [];
@@ -58,11 +65,19 @@ const GenreLists = () => {
 
   return (
     <div className="datatable">
+      {isLoading && (
+        <div className="loading-container">
+          <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
+        </div>
+      )}
       <div className="datatableTitle">
         <div>All Genres</div>
         <div className="title-right">
           <div className="title-right-first">
-            <ImportData docName={STATIC_WORDS.GENRES} />
+            <ImportCSV
+              docName={STATIC_WORDS.GENRES}
+              isLoading={handleIsLoading}
+            />
           </div>
           <div>
             <Link to="/genres/new" className="link">

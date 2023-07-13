@@ -1,17 +1,25 @@
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { db, storage } from "../../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATICWORDS";
+import { isDocumentEmpty } from "../../helper/isDocumentEmpty";
 
 export const uploadData = async (rawData, docName) => {
   const data = await modifiedData(rawData, docName);
   console.log(data);
   let cleanedData = [];
   let batchArray = [];
-  const checkQuerySnapShot = await getDocs(collection(db, docName));
 
-  if (checkQuerySnapShot.empty) {
+  if (await isDocumentEmpty(docName)) {
     cleanedData.push(...data);
   } else {
     data.forEach(async (object) => {
@@ -144,10 +152,44 @@ export const uploadData = async (rawData, docName) => {
 
 const modifiedData = async (rawData, docName) => {
   console.log(docName);
-  if (docName === STATIC_WORDS.ACTORS) {
-    const actorUrlPromise = await fetchRelatedImage(rawData, docName);
+  if (docName === STATIC_WORDS.ACTORS || docName === STATIC_WORDS.DIRECTORS) {
+    const imageUrlPromise = await fetchRelatedImage(rawData, docName);
     for (let i = 0; i < rawData.length; i++) {
-      rawData[i].image = actorUrlPromise[i];
+      rawData[i].image = imageUrlPromise[i];
+    }
+  }
+  if (docName === STATIC_WORDS.GENRES) {
+    let increment = 1;
+    if (await isDocumentEmpty(STATIC_WORDS.GENRES)) {
+      rawData.forEach((data) => {
+        data.name = data.name.substring(7, data.name.length - 2);
+      });
+    } else {
+      rawData.forEach(async (data) => {
+        data.name = data.name.substring(7, data.name.length - 2);
+        const q = query(
+          collection(db, STATIC_WORDS.GENRES),
+          where("name", "==", data.name)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          const q = query(
+            collection(db, STATIC_WORDS.GENRES),
+            orderBy("position", "desc"),
+            limit(1)
+          );
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            const highestDoc = querySnapshot.docs[0];
+            const position = highestDoc.data().position;
+            data.position = position + increment;
+            increment++;
+          }
+        }
+      });
     }
   }
   if (docName === STATIC_WORDS.MOVIES) {
@@ -171,11 +213,15 @@ const fetchRelatedImage = async (rawData, docName) => {
   const thumbnailRefs = [];
   const actorBlobs = [];
   const actorRefs = [];
-  console.log(docName);
+  const directorBlobs = [];
+  const directorRefs = [];
+
   rawData.forEach((data) => {
     if (docName === STATIC_WORDS.ACTORS) {
       if (data.image !== null && data.image !== "") {
+        console.log("dfk");
         const imagePath = data.image.replace("tmdb_", "");
+        console.log(data.image);
         const actor = `https://image.tmdb.org/t/p/w300/${imagePath}`;
         const actorRef = ref(storage, `actors/${imagePath}`);
         const blob = fromURL(actor, 80, 0, 0, "webp");
@@ -184,6 +230,19 @@ const fetchRelatedImage = async (rawData, docName) => {
       } else {
         actorRefs.push(Promise.resolve(null));
         actorBlobs.push(Promise.resolve(null));
+      }
+    }
+    if (docName === STATIC_WORDS.DIRECTORS) {
+      if (data.image !== null && data.image !== "") {
+        const imagePath = data.image.replace("tmdb_", "");
+        const director = `https://image.tmdb.org/t/p/w300/${imagePath}`;
+        const directorRef = ref(storage, `directors/${imagePath}`);
+        const blob = fromURL(director, 80, 0, 0, "webp");
+        directorBlobs.push(blob);
+        directorRefs.push(directorRef);
+      } else {
+        directorRefs.push(Promise.resolve(null));
+        directorBlobs.push(Promise.resolve(null));
       }
     }
     if (docName === STATIC_WORDS.MOVIES) {
@@ -217,10 +276,16 @@ const fetchRelatedImage = async (rawData, docName) => {
   let posterBlobPromise = [];
   let thumbnailBlobPromise = [];
   let actorBlobPromise = [];
+  let directorBlobPromise = [];
+
   try {
     if (docName === STATIC_WORDS.ACTORS) {
       actorBlobPromise = await Promise.all(actorBlobs);
-      console.log(actorBlobPromise);
+    }
+    if (docName === STATIC_WORDS.DIRECTORS) {
+      console.log("asdf");
+      directorBlobPromise = await Promise.all(directorBlobs);
+      console.log(directorBlobPromise);
     }
     if (docName === STATIC_WORDS.MOVIES) {
       posterBlobPromise = await Promise.all(posterBlobs);
@@ -233,6 +298,7 @@ const fetchRelatedImage = async (rawData, docName) => {
   const uploadPosters = [];
   const uploadThumbnails = [];
   const uploadActors = [];
+  const uploadDirectors = [];
 
   for (let i = 0; i < rawData.length; i++) {
     if (docName === STATIC_WORDS.ACTORS) {
@@ -244,6 +310,17 @@ const fetchRelatedImage = async (rawData, docName) => {
         uploadActors.push(uploadActor);
       } else {
         uploadActors.push(Promise.resolve(null));
+      }
+    }
+    if (docName === STATIC_WORDS.DIRECTORS) {
+      if (directorBlobPromise[i] !== null) {
+        const uploadDirector = uploadBytesResumable(
+          directorRefs[i],
+          directorBlobPromise[i]
+        );
+        uploadDirectors.push(uploadDirector);
+      } else {
+        uploadDirectors.push(Promise.resolve(null));
       }
     }
     if (docName === STATIC_WORDS.MOVIES) {
@@ -272,6 +349,9 @@ const fetchRelatedImage = async (rawData, docName) => {
     if (docName === STATIC_WORDS.ACTORS) {
       await Promise.all(uploadActors);
     }
+    if (docName === STATIC_WORDS.DIRECTORS) {
+      await Promise.all(uploadDirectors);
+    }
     if (docName === STATIC_WORDS.MOVIES) {
       await Promise.all(uploadPosters);
       await Promise.all(uploadThumbnails);
@@ -283,6 +363,7 @@ const fetchRelatedImage = async (rawData, docName) => {
   const posterUrls = [];
   const thumbnailUrls = [];
   const actorUrls = [];
+  const directorUrls = [];
 
   for (let i = 0; i < rawData.length; i++) {
     if (docName === STATIC_WORDS.ACTORS) {
@@ -291,6 +372,14 @@ const fetchRelatedImage = async (rawData, docName) => {
         actorUrls.push(actorUrl);
       } else {
         actorUrls.push(Promise.resolve(null));
+      }
+    }
+    if (docName === STATIC_WORDS.DIRECTORS) {
+      if (directorBlobPromise[i] !== null) {
+        const directorUrl = getDownloadURL(directorRefs[i]);
+        directorUrls.push(directorUrl);
+      } else {
+        directorUrls.push(Promise.resolve(null));
       }
     }
     if (docName === STATIC_WORDS.MOVIES) {
@@ -312,12 +401,17 @@ const fetchRelatedImage = async (rawData, docName) => {
   let posterUrlPromise = [];
   let thumbnailUrlPromise = [];
   let actorUrlPromise = [];
+  let directorUrlPromise = [];
   let returnUrls = null;
 
   try {
     if (docName === STATIC_WORDS.ACTORS) {
       actorUrlPromise = await Promise.all(actorUrls);
       returnUrls = actorUrlPromise;
+    }
+    if (docName === STATIC_WORDS.DIRECTORS) {
+      directorUrlPromise = await Promise.all(directorUrls);
+      returnUrls = directorUrlPromise;
     }
     if (docName === STATIC_WORDS.MOVIES) {
       posterUrlPromise = await Promise.all(posterUrls);

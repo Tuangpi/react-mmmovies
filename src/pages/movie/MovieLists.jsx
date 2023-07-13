@@ -5,11 +5,17 @@ import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import { motion } from "framer-motion";
 import ImageComponent from "../../components/widget/ImageComponent";
-import ImportData from "../../components/import/ImportData";
+import ImportCSV from "../../components/import/ImportCSV";
 import { STATIC_WORDS } from "../../assets/STATICWORDS";
+import Loading from "react-loading";
 
 const MovieLists = () => {
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleIsLoading = (data) => {
+    setIsLoading(data);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,7 +32,6 @@ const MovieLists = () => {
         console.log(err);
       }
     };
-
     fetchData();
   }, []);
 
@@ -64,11 +69,19 @@ const MovieLists = () => {
 
   return (
     <div className="datatable">
+      {isLoading && (
+        <div className="loading-container">
+          <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
+        </div>
+      )}
       <div className="datatableTitle">
         <div>All Movie</div>
         <div className="title-right">
           <div className="title-right-first">
-            <ImportData docName={STATIC_WORDS.MOVIES} />
+            <ImportCSV
+              docName={STATIC_WORDS.MOVIES}
+              isLoading={handleIsLoading}
+            />
           </div>
           <Link to="/movies/new" className="link">
             Add New

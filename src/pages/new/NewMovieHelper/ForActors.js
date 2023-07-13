@@ -10,6 +10,7 @@ import {
 import { db, storage } from "../../../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { STATIC_WORDS } from "../../../assets/STATICWORDS";
+import { isDocumentEmpty } from "../../../helper/isDocumentEmpty";
 
 export const ForActors = async (TMDB_API_KEY, credits) => {
   let actorIds = [];
@@ -32,10 +33,7 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
       console.error(error);
     }
     if (actors.length > 0) {
-      const actorSnapShot = await getDocs(collection(db, STATIC_WORDS.ACTORS));
-      const isActorSnapShotEmpty = actorSnapShot.empty;
-
-      if (isActorSnapShotEmpty) {
+      if (await isDocumentEmpty(STATIC_WORDS.ACTORS)) {
         let actorURL = null;
         if (actors[0].data.profile_path != null) {
           const actor_image = await axios.get(
@@ -74,7 +72,7 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
         }
       }
 
-      const initial = isActorSnapShotEmpty ? 1 : 0;
+      const initial = (await isDocumentEmpty(STATIC_WORDS.ACTORS)) ? 1 : 0;
 
       if (initial >= actors.length) return null;
 

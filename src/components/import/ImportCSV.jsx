@@ -1,16 +1,19 @@
 import { uploadData } from "./uploadData";
 import Papa from "papaparse";
-const ImportData = ({ docName }) => {
+
+const ImportCSV = ({ docName, isLoading }) => {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
 
     try {
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
+        isLoading(true);
         const csvFileContent = event.target.result;
         const parsedData = Papa.parse(csvFileContent, { header: true });
         parsedData.data.pop();
-        uploadData(parsedData.data, docName);
+        await uploadData(parsedData.data, docName);
+        isLoading(false);
       };
 
       reader.readAsText(file);
@@ -27,4 +30,4 @@ const ImportData = ({ docName }) => {
   );
 };
 
-export default ImportData;
+export default ImportCSV;
