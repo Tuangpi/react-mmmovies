@@ -1,8 +1,9 @@
+import { MakeMovieTableRelation } from "../../utils/MakeMovieTableRelation";
 import { uploadData } from "./uploadData";
 import Papa from "papaparse";
 
 const ImportCSV = ({ docName, isLoading }) => {
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
 
@@ -13,10 +14,17 @@ const ImportCSV = ({ docName, isLoading }) => {
         const parsedData = Papa.parse(csvFileContent, { header: true });
         parsedData.data.pop();
         await uploadData(parsedData.data, docName);
-        isLoading(false);
       };
 
       reader.readAsText(file);
+    } catch (err) {
+      console.log(err);
+    }
+
+    try {
+      const a = await MakeMovieTableRelation(docName);
+      isLoading(false);
+      console.log(a);
     } catch (err) {
       console.log(err);
     }
