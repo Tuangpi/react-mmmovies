@@ -20,7 +20,7 @@ function ImageComponent({ src, className, alt }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: isLoading ? 0 : 1 }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
+      transition={{ duration: 1, ease: "easeOut" }}
     >
       <img src={src} alt={alt} className={className} />
     </motion.div>

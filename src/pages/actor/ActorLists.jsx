@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import ImportCSV from "../../components/import/ImportCSV";
-import { STATIC_WORDS } from "../../assets/STATICWORDS";
+import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import Loading from "react-loading";
 import { motion } from "framer-motion";
 import ImageComponent from "../../components/widget/ImageComponent";
@@ -100,9 +100,22 @@ const ActorLists = () => {
           className="loading-container-1"
         />
       ) : data.length > 0 ? (
-        <div className="movie-card">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeIn" }}
+          className="movie-card"
+        >
           {data.map((item, id) => (
-            <div className="card" key={id}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, ease: "easeIn" }}
+              className="card"
+              key={id}
+            >
               <ImageComponent
                 alter="Actor Poster"
                 src={item.image}
@@ -130,9 +143,9 @@ const ActorLists = () => {
                     : item.biography}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
         <motion.div
           initial={{ opacity: 0 }}

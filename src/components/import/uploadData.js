@@ -10,8 +10,8 @@ import {
 import { db, storage } from "../../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { fromURL } from "image-resize-compress";
-import { STATIC_WORDS } from "../../assets/STATICWORDS";
-import { isDocumentEmpty } from "../../helper/isDocumentEmpty";
+import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
+import { isDocumentEmpty } from "../../helper/Helpers";
 
 export const uploadData = async (rawData, docName) => {
   const data = await modifiedData(rawData, docName);

@@ -25,7 +25,56 @@
 }
 
 .card-details {
-  /* Add styling properties for the card details container */
+  .card-edit-link-container {
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+
+    .card-edit-list,
+    .card-edit-list-movie {
+      position: absolute;
+      top: -20.5vh;
+      z-index: 2;
+      ul {
+        display: flex;
+        flex-direction: column;
+        background-color: rgb(209, 209, 209);
+        border-radius: 5px;
+        list-style: none;
+        color: rgb(87, 87, 87);
+        padding: 0.6rem 0 0.1rem 0;
+        li {
+          display: flex;
+          font-size: 13px;
+          column-gap: 0.6rem;
+          cursor: pointer;
+          border-radius: 3px;
+          padding: 0.8rem 1rem;
+
+          &:hover {
+            color: rgb(19, 19, 19);
+            background-color: rgb(193, 193, 193);
+          }
+        }
+        .delete {
+          color: rgb(170, 31, 31);
+          &:hover {
+            color: rgb(170, 29, 29);
+          }
+        }
+      }
+    }
+    .card-edit-list-movie {
+      top: -14.5vh;
+    }
+
+    .card-edit-link {
+      cursor: pointer;
+      rotate: 90deg;
+      font-size: 18px;
+      font-weight: 800;
+    }
+  }
 }
 
 .card-title {

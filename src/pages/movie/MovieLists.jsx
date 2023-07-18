@@ -6,16 +6,24 @@ import { db } from "../../configs/firebase";
 import { motion } from "framer-motion";
 import ImageComponent from "../../components/widget/ImageComponent";
 import ImportCSV from "../../components/import/ImportCSV";
-import { STATIC_WORDS } from "../../assets/STATICWORDS";
+import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import Loading from "react-loading";
+import { Delete, Edit } from "@mui/icons-material";
 
 const MovieLists = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [editor, setEditor] = useState(false);
+  const [showElement, setShowElement] = useState(null);
 
   const handleIsLoading = (value) => {
     setIsLoading(value);
+  };
+
+  const handleClick = (id) => {
+    setShowElement(id);
+    if (showElement === id) setShowElement(null);
   };
 
   useEffect(() => {
@@ -27,7 +35,7 @@ const MovieLists = () => {
           collection(db, STATIC_WORDS.MOVIES)
         );
         querySnapshot.forEach((doc) => {
-          list.push(doc.data());
+          list.push({ data: doc.data(), id: doc.id });
         });
         setData(list);
       } catch (err) {
@@ -40,7 +48,7 @@ const MovieLists = () => {
 
   const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, "movies", id));
+      await deleteDoc(doc(db, STATIC_WORDS.MOVIES, id));
       setData(data.filter((item) => item.id !== id));
     } catch (err) {
       console.log(err);
@@ -100,29 +108,61 @@ const MovieLists = () => {
           className="loading-container-1"
         />
       ) : data.length > 0 ? (
-        <div className="movie-card">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeIn" }}
+          className="movie-card"
+        >
           {data.map((item, id) => (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
               className="card"
               key={id}
             >
               <ImageComponent
                 alter="movie poster"
-                src={item.thumbnail}
+                src={item.data.thumbnail}
                 className="card-image"
               />
 
               <div className="card-details">
-                <h2 className="card-title">{item.title}</h2>
+                <div className="card-edit-link-container">
+                  {showElement === id && showElement !== null && (
+                    <div className="card-edit-list-movie">
+                      <ul>
+                        <Link to={`/movies/${item.id}/edit`}>
+                          <li>
+                            <Edit fontSize="12px" /> <span>Edit</span>
+                          </li>
+                        </Link>
+                        <li
+                          className="delete"
+                          onClick={() => handleDelete(item.id)}
+                        >
+                          <Delete fontSize="12px" />
+                          <span>Delete</span>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                  <div
+                    className="card-edit-link"
+                    onClick={() => handleClick(id)}
+                  >
+                    ...
+                  </div>
+                </div>
+                <h2 className="card-title">{item.data.title}</h2>
                 <div className="card-info">
                   <div className="card-year">
                     YEAR
                     <br />
-                    {item.released}
+                    {item.data.released}
                   </div>
                   <div className="card-length">
                     LENGTH
@@ -133,7 +173,7 @@ const MovieLists = () => {
                 <div className="card-ratings">
                   RATINGS
                   <br />
-                  <span className="star-rating">{item.rating}/10</span>
+                  <span className="star-rating">{item.data.rating}/10</span>
                 </div>
                 <div className="card-genre">
                   GENRE
@@ -155,7 +195,7 @@ const MovieLists = () => {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
         <motion.div
           initial={{ opacity: 0 }}

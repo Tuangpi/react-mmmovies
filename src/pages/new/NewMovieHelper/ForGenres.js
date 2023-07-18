@@ -9,8 +9,8 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../../../configs/firebase";
-import { STATIC_WORDS } from "../../../assets/STATICWORDS";
-import { isDocumentEmpty } from "../../../helper/isDocumentEmpty";
+import { STATIC_WORDS } from "../../../assets/STATIC_WORDS";
+import { isDocumentEmpty } from "../../../helper/Helpers";
 
 export const ForGenres = async (data) => {
   let genreIds = [];

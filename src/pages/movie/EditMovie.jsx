@@ -2,11 +2,13 @@ import "../../style/new.scss";
 import "../../style/modal.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Loading from "react-loading";
 import {
   addDoc,
   collection,
+  doc,
+  getDoc,
   getDocs,
   query,
   serverTimestamp,
@@ -15,7 +17,7 @@ import {
 import { db, storage } from "../../configs/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { GetData } from "../new/NewMovieHelper/GetData";
 import { ForActors } from "../new/NewMovieHelper/ForActors";
 import { ForDirectors } from "../new/NewMovieHelper/ForDirectors";
@@ -26,7 +28,7 @@ import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { isDocumentEmpty } from "../../helper/Helpers";
 
-const NewMovie = ({ title }) => {
+const EditMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchByToggle, setSearchByToggle] = useState(false);
   const [searchBy, setSearchBy] = useState("");
@@ -45,6 +47,7 @@ const NewMovie = ({ title }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectKey, setSelectKey] = useState(null);
   const [selectTMDB, setSelectTMDB] = useState("tmdb");
+  const { id } = useParams();
 
   var handleClose = () => setShowModal(false);
   const handleSearch = (data, e) => {
@@ -91,137 +94,158 @@ const NewMovie = ({ title }) => {
     setMovieSlug(event.target.value);
   };
 
-  async function fetchDataAndStore() {
-    const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
-
-    if (!(await isDocumentEmpty(STATIC_WORDS.MOVIES))) {
-      const q = query(
-        collection(db, STATIC_WORDS.MOVIES),
-        where("tmdb_id", "==", movieTitle)
-      );
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        console.log("already exist");
-        return;
+  useEffect(() => {
+    const fetchData = async (docRef) => {
+      try {
+        const querySnapshot = await getDoc(
+          doc(db, `${STATIC_WORDS.MOVIES}/${docRef}`)
+        );
+        const data = querySnapshot.data();
+        setMovieSlug(data.movieSlug);
+        setMovieTitle(data.title);
+        setIsUpcoming(data.is_upcoming);
+        setIsSeries(data.is_series);
+        setUpcomingDate(data.upcoming_date);
+      } catch (err) {
+        console.log(err);
       }
-    }
+    };
 
-    const data = await GetData(searchBy, TMDB_API_KEY, movieTitle);
-    let credits = null;
-    if (data["id"]) {
-      credits = await axios.get(
-        `https://api.themoviedb.org/3/movie/${data["id"]}/credits?api_key=${TMDB_API_KEY}`
-      );
-    } else {
-      console.log("movie does not found on TMDB Server");
-      return;
-    }
+    if (id) fetchData(id);
+  }, [id]);
 
-    const [actor_id, director_id, genre_id] = await Promise.all([
-      ForActors(TMDB_API_KEY, credits),
-      ForDirectors(TMDB_API_KEY, credits),
-      ForGenres(data),
-    ]);
+  //   async function fetchDataAndStore() {
+  //     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
 
-    const poster = `https://image.tmdb.org/t/p/original/${data["poster_path"]}`;
-    const thumnail = `https://image.tmdb.org/t/p/original/${data["backdrop_path"]}`;
-    let blob1 = null;
-    let blob2 = null;
-    try {
-      [blob1, blob2] = await Promise.all([
-        fromURL(poster, 1, 0, 0, "webp"),
-        fromURL(thumnail, 1, 0, 0, "webp"),
-      ]);
-    } catch (err) {
-      console.log(err);
-    }
-    const posterRef = ref(storage, `posters/${data["poster_path"]}`);
-    const thumbnailRef = ref(storage, `thumbnail/${data["backdrop_path"]}`);
+  //     if (!(await isDocumentEmpty(STATIC_WORDS.MOVIES))) {
+  //       const q = query(
+  //         collection(db, STATIC_WORDS.MOVIES),
+  //         where("tmdb_id", "==", movieTitle)
+  //       );
+  //       const querySnapshot = await getDocs(q);
+  //       if (!querySnapshot.empty) {
+  //         console.log("already exist");
+  //         return;
+  //       }
+  //     }
 
-    let posterURL = null;
-    let thumbnailURL = null;
+  //     const data = await GetData(searchBy, TMDB_API_KEY, movieTitle);
+  //     let credits = null;
+  //     if (data["id"]) {
+  //       credits = await axios.get(
+  //         `https://api.themoviedb.org/3/movie/${data["id"]}/credits?api_key=${TMDB_API_KEY}`
+  //       );
+  //     } else {
+  //       console.log("movie does not found on TMDB Server");
+  //       return;
+  //     }
 
-    try {
-      await Promise.all([
-        uploadBytesResumable(thumbnailRef, blob1),
-        uploadBytesResumable(posterRef, blob2),
-      ]);
-    } catch (err) {
-      console.log(err);
-    }
-    try {
-      [posterURL, thumbnailURL] = await Promise.all([
-        getDownloadURL(posterRef),
-        getDownloadURL(thumbnailRef),
-      ]);
-    } catch (err) {
-      console.log(err);
-    }
+  //     const [actor_id, director_id, genre_id] = await Promise.all([
+  //       ForActors(TMDB_API_KEY, credits),
+  //       ForDirectors(TMDB_API_KEY, credits),
+  //       ForGenres(data),
+  //     ]);
 
-    let movieRef = null;
-    try {
-      const docRef = await addDoc(collection(db, STATIC_WORDS.MOVIES), {
-        tmdb_id: String(data["id"]),
-        title: data["title"],
-        slug: movieSlug,
-        duration: 'data["runtime"]',
-        thumbnail: thumbnailURL,
-        poster: posterURL,
-        tmdb: "Y",
-        fetch_by: searchBy,
-        director_id: director_id,
-        actor_id: actor_id,
-        genre_id: genre_id,
-        trailer_url: null,
-        detail: data["overview"],
-        views: null,
-        rating: data["vote_average"],
-        maturity_rating: "all age",
-        subtitle: null,
-        publish_year: null,
-        released: data["release_date"].split("-")[0],
-        upload_video: null,
-        featured: null,
-        series: null,
-        type: "M",
-        status: "1",
-        created_by: null,
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp(),
-        is_upcoming: 0,
-        upcoming_date: null,
-        is_kids: 0,
-        desc_myan: null,
-        updated_by: null,
-        channel: 0,
-      });
-      movieRef = docRef;
-    } catch (error) {
-      console.log(error);
-    }
-    try {
-      await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
-        movie_id: movieRef,
-        episode_id: null,
-        type: "upload_video",
-        url_360: null,
-        url_480: null,
-        url_720: null,
-        url_1080: null,
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp(),
-        upload_video: selectKey,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  //     const poster = `https://image.tmdb.org/t/p/original/${data["poster_path"]}`;
+  //     const thumnail = `https://image.tmdb.org/t/p/original/${data["backdrop_path"]}`;
+  //     let blob1 = null;
+  //     let blob2 = null;
+  //     try {
+  //       [blob1, blob2] = await Promise.all([
+  //         fromURL(poster, 1, 0, 0, "webp"),
+  //         fromURL(thumnail, 1, 0, 0, "webp"),
+  //       ]);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //     const posterRef = ref(storage, `posters/${data["poster_path"]}`);
+  //     const thumbnailRef = ref(storage, `thumbnail/${data["backdrop_path"]}`);
+
+  //     let posterURL = null;
+  //     let thumbnailURL = null;
+
+  //     try {
+  //       await Promise.all([
+  //         uploadBytesResumable(thumbnailRef, blob1),
+  //         uploadBytesResumable(posterRef, blob2),
+  //       ]);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //     try {
+  //       [posterURL, thumbnailURL] = await Promise.all([
+  //         getDownloadURL(posterRef),
+  //         getDownloadURL(thumbnailRef),
+  //       ]);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+
+  //     let movieRef = null;
+  //     try {
+  //       const docRef = await addDoc(collection(db, STATIC_WORDS.MOVIES), {
+  //         tmdb_id: String(data["id"]),
+  //         title: data["title"],
+  //         slug: movieSlug,
+  //         duration: 'data["runtime"]',
+  //         thumbnail: thumbnailURL,
+  //         poster: posterURL,
+  //         tmdb: "Y",
+  //         fetch_by: searchBy,
+  //         director_id: director_id,
+  //         actor_id: actor_id,
+  //         genre_id: genre_id,
+  //         trailer_url: null,
+  //         detail: data["overview"],
+  //         views: null,
+  //         rating: data["vote_average"],
+  //         maturity_rating: "all age",
+  //         subtitle: null,
+  //         publish_year: null,
+  //         released: data["release_date"].split("-")[0],
+  //         upload_video: null,
+  //         featured: null,
+  //         series: null,
+  //         type: "M",
+  //         status: "1",
+  //         created_by: null,
+  //         created_at: serverTimestamp(),
+  //         updated_at: serverTimestamp(),
+  //         is_upcoming: 0,
+  //         upcoming_date: null,
+  //         is_kids: 0,
+  //         desc_myan: null,
+  //         updated_by: null,
+  //         channel: 0,
+  //       });
+  //       movieRef = docRef;
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //     try {
+  //       await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
+  //         movie_id: movieRef,
+  //         episode_id: null,
+  //         type: "upload_video",
+  //         url_360: null,
+  //         url_480: null,
+  //         url_720: null,
+  //         url_1080: null,
+  //         created_at: serverTimestamp(),
+  //         updated_at: serverTimestamp(),
+  //         upload_video: selectKey,
+  //       });
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await fetchDataAndStore();
+      // await fetchDataAndStore();
+      console.log("asdf");
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -247,7 +271,7 @@ const NewMovie = ({ title }) => {
         <form onSubmit={handleSubmit}>
           <div className="form-container">
             <div className="form-header">
-              <div className="form-header-title">Create Movie</div>
+              <div className="form-header-title">Edit Movie</div>
               <Link to="/movies">
                 <button className="back-btn">Back</button>
               </Link>
@@ -596,4 +620,4 @@ const NewMovie = ({ title }) => {
   );
 };
 
-export default NewMovie;
+export default EditMovie;

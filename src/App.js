@@ -29,6 +29,9 @@ import PlayerSetting from "./pages/playerSetting/PlayerSetting";
 import PaymentGateWay from "./pages/paymentGateWay/PaymentGateWay";
 import AppSetting from "./pages/appSetting/AppSetting";
 import HelpAndSupport from "./pages/helpAndSupport/HelpAndSupport";
+import NewSeason from "./pages/tvseries/seasons/NewSeason";
+import NewEpisode from "./pages/tvseries/episodes/NewEpisode";
+import EditMovie from "./pages/movie/EditMovie";
 
 function App() {
   const { darkMode } = useContext(DarkModeContext);
@@ -131,6 +134,14 @@ function App() {
                   </RequireAuth>
                 }
               />
+              <Route
+                path=":id/edit"
+                element={
+                  <RequireAuth>
+                    <EditMovie title="Edit Movie" />
+                  </RequireAuth>
+                }
+              />
             </Route>
             <Route path="tvseries">
               <Route
@@ -146,6 +157,22 @@ function App() {
                 element={
                   <RequireAuth>
                     <NewTvSeries title="Add New TV Series" />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path=":id/season"
+                element={
+                  <RequireAuth>
+                    <NewSeason title="Add New Season" />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="season/:id/episode"
+                element={
+                  <RequireAuth>
+                    <NewEpisode title="Add New Episode" />
                   </RequireAuth>
                 }
               />

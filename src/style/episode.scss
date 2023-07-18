@@ -1,0 +1,48 @@
+.new-episode-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: rgb(243, 243, 243);
+  .btn {
+    padding: 0.5rem 0.8rem;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    &:hover {
+      color: rgb(37, 37, 37);
+    }
+  }
+  .right-side {
+    background-color: rgb(255, 255, 255);
+    padding: 1rem 0.8rem 0.8rem 1.4rem;
+    .right-header {
+      display: flex;
+      justify-content: space-between;
+      .btn {
+        background-color: rgb(201, 201, 201);
+      }
+    }
+    .bottom-create {
+      display: flex;
+    }
+  }
+  .left-side {
+    .episode-list {
+      padding: 1rem 0 2rem 0;
+      background-color: rgb(255, 255, 255);
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+        thead {
+          background-color: rgb(201, 201, 201);
+          th {
+            text-align: left;
+            padding: 0.8rem 0.4rem;
+          }
+        }
+      }
+    }
+  }
+}

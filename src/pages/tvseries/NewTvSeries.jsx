@@ -7,10 +7,10 @@ import Loading from "react-loading";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db, storage } from "../../configs/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import { ForGenres } from "../new/NewMovieHelper/ForGenres";
 import { GetData } from "../new/NewMovieHelper/GetData";
+import { fromURL } from "image-resize-compress";
 
 const NewTvSeries = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +18,9 @@ const NewTvSeries = ({ title }) => {
   const [searchBy, setSearchBy] = useState("");
   const [movieTitle, setMovieTitle] = useState("");
   const [movieSlug, setMovieSlug] = useState("");
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [selectTMDB, setSelectTMDB] = useState("tmdb");
+  const [checkMenuAll, setCheckMenuAll] = useState(false);
 
   const handleSearchByToggle = (event) => {
     setSearchByToggle(event.target.checked);
@@ -36,38 +39,48 @@ const NewTvSeries = ({ title }) => {
     //for genre
     const genre_id = await ForGenres(data);
 
-    //for movie
-    const poster = await axios.get(
-      `https://image.tmdb.org/t/p/original/${data["poster_path"]}`,
-      { responseType: "arraybuffer" }
-    );
+    //for tvseries
+    const poster = `https://image.tmdb.org/t/p/original/${data["poster_path"]}`;
+    const thumnail = `https://image.tmdb.org/t/p/original/${data["backdrop_path"]}`;
 
-    const thumbnail = await axios.get(
-      `https://image.tmdb.org/t/p/original/${data["backdrop_path"]}`,
-      { responseType: "arraybuffer" }
-    );
+    let blob1 = null;
+    let blob2 = null;
+    try {
+      [blob1, blob2] = await Promise.all([
+        fromURL(poster, 1, 0, 0, "webp"),
+        fromURL(thumnail, 1, 0, 0, "webp"),
+      ]);
+    } catch (err) {
+      console.log(err);
+    }
+    const posterRef = ref(storage, `posters/${data["poster_path"]}`);
+    const thumbnailRef = ref(storage, `thumbnail/${data["backdrop_path"]}`);
 
     let posterURL = null;
     let thumbnailURL = null;
 
     try {
-      const posterRef = ref(storage, `posters/${data["poster_path"]}`);
-      const thumbnailRef = ref(storage, `thumbnail/${data["backdrop_path"]}`);
-
-      await uploadBytesResumable(posterRef, poster.data);
-      await uploadBytesResumable(thumbnailRef, thumbnail.data);
-
-      // Get the download URL of the uploaded image
-      posterURL = await getDownloadURL(posterRef);
-      thumbnailURL = await getDownloadURL(thumbnailRef);
-    } catch (error) {
-      console.log(error);
+      await Promise.all([
+        uploadBytesResumable(thumbnailRef, blob1),
+        uploadBytesResumable(posterRef, blob2),
+      ]);
+    } catch (err) {
+      console.log(err);
     }
-    let movieRef = null;
     try {
-      const docRef = await addDoc(collection(db, "tvseries"), {
+      [posterURL, thumbnailURL] = await Promise.all([
+        getDownloadURL(posterRef),
+        getDownloadURL(thumbnailRef),
+      ]);
+    } catch (err) {
+      console.log(err);
+    }
+    console.log(data);
+
+    try {
+      await addDoc(collection(db, "tvseries"), {
         tmdb_id: data["id"],
-        title: data["title"],
+        title: data["name"],
         slug: movieSlug,
         duration: 'data["runtime"]',
         thumbnail: thumbnailURL,
@@ -82,7 +95,7 @@ const NewTvSeries = ({ title }) => {
         maturity_rating: "all age",
         subtitle: null,
         publish_year: null,
-        released: data["release_date"].split("-")[0],
+        released: data["first_air_date"].split("-")[0],
         featured: null,
         type: "T",
         status: "1",
@@ -96,7 +109,6 @@ const NewTvSeries = ({ title }) => {
         updated_by: null,
         channel: 0,
       });
-      movieRef = docRef;
     } catch (error) {
       console.log(error);
     }
@@ -104,7 +116,7 @@ const NewTvSeries = ({ title }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading state to true
+    setIsLoading(true);
 
     try {
       await fetchDataAndStore();
@@ -126,14 +138,13 @@ const NewTvSeries = ({ title }) => {
         {isLoading ? (
           <div className="loading-container">
             <Loading type="spokes" color="#3f51b5" height={"3%"} width={"3%"} />{" "}
-            {/* Replace with your preferred loading component */}
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="form-container">
               <div className="form-header">
                 <div className="form-header-title">Create TvSeries</div>
-                <Link to="/movies">
+                <Link to="/tvseries">
                   <button className="back-btn">Back</button>
                 </Link>
               </div>
@@ -191,13 +202,21 @@ const NewTvSeries = ({ title }) => {
                 <div className="form-block-inside">
                   <div>Featured:</div>
                   <label htmlFor="featured" className="toggle-switch">
-                    <input type="checkbox" id="featured" />
+                    <input
+                      type="checkbox"
+                      id="featured"
+                      onChange={() => setIsFeatured(!isFeatured)}
+                    />
                     <span className="slider"></span>
                   </label>
                 </div>
                 <div className="form-block-inside">
                   <label htmlFor="selectMenu">Select Menu*:</label>
-                  <input type="checkbox" id="selectMenu" />
+                  <input
+                    type="checkbox"
+                    id="selectMenu"
+                    onChange={() => setCheckMenuAll(!checkMenuAll)}
+                  />
                 </div>
               </div>
 
@@ -212,7 +231,8 @@ const NewTvSeries = ({ title }) => {
                         name="details"
                         value="tmdb"
                         className="hidden-radio"
-                        checked
+                        onChange={(e) => setSelectTMDB(e.target.value)}
+                        checked={selectTMDB === "tmdb"}
                       />
                       <label htmlFor="tmdb" className="button-style">
                         TMDB
@@ -225,6 +245,8 @@ const NewTvSeries = ({ title }) => {
                         name="details"
                         value="custom"
                         className="hidden-radio"
+                        onChange={(e) => setSelectTMDB(e.target.value)}
+                        checked={selectTMDB === "custom"}
                       />
                       <label htmlFor="custom" className="button-style">
                         Custom

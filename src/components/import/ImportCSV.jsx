@@ -1,6 +1,6 @@
+import { ChangeCSVtoJson } from "../../helper/Helpers";
 import { MakeMovieTableRelation } from "../../utils/MakeMovieTableRelation";
 import { uploadData } from "./uploadData";
-import Papa from "papaparse";
 
 const ImportCSV = ({ docName, isLoading }) => {
   const handleFileUpload = async (e) => {
@@ -10,10 +10,8 @@ const ImportCSV = ({ docName, isLoading }) => {
     try {
       reader.onload = async (event) => {
         isLoading(true);
-        const csvFileContent = event.target.result;
-        const parsedData = Papa.parse(csvFileContent, { header: true });
-        parsedData.data.pop();
-        await uploadData(parsedData.data, docName);
+        const JSONData = ChangeCSVtoJson(event.target.result);
+        await uploadData(JSONData, docName);
       };
 
       reader.readAsText(file);

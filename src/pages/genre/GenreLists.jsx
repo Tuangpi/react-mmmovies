@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import ImportCSV from "../../components/import/ImportCSV";
-import { STATIC_WORDS } from "../../assets/STATICWORDS";
+import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { motion } from "framer-motion";
 import Loading from "react-loading";
 

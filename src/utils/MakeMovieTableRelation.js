@@ -7,7 +7,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../configs/firebase";
-import { STATIC_WORDS } from "../assets/STATICWORDS";
+import { STATIC_WORDS } from "../assets/STATIC_WORDS";
 
 export const MakeMovieTableRelation = async (docName) => {
   const [actors, directors, genres] = await getUnRelatedIds();
