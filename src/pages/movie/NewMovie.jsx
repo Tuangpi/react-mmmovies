@@ -188,7 +188,7 @@ const NewMovie = ({ title }) => {
         created_by: null,
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
-        is_upcoming: 0,
+        is_upcoming: false,
         upcoming_date: null,
         is_kids: 0,
         desc_myan: null,
