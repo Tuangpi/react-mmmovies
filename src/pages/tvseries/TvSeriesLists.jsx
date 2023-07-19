@@ -1,7 +1,14 @@
 import "../../style/cardlist.scss";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import ImportCSV from "../../components/import/ImportCSV";
 import ImageComponent from "../../components/widget/ImageComponent";
@@ -30,7 +37,9 @@ const TvSeriesLists = () => {
       setIsFetching(true);
       let list = [];
       try {
-        const querySnapshot = await getDocs(collection(db, "tvseries"));
+        const querySnapshot = await getDocs(
+          collection(db, STATIC_WORDS.TVSERIES)
+        );
         querySnapshot.forEach((doc) => {
           list.push({ id: doc.id, data: doc.data() });
         });
@@ -43,37 +52,59 @@ const TvSeriesLists = () => {
     fetchData();
   }, []);
 
+  const deleteEpisodesForSeason = async (seasonId) => {
+    const episodesQuery = query(
+      collection(db, STATIC_WORDS.EPISODES),
+      where("seasons_id", "==", seasonId)
+    );
+    const episodesSnapshot = await getDocs(episodesQuery);
+
+    const deletionPromises = episodesSnapshot.docs.map((doc) =>
+      deleteDoc(doc.ref)
+    );
+    await Promise.all(deletionPromises);
+  };
+
+  const deleteSeasonsForTVSeries = async (tvSeriesId) => {
+    const seasonsQuery = query(
+      collection(db, STATIC_WORDS.SEASONS),
+      where("tv_series_id", "==", tvSeriesId)
+    );
+    const seasonsSnapshot = await getDocs(seasonsQuery);
+
+    const deletionPromises = seasonsSnapshot.docs.map(async (doc) => {
+      await deleteEpisodesForSeason(doc.id);
+      await deleteDoc(doc.ref);
+    });
+
+    await Promise.all(deletionPromises);
+  };
+
+  const deleteTVSeries = async (tvSeriesId) => {
+    const tvSeriesDocRef = doc(db, STATIC_WORDS.TVSERIES, tvSeriesId);
+    await deleteDoc(tvSeriesDocRef);
+  };
+
+  const deleteTVSeriesAndRelatedData = async (tvSeriesId) => {
+    try {
+      await deleteSeasonsForTVSeries(tvSeriesId);
+      await deleteTVSeries(tvSeriesId);
+
+      console.log("TV series and related data deleted successfully");
+    } catch (error) {
+      console.error("Error deleting TV series and related data:", error);
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, "tvseries", id));
+      await deleteTVSeriesAndRelatedData(id);
       setData(data.filter((item) => item.id !== id));
+      setShowElement(() => null);
     } catch (err) {
       console.log(err);
     }
   };
-
-  const actionColumn = [
-    {
-      field: "action",
-      headerName: "Action",
-      width: 200,
-      renderCell: (params) => {
-        return (
-          <div className="cellAction">
-            <Link to="/products/test" style={{ textDecoration: "none" }}>
-              <div className="viewButton">View</div>
-            </Link>
-            <div
-              className="deleteButton"
-              onClick={() => handleDelete(params.row.id)}
-            >
-              Delete
-            </div>
-          </div>
-        );
-      },
-    },
-  ];
 
   return (
     <div className="datatable">
@@ -127,7 +158,7 @@ const TvSeriesLists = () => {
                 className="card-image"
               />
               <div className="card-details">
-                <div className="card-edit-link-container">
+                <div className="card-edit-link-container-tv">
                   {showElement === id && showElement !== null && (
                     <div className="card-edit-list">
                       <ul>
@@ -140,10 +171,15 @@ const TvSeriesLists = () => {
                             <span>Manage Seasons</span>
                           </li>
                         </Link>
-                        <li>
-                          <Edit fontSize="12px" /> <span>Edit</span>
-                        </li>
-                        <li className="delete">
+                        <Link to={`/tvseries/${item.id}/edit`}>
+                          <li>
+                            <Edit fontSize="12px" /> <span>Edit</span>
+                          </li>
+                        </Link>
+                        <li
+                          className="delete"
+                          onClick={() => handleDelete(item.id)}
+                        >
                           <Delete fontSize="12px" />
                           <span>Delete</span>
                         </li>
@@ -154,7 +190,7 @@ const TvSeriesLists = () => {
                     className="card-edit-link"
                     onClick={() => handleClick(id)}
                   >
-                    ...
+                    <div className="dot">...</div>
                   </div>
                 </div>
                 <h2 className="card-title">{item.data.title}</h2>

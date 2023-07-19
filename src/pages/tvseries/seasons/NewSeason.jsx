@@ -7,8 +7,13 @@ import { STATIC_WORDS } from "../../../assets/STATIC_WORDS";
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
+  getDoc,
   getDocs,
+  query,
   serverTimestamp,
+  where,
 } from "firebase/firestore";
 import { db, storage } from "../../../configs/firebase";
 import { useEffect, useState } from "react";
@@ -16,12 +21,15 @@ import axios from "axios";
 import { fromURL } from "image-resize-compress";
 import { ForActors } from "../../new/NewMovieHelper/ForActors";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { Delete, Edit, SettingsSuggest } from "@mui/icons-material";
 
 const NewSeason = ({ title }) => {
   const { id } = useParams();
   const [seasonNumber, setSeasonNumber] = useState();
   const [seasonSlug, setSeasonSlug] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectTMDB, setSelectTMDB] = useState("tmdb");
+  const [edit, setEdit] = useState(true);
   const [data, setData] = useState([]);
   const location = useLocation();
   const tmdb_id = location.state;
@@ -31,15 +39,17 @@ const NewSeason = ({ title }) => {
       let list = [];
       try {
         const querySnapshot = await getDocs(
-          collection(db, STATIC_WORDS.SEASONS)
+          query(
+            collection(db, STATIC_WORDS.SEASONS),
+            where("tv_series_id", "==", id)
+          )
         );
-        querySnapshot.forEach((doc) => {
-          list.push({ id: doc.id, data: doc.data() });
-        });
-        list.map((doc) => {
-          console.log(doc.data);
-        });
-        setData(list);
+        if (querySnapshot) {
+          querySnapshot.forEach((doc) => {
+            list.push({ id: doc.id, data: doc.data() });
+          });
+          setData(list);
+        }
       } catch (err) {
         console.log(err);
       }
@@ -49,7 +59,7 @@ const NewSeason = ({ title }) => {
 
   async function fetchDataAndStore() {
     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
-    console.log(id, tmdb_id);
+
     const trailer_url = await axios.get(
       `https://api.themoviedb.org/3/tv/${tmdb_id}/season/${seasonNumber}/videos?api_key=${TMDB_API_KEY}`
     );
@@ -61,14 +71,12 @@ const NewSeason = ({ title }) => {
     const season_data = await axios.get(
       `https://api.themoviedb.org/3/tv/${tmdb_id}/season/${seasonNumber}?api_key=${TMDB_API_KEY}`
     );
-    console.log(season_data);
 
     const credits = await axios.get(
       `https://api.themoviedb.org/3/tv/${tmdb_id}/season/${seasonNumber}/credits?api_key=${TMDB_API_KEY}`
     );
 
     const actor_id = await ForActors(TMDB_API_KEY, credits);
-    console.log(actor_id);
 
     let posterURL = null;
     if (season_data["data"]["poster_path"]) {
@@ -112,11 +120,31 @@ const NewSeason = ({ title }) => {
         updated_at: serverTimestamp(),
       };
       const docRef = await addDoc(collection(db, STATIC_WORDS.SEASONS), obj);
-      setData([...data, { id: docRef, data: obj }]);
+      setData([...data, { id: docRef.id, data: obj }]);
     } catch (error) {
       console.log(error);
     }
   }
+
+  const handleEdit = (id) => {
+    console.log("asdf");
+    const fetchData = async (docRef) => {
+      try {
+        const querySnapshot = await getDoc(
+          doc(db, `${STATIC_WORDS.SEASONS}/${docRef}`)
+        );
+        const data = querySnapshot.data();
+        setSeasonNumber(data.season_no);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (edit) {
+      console.log("edit");
+      if (id) fetchData(id);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -127,6 +155,28 @@ const NewSeason = ({ title }) => {
       console.error("Error:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+    console.log("asdf");
+    // setIsLoading(true);
+    // try {
+    //   await fetchDataAndStore();
+    // } catch (error) {
+    //   console.error("Error:", error);
+    // } finally {
+    //   setIsLoading(false);
+    // }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, STATIC_WORDS.SEASONS, id));
+      setData(data.filter((item) => item.id !== id));
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -148,96 +198,189 @@ const NewSeason = ({ title }) => {
               <div className="btn">Import CSV</div>
               <div className="btn">Add Seasons</div>
             </div>
-            <form onSubmit={handleSubmit}>
-              <div className="season-no">
-                <label htmlFor="seasonNo">Season No.</label>
-                <input
-                  id="seasonNo"
-                  type="number"
-                  value={seasonNumber}
-                  onChange={(e) => setSeasonNumber(e.target.value)}
-                />
-              </div>
-              <div className="season-slug">
-                <label htmlFor="seasonSlug">Season Slug</label>
-                <input
-                  id="seasonSlug"
-                  type="text"
-                  //   value={movieTitle}
-                  //   onChange={handleMovieTitleChange}
-                />
-              </div>
-              <div className="audio-languages">
-                <label htmlFor="audioLanguages">Audio Languages</label>
-                <input
-                  id="audioLanguages"
-                  type="text"
-                  //   value={movieTitle}
-                  //   onChange={handleMovieTitleChange}
-                />
-              </div>
-              <div className="custom-thumbnail">
-                <div>Choose Custom Thumbnail and Poster</div>
-                <label htmlFor="customThumbnail" className="toggle-switch">
+            {edit ? (
+              <form onSubmit={handleSubmit}>
+                <div className="season-no">
+                  <label htmlFor="seasonNo">Season No.</label>
                   <input
-                    type="checkbox"
-                    id="customThumbnail"
-                    //   onChange={() => setIsFeatured(!isFeatured)}
+                    id="seasonNo"
+                    type="number"
+                    value={seasonNumber}
+                    onChange={(e) => setSeasonNumber(e.target.value)}
                   />
-                  <span className="slider"></span>
-                </label>
-              </div>
-              <div className="protected">
-                <div>Protected Video?</div>
-                <label htmlFor="protected" className="toggle-switch">
+                </div>
+                <div className="season-slug">
+                  <label htmlFor="seasonSlug">Season Slug</label>
                   <input
-                    type="checkbox"
-                    id="protected"
-                    //   onChange={() => setIsFeatured(!isFeatured)}
+                    id="seasonSlug"
+                    type="text"
+                    //   value={movieTitle}
+                    //   onChange={handleMovieTitleChange}
                   />
-                  <span className="slider"></span>
-                </label>
-              </div>
-              <div>Want IMDB Ratings And More Or Custom?</div>
-              <div className="radio-group">
-                <div>
+                </div>
+                <div className="audio-languages">
+                  <label htmlFor="audioLanguages">Audio Languages</label>
                   <input
-                    type="radio"
-                    id="tmdb"
-                    name="details"
-                    value="tmdb"
-                    className="hidden-radio"
-                    // onChange={(e) => setSelectTMDB(e.target.value)}
-                    // checked={selectTMDB === "tmdb"}
+                    id="audioLanguages"
+                    type="text"
+                    //   value={movieTitle}
+                    //   onChange={handleMovieTitleChange}
                   />
-                  <label htmlFor="tmdb" className="button-style">
-                    TMDB
+                </div>
+                <div className="custom-thumbnail">
+                  <div>Choose Custom Thumbnail and Poster</div>
+                  <label htmlFor="customThumbnail" className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="customThumbnail"
+                      //   onChange={() => setIsFeatured(!isFeatured)}
+                    />
+                    <span className="slider"></span>
                   </label>
                 </div>
-                <div>
-                  <input
-                    type="radio"
-                    id="custom"
-                    name="details"
-                    value="custom"
-                    className="hidden-radio"
-                    // onChange={(e) => setSelectTMDB(e.target.value)}
-                    // checked={selectTMDB === "custom"}
-                  />
-                  <label htmlFor="custom" className="button-style">
-                    Custom
+                <div className="protected">
+                  <div>Protected Video?</div>
+                  <label htmlFor="protected" className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="protected"
+                      //   onChange={() => setIsFeatured(!isFeatured)}
+                    />
+                    <span className="slider"></span>
                   </label>
                 </div>
-              </div>
-              <div className="bottom-create">
-                <button type="reset" className="btn">
-                  Reset
-                </button>
-                <button type="submit" className="btn">
-                  Create
-                </button>
-              </div>
-            </form>
+                <div>Want IMDB Ratings And More Or Custom?</div>
+                <div className="radio-group">
+                  <div>
+                    <input
+                      type="radio"
+                      id="tmdb"
+                      name="details"
+                      value="tmdb"
+                      className="hidden-radio"
+                      // onChange={(e) => setSelectTMDB(e.target.value)}
+                      // checked={selectTMDB === "tmdb"}
+                    />
+                    <label htmlFor="tmdb" className="button-style">
+                      TMDB
+                    </label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      id="custom"
+                      name="details"
+                      value="custom"
+                      className="hidden-radio"
+                      // onChange={(e) => setSelectTMDB(e.target.value)}
+                      // checked={selectTMDB === "custom"}
+                    />
+                    <label htmlFor="custom" className="button-style">
+                      Custom
+                    </label>
+                  </div>
+                </div>
+                <div className="bottom-create">
+                  <button type="reset" className="btn">
+                    Reset
+                  </button>
+                  <button type="submit" className="btn">
+                    Create
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmitEdit}>
+                <div className="season-no">
+                  <label htmlFor="seasonNo">Season No.</label>
+                  <input
+                    id="seasonNo"
+                    type="number"
+                    value={seasonNumber}
+                    onChange={(e) => setSeasonNumber(e.target.value)}
+                  />
+                </div>
+                <div className="season-slug">
+                  <label htmlFor="seasonSlug">Season Slug</label>
+                  <input
+                    id="seasonSlug"
+                    type="text"
+                    //   value={movieTitle}
+                    //   onChange={handleMovieTitleChange}
+                  />
+                </div>
+                <div className="audio-languages">
+                  <label htmlFor="audioLanguages">Audio Languages</label>
+                  <input
+                    id="audioLanguages"
+                    type="text"
+                    //   value={movieTitle}
+                    //   onChange={handleMovieTitleChange}
+                  />
+                </div>
+                <div className="custom-thumbnail">
+                  <div>Choose Custom Thumbnail and Poster</div>
+                  <label htmlFor="customThumbnail" className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="customThumbnail"
+                      //   onChange={() => setIsFeatured(!isFeatured)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+                <div className="protected">
+                  <div>Protected Video?</div>
+                  <label htmlFor="protected" className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="protected"
+                      //   onChange={() => setIsFeatured(!isFeatured)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+                <div>Want IMDB Ratings And More Or Custom?</div>
+                <div className="radio-group">
+                  <div>
+                    <input
+                      type="radio"
+                      id="tmdb"
+                      name="details"
+                      value="tmdb"
+                      className="hidden-radio"
+                      // onChange={(e) => setSelectTMDB(e.target.value)}
+                      // checked={selectTMDB === "tmdb"}
+                    />
+                    <label htmlFor="tmdb" className="button-style">
+                      TMDB
+                    </label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      id="custom"
+                      name="details"
+                      value="custom"
+                      className="hidden-radio"
+                      // onChange={(e) => setSelectTMDB(e.target.value)}
+                      // checked={selectTMDB === "custom"}
+                    />
+                    <label htmlFor="custom" className="button-style">
+                      Custom
+                    </label>
+                  </div>
+                </div>
+                <div className="bottom-create">
+                  <button type="reset" className="btn">
+                    Reset
+                  </button>
+                  <button type="submit" className="btn">
+                    Edit
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
           <div className="left-side">
             <div className="episode-list">
@@ -255,19 +398,34 @@ const NewSeason = ({ title }) => {
                   {data.length > 0 &&
                     data.map((doc) => (
                       <tr>
-                        <td>Thumbnail</td>
-                        <td>Season {doc.data.season_no}</td>
-                        <td>12 Episodes</td>
-                        <td>{doc.data.tmdb}</td>
-                        <td>
+                        <td className="cell">
+                          <img src={doc.data.poster} alt="season-thumbnail" />
+                        </td>
+                        <td className="cell">Season {doc.data.season_no}</td>
+                        <td className="cell">12 Episodes</td>
+                        <td className="cell">{doc.data.tmdb}</td>
+                        <td className="cell">
                           <Link
                             to={`/tvseries/season/${doc.id}/episode`}
-                            state={id}
+                            state={{
+                              tmdb_id: doc.data.tmdb_id,
+                              tv_series_id: id,
+                              season_number: doc.data.season_no,
+                            }}
                           >
-                            episode
+                            <SettingsSuggest />
                           </Link>
-                          <Link to="/tvseries/season/episode">Edit</Link>
-                          <Link to="/tvseries/season/episode">Delete</Link>
+                          <Edit
+                            onClick={() => {
+                              setEdit((preEdit) => !preEdit);
+                              handleEdit(doc.id);
+                            }}
+                            style={{ cursor: "pointer" }}
+                          />
+                          <Delete
+                            className="delete"
+                            onClick={() => handleDelete(doc.id)}
+                          />
                         </td>
                       </tr>
                     ))}

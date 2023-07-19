@@ -32,6 +32,7 @@ import HelpAndSupport from "./pages/helpAndSupport/HelpAndSupport";
 import NewSeason from "./pages/tvseries/seasons/NewSeason";
 import NewEpisode from "./pages/tvseries/episodes/NewEpisode";
 import EditMovie from "./pages/movie/EditMovie";
+import EditTvSeries from "./pages/tvseries/EditTvSeries";
 
 function App() {
   const { darkMode } = useContext(DarkModeContext);
@@ -157,6 +158,14 @@ function App() {
                 element={
                   <RequireAuth>
                     <NewTvSeries title="Add New TV Series" />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path=":id/edit"
+                element={
+                  <RequireAuth>
+                    <EditTvSeries title="Edit TV Series" />
                   </RequireAuth>
                 }
               />

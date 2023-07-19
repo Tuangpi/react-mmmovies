@@ -25,15 +25,18 @@
 }
 
 .card-details {
-  .card-edit-link-container {
+  .card-edit-link-container-movie,
+  .card-edit-link-container-tv {
     display: flex;
     justify-content: flex-end;
     position: relative;
+    margin-right: 0.8rem;
+    margin-top: -1.2rem;
 
     .card-edit-list,
     .card-edit-list-movie {
       position: absolute;
-      top: -20.5vh;
+      top: -17vh;
       z-index: 2;
       ul {
         display: flex;
@@ -45,38 +48,55 @@
         padding: 0.6rem 0 0.1rem 0;
         li {
           display: flex;
-          font-size: 13px;
+          font-size: 12px;
           column-gap: 0.6rem;
           cursor: pointer;
           border-radius: 3px;
-          padding: 0.8rem 1rem;
+          padding: 0.7rem 0.95rem;
 
           &:hover {
             color: rgb(19, 19, 19);
             background-color: rgb(193, 193, 193);
           }
         }
-        .delete {
-          color: rgb(170, 31, 31);
-          &:hover {
-            color: rgb(170, 29, 29);
-          }
-        }
       }
     }
     .card-edit-list-movie {
-      top: -14.5vh;
+      top: -11.5vh;
     }
 
     .card-edit-link {
       cursor: pointer;
-      rotate: 90deg;
       font-size: 18px;
       font-weight: 800;
+      .dot {
+        background-color: rgb(49 106 173);
+        border-radius: 50%;
+        transform: rotate(90deg) scale(1.2);
+        width: 187%;
+        height: 138%;
+        display: flex;
+        justify-content: center;
+        color: rgb(240, 240, 240);
+        border: none;
+        outline: none;
+        &:hover {
+          background-color: rgb(55 115 188);
+        }
+      }
     }
   }
+  .card-edit-link-container-movie {
+    margin-right: 1.25rem;
+  }
 }
-
+.delete {
+  color: rgb(180, 24, 24);
+  cursor: pointer;
+  &:hover {
+    color: rgb(190, 39, 39);
+  }
+}
 .card-title {
   /* Add styling properties for the movie title */
 }

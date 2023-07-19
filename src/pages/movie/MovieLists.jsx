@@ -50,33 +50,11 @@ const MovieLists = () => {
     try {
       await deleteDoc(doc(db, STATIC_WORDS.MOVIES, id));
       setData(data.filter((item) => item.id !== id));
+      setShowElement(() => null);
     } catch (err) {
       console.log(err);
     }
   };
-
-  const actionColumn = [
-    {
-      field: "action",
-      headerName: "Action",
-      width: 200,
-      renderCell: (params) => {
-        return (
-          <div className="cellAction">
-            <Link to="/products/test" style={{ textDecoration: "none" }}>
-              <div className="viewButton">View</div>
-            </Link>
-            <div
-              className="deleteButton"
-              onClick={() => handleDelete(params.row.id)}
-            >
-              Delete
-            </div>
-          </div>
-        );
-      },
-    },
-  ];
 
   return (
     <div className="datatable">
@@ -131,7 +109,7 @@ const MovieLists = () => {
               />
 
               <div className="card-details">
-                <div className="card-edit-link-container">
+                <div className="card-edit-link-container-movie">
                   {showElement === id && showElement !== null && (
                     <div className="card-edit-list-movie">
                       <ul>
@@ -154,7 +132,7 @@ const MovieLists = () => {
                     className="card-edit-link"
                     onClick={() => handleClick(id)}
                   >
-                    ...
+                    <div className="dot">...</div>
                   </div>
                 </div>
                 <h2 className="card-title">{item.data.title}</h2>

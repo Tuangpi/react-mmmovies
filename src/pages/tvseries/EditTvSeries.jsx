@@ -2,26 +2,24 @@ import "../../style/new.scss";
 import "../../style/modal.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Loading from "react-loading";
 import {
   addDoc,
   collection,
-  getDocs,
-  query,
+  doc,
+  getDoc,
   serverTimestamp,
-  where,
 } from "firebase/firestore";
 import { db, storage } from "../../configs/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ForGenres } from "../new/NewMovieHelper/ForGenres";
 import { GetData } from "../new/NewMovieHelper/GetData";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
-import { isDocumentEmpty } from "../../helper/Helpers";
 
-const NewTvSeries = ({ title }) => {
+const EditTvSeries = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchByToggle, setSearchByToggle] = useState(false);
   const [searchBy, setSearchBy] = useState("");
@@ -30,6 +28,7 @@ const NewTvSeries = ({ title }) => {
   const [isFeatured, setIsFeatured] = useState(false);
   const [selectTMDB, setSelectTMDB] = useState("tmdb");
   const [checkMenuAll, setCheckMenuAll] = useState(false);
+  const { id } = useParams();
 
   const handleSearchByToggle = (event) => {
     setSearchByToggle(event.target.checked);
@@ -40,118 +39,118 @@ const NewTvSeries = ({ title }) => {
     setMovieTitle(event.target.value);
   };
 
-  async function fetchDataAndStore() {
-    const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
-
-    if (!(await isDocumentEmpty(STATIC_WORDS.TVSERIES))) {
-      const q = query(
-        collection(db, STATIC_WORDS.TVSERIES),
-        where("tmdb_id", "==", movieTitle)
-      );
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        console.log("already exist");
-        return;
+  useEffect(() => {
+    const fetchData = async (docRef) => {
+      try {
+        const querySnapshot = await getDoc(
+          doc(db, `${STATIC_WORDS.TVSERIES}/${docRef}`)
+        );
+        const data = querySnapshot.data();
+        setMovieSlug(data.movieSlug);
+        setMovieTitle(data.title);
+      } catch (err) {
+        console.log(err);
       }
-    }
+    };
 
-    const data = await GetData(
-      searchBy,
-      TMDB_API_KEY,
-      movieTitle,
-      STATIC_WORDS.TVSERIES
-    );
+    if (id) fetchData(id);
+  }, [id]);
 
-    //for genre
-    const genre_id = await ForGenres(data);
+  //   async function fetchDataAndStore() {
+  //     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
 
-    //for tvseries
-    const poster = `https://image.tmdb.org/t/p/original/${data["poster_path"]}`;
-    const thumnail = `https://image.tmdb.org/t/p/original/${data["backdrop_path"]}`;
+  //     const data = await GetData(searchBy, TMDB_API_KEY, movieTitle);
 
-    let blob1 = null;
-    let blob2 = null;
-    try {
-      [blob1, blob2] = await Promise.all([
-        fromURL(poster, 1, 0, 0, "webp"),
-        fromURL(thumnail, 1, 0, 0, "webp"),
-      ]);
-    } catch (err) {
-      console.log(err);
-    }
-    const posterRef = ref(storage, `posters/${data["poster_path"]}`);
-    const thumbnailRef = ref(storage, `thumbnail/${data["backdrop_path"]}`);
+  //     //for genre
+  //     const genre_id = await ForGenres(data);
 
-    let posterURL = null;
-    let thumbnailURL = null;
+  //     //for tvseries
+  //     const poster = `https://image.tmdb.org/t/p/original/${data["poster_path"]}`;
+  //     const thumnail = `https://image.tmdb.org/t/p/original/${data["backdrop_path"]}`;
 
-    try {
-      await Promise.all([
-        uploadBytesResumable(thumbnailRef, blob1),
-        uploadBytesResumable(posterRef, blob2),
-      ]);
-    } catch (err) {
-      console.log(err);
-    }
-    try {
-      [posterURL, thumbnailURL] = await Promise.all([
-        getDownloadURL(posterRef),
-        getDownloadURL(thumbnailRef),
-      ]);
-    } catch (err) {
-      console.log(err);
-    }
+  //     let blob1 = null;
+  //     let blob2 = null;
+  //     try {
+  //       [blob1, blob2] = await Promise.all([
+  //         fromURL(poster, 1, 0, 0, "webp"),
+  //         fromURL(thumnail, 1, 0, 0, "webp"),
+  //       ]);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //     const posterRef = ref(storage, `posters/${data["poster_path"]}`);
+  //     const thumbnailRef = ref(storage, `thumbnail/${data["backdrop_path"]}`);
 
-    try {
-      await addDoc(collection(db, "tvseries"), {
-        tmdb_id: String(data["id"]),
-        title: data["name"],
-        slug: movieSlug,
-        duration: 'data["runtime"]',
-        thumbnail: thumbnailURL,
-        poster: posterURL,
-        tmdb: "Y",
-        fetch_by: searchBy,
-        genre_id: genre_id,
-        trailer_url: null,
-        detail: data["overview"],
-        views: null,
-        rating: data["vote_average"],
-        maturity_rating: "all age",
-        subtitle: null,
-        publish_year: null,
-        released: data["first_air_date"].split("-")[0],
-        featured: null,
-        type: "T",
-        status: "1",
-        created_by: null,
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp(),
-        is_upcoming: 0,
-        upcoming_date: null,
-        is_kids: 0,
-        desc_myan: null,
-        updated_by: null,
-        channel: 0,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  //     let posterURL = null;
+  //     let thumbnailURL = null;
+
+  //     try {
+  //       await Promise.all([
+  //         uploadBytesResumable(thumbnailRef, blob1),
+  //         uploadBytesResumable(posterRef, blob2),
+  //       ]);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //     try {
+  //       [posterURL, thumbnailURL] = await Promise.all([
+  //         getDownloadURL(posterRef),
+  //         getDownloadURL(thumbnailRef),
+  //       ]);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+
+  //     try {
+  //       await addDoc(collection(db, "tvseries"), {
+  //         tmdb_id: data["id"],
+  //         title: data["name"],
+  //         slug: movieSlug,
+  //         duration: 'data["runtime"]',
+  //         thumbnail: thumbnailURL,
+  //         poster: posterURL,
+  //         tmdb: "Y",
+  //         fetch_by: searchBy,
+  //         genre_id: genre_id,
+  //         trailer_url: null,
+  //         detail: data["overview"],
+  //         views: null,
+  //         rating: data["vote_average"],
+  //         maturity_rating: "all age",
+  //         subtitle: null,
+  //         publish_year: null,
+  //         released: data["first_air_date"].split("-")[0],
+  //         featured: null,
+  //         type: "T",
+  //         status: "1",
+  //         created_by: null,
+  //         created_at: serverTimestamp(),
+  //         updated_at: serverTimestamp(),
+  //         is_upcoming: 0,
+  //         upcoming_date: null,
+  //         is_kids: 0,
+  //         desc_myan: null,
+  //         updated_by: null,
+  //         channel: 0,
+  //       });
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      await fetchDataAndStore();
+      console.log("asdf");
+      //   await fetchDataAndStore();
     } catch (error) {
       console.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="new">
       <Sidebar />
@@ -168,7 +167,7 @@ const NewTvSeries = ({ title }) => {
           <form onSubmit={handleSubmit}>
             <div className="form-container">
               <div className="form-header">
-                <div className="form-header-title">Create TvSeries</div>
+                <div className="form-header-title">Edit TvSeries</div>
                 <Link to="/tvseries">
                   <button className="back-btn">Back</button>
                 </Link>
@@ -309,5 +308,4 @@ const NewTvSeries = ({ title }) => {
     </div>
   );
 };
-
-export default NewTvSeries;
+export default EditTvSeries;

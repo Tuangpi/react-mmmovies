@@ -106,7 +106,12 @@ const NewMovie = ({ title }) => {
       }
     }
 
-    const data = await GetData(searchBy, TMDB_API_KEY, movieTitle);
+    const data = await GetData(
+      searchBy,
+      TMDB_API_KEY,
+      movieTitle,
+      STATIC_WORDS.MOVIES
+    );
     let credits = null;
     if (data["id"]) {
       credits = await axios.get(
