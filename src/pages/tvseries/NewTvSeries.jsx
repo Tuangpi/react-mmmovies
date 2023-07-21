@@ -154,157 +154,150 @@ const NewTvSeries = ({ title }) => {
 
   return (
     <div className="new">
+      {isLoading && (
+        <div className="loading-container">
+          <Loading type="spokes" color="#3f51b5" height={"3%"} width={"3%"} />{" "}
+        </div>
+      )}
       <Sidebar />
       <div className="newContainer">
         <Navbar />
         <div className="top">
           <h1>{title}</h1>
         </div>
-        {isLoading ? (
-          <div className="loading-container">
-            <Loading type="spokes" color="#3f51b5" height={"3%"} width={"3%"} />{" "}
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="form-container">
-              <div className="form-header">
-                <div className="form-header-title">Create TvSeries</div>
-                <Link to="/tvseries">
-                  <button className="back-btn">Back</button>
-                </Link>
-              </div>
-              <div className="form-block">
-                <div className="form-block-inside">
-                  <div>Search TVSeries By TMDB ID</div>
-                  <label className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={searchByToggle}
-                      onChange={handleSearchByToggle}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                {searchByToggle ? (
-                  <div className="form-block-inside">
-                    <label htmlFor="movieName">Series Title:</label>
-                    <input
-                      type="text"
-                      id="movieName"
-                      value={movieTitle}
-                      onChange={handleMovieTitleChange}
-                    />
-                  </div>
-                ) : (
-                  <div className="form-block-inside">
-                    <label htmlFor="movieTMDB">Tv Series ID:</label>
-                    <input
-                      id="movieTMDB"
-                      type="text"
-                      value={movieTitle}
-                      onChange={handleMovieTitleChange}
-                    />
-                  </div>
-                )}
-                <div className="form-block-inside">
-                  <label htmlFor="maturityRating">Maturity Rating:</label>
-                  <input type="text" id="maturityRating" />
-                </div>
-                <div className="form-block-inside">
-                  <label htmlFor="country">Country:</label>
-                  <input type="text" id="country" />
-                </div>
-                <div className="form-block-inside">
-                  <label htmlFor="metaKeyword">Meta Keyword:</label>
-                  <input type="text" id="metaKeyword" />
-                </div>
-                <div className="form-block-inside">
-                  <label htmlFor="metaDescription">Meta Description:</label>
-                  <textarea name="" id="metaDescription" cols="30"></textarea>
-                </div>
-              </div>
-              <div className="form-block">
-                <div className="form-block-inside">
-                  <div>Featured:</div>
-                  <label htmlFor="featured" className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      id="featured"
-                      onChange={() => setIsFeatured(!isFeatured)}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                <div className="form-block-inside">
-                  <label htmlFor="selectMenu">Select Menu*:</label>
+        <form onSubmit={handleSubmit}>
+          <div className="form-container">
+            <div className="form-header">
+              <div className="form-header-title">Create TvSeries</div>
+              <Link to="/tvseries">
+                <button className="back-btn">Back</button>
+              </Link>
+            </div>
+            <div className="form-block">
+              <div className="form-block-inside">
+                <div>Search TVSeries By TMDB ID</div>
+                <label className="toggle-switch">
                   <input
                     type="checkbox"
-                    id="selectMenu"
-                    onChange={() => setCheckMenuAll(!checkMenuAll)}
+                    checked={searchByToggle}
+                    onChange={handleSearchByToggle}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              {searchByToggle ? (
+                <div className="form-block-inside">
+                  <label htmlFor="movieName">Series Title:</label>
+                  <input
+                    type="text"
+                    id="movieName"
+                    value={movieTitle}
+                    onChange={handleMovieTitleChange}
                   />
                 </div>
-              </div>
-
-              <div className="form-block">
+              ) : (
                 <div className="form-block-inside">
-                  <label>More Details: TMDB Or Custom?</label>
-                  <div className="radio-group">
-                    <div>
-                      <input
-                        type="radio"
-                        id="tmdb"
-                        name="details"
-                        value="tmdb"
-                        className="hidden-radio"
-                        onChange={(e) => setSelectTMDB(e.target.value)}
-                        checked={selectTMDB === "tmdb"}
-                      />
-                      <label htmlFor="tmdb" className="button-style">
-                        TMDB
-                      </label>
-                    </div>
-                    <div>
-                      <input
-                        type="radio"
-                        id="custom"
-                        name="details"
-                        value="custom"
-                        className="hidden-radio"
-                        onChange={(e) => setSelectTMDB(e.target.value)}
-                        checked={selectTMDB === "custom"}
-                      />
-                      <label htmlFor="custom" className="button-style">
-                        Custom
-                      </label>
-                    </div>
+                  <label htmlFor="movieTMDB">Tv Series ID:</label>
+                  <input
+                    id="movieTMDB"
+                    type="text"
+                    value={movieTitle}
+                    onChange={handleMovieTitleChange}
+                  />
+                </div>
+              )}
+              <div className="form-block-inside">
+                <label htmlFor="maturityRating">Maturity Rating:</label>
+                <input type="text" id="maturityRating" />
+              </div>
+              <div className="form-block-inside">
+                <label htmlFor="country">Country:</label>
+                <input type="text" id="country" />
+              </div>
+              <div className="form-block-inside">
+                <label htmlFor="metaKeyword">Meta Keyword:</label>
+                <input type="text" id="metaKeyword" />
+              </div>
+              <div className="form-block-inside">
+                <label htmlFor="metaDescription">Meta Description:</label>
+                <textarea name="" id="metaDescription" cols="30"></textarea>
+              </div>
+            </div>
+            <div className="form-block">
+              <div className="form-block-inside">
+                <div>Featured:</div>
+                <label htmlFor="featured" className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    id="featured"
+                    onChange={() => setIsFeatured(!isFeatured)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <div className="form-block-inside">
+                <label htmlFor="selectMenu">Select Menu*:</label>
+                <input
+                  type="checkbox"
+                  id="selectMenu"
+                  onChange={() => setCheckMenuAll(!checkMenuAll)}
+                />
+              </div>
+            </div>
+
+            <div className="form-block">
+              <div className="form-block-inside">
+                <label>More Details: TMDB Or Custom?</label>
+                <div className="radio-group">
+                  <div>
+                    <input
+                      type="radio"
+                      id="tmdb"
+                      name="details"
+                      value="tmdb"
+                      className="hidden-radio"
+                      onChange={(e) => setSelectTMDB(e.target.value)}
+                      checked={selectTMDB === "tmdb"}
+                    />
+                    <label htmlFor="tmdb" className="button-style">
+                      TMDB
+                    </label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      id="custom"
+                      name="details"
+                      value="custom"
+                      className="hidden-radio"
+                      onChange={(e) => setSelectTMDB(e.target.value)}
+                      checked={selectTMDB === "custom"}
+                    />
+                    <label htmlFor="custom" className="button-style">
+                      Custom
+                    </label>
                   </div>
                 </div>
               </div>
-              <div className="form-block-myanmar">
-                <div className="form-block-inside">
-                  <label htmlFor="descriptionSource">
-                    Get Description From:
-                  </label>
-                  <input type="text" id="descriptionSource" />
-                </div>
-                <div className="form-block-inside">
-                  <label htmlFor="descriptionMyanmar">
-                    Description in Myanmar:
-                  </label>
-                  <textarea
-                    name=""
-                    id="descriptionMyanmar"
-                    cols="30"
-                  ></textarea>
-                </div>
+            </div>
+            <div className="form-block-myanmar">
+              <div className="form-block-inside">
+                <label htmlFor="descriptionSource">Get Description From:</label>
+                <input type="text" id="descriptionSource" />
               </div>
-
-              <div className="form-block">
-                <button type="submit">Create</button>
+              <div className="form-block-inside">
+                <label htmlFor="descriptionMyanmar">
+                  Description in Myanmar:
+                </label>
+                <textarea name="" id="descriptionMyanmar" cols="30"></textarea>
               </div>
             </div>
-          </form>
-        )}
+
+            <div className="form-block">
+              <button type="submit">Create</button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
   if (credits.data) {
     for (let i = 0; i < 5; i++) {
       const element = credits.data.cast[i];
-      if (element.id) {
+      if (element && element.id) {
         const actorUrl = axios.get(
           `https://api.themoviedb.org/3/person/${element.id}?api_key=${TMDB_API_KEY}`
         );

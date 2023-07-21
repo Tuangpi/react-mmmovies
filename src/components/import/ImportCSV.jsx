@@ -1,5 +1,5 @@
 import { ChangeCSVtoJson } from "../../helper/Helpers";
-import { MakeMovieTableRelation } from "../../utils/MakeMovieTableRelation";
+import { MakeTableRelation } from "../../utils/MakeTableRelation";
 import { uploadData } from "./uploadData";
 
 const ImportCSV = ({ docName, isLoading }) => {
@@ -12,17 +12,12 @@ const ImportCSV = ({ docName, isLoading }) => {
         isLoading(true);
         const JSONData = ChangeCSVtoJson(event.target.result);
         await uploadData(JSONData, docName);
+        const a = await MakeTableRelation(docName);
+        console.log(a);
+        isLoading(false);
       };
 
       reader.readAsText(file);
-    } catch (err) {
-      console.log(err);
-    }
-
-    try {
-      const a = await MakeMovieTableRelation(docName);
-      isLoading(false);
-      console.log(a);
     } catch (err) {
       console.log(err);
     }

@@ -19,12 +19,20 @@ export const uploadData = async (rawData, docName) => {
   let cleanedData = [];
   let batchArray = [];
 
+  const validDocNames = [
+    STATIC_WORDS.MOVIES,
+    STATIC_WORDS.TVSERIES,
+    STATIC_WORDS.SEASONS,
+    STATIC_WORDS.EPISODES,
+  ];
+
   if (await isDocumentEmpty(docName)) {
     cleanedData.push(...data);
   } else {
     data.forEach(async (object) => {
-      const checkValue =
-        docName === STATIC_WORDS.MOVIES ? object.tmdb_id : object.name;
+      let checkValue = object.name;
+      if (validDocNames.includes(docName)) checkValue = object.tmdb_id;
+
       if (checkValue !== "" && checkValue !== null) {
         batchArray.push({ id: checkValue, data: object });
       } else {
@@ -36,15 +44,17 @@ export const uploadData = async (rawData, docName) => {
 
     if (batchArray.length > 0) {
       let tmpArrForCheck = [];
+      let fieldWhere = "name";
+      if (validDocNames.includes(docName)) fieldWhere = "tmdb_id";
+
       for (let i = 0; i < batchArray.length; i++) {
-        if (i % 20 === 0) {
+        if (i % 20 === 0 && i !== 0) {
           lastBatchArray = [];
-          if (i === 0) continue;
           try {
             const q = query(
               collection(db, docName),
               where(
-                docName === STATIC_WORDS.MOVIES ? "tmdb_id" : "name",
+                fieldWhere,
                 "in",
                 batchArray.slice(i - 20, i).map((result) => result.id)
               )
@@ -53,7 +63,7 @@ export const uploadData = async (rawData, docName) => {
             const querySnapshots = await Promise.all([getDocs(q)]);
             querySnapshots.forEach((querySnap) => {
               querySnap.forEach((q) => {
-                if (docName === STATIC_WORDS.MOVIES) {
+                if (validDocNames.includes(docName)) {
                   tmpArrForCheck.push(q.data().tmdb_id);
                 } else {
                   tmpArrForCheck.push(q.data().name);
@@ -74,6 +84,7 @@ export const uploadData = async (rawData, docName) => {
             console.log(err);
           }
         }
+
         lastBatchArray.push(batchArray[i]);
         tmpArrForCheck.length = 0;
       }
@@ -83,7 +94,7 @@ export const uploadData = async (rawData, docName) => {
           const q = query(
             collection(db, docName),
             where(
-              docName === STATIC_WORDS.MOVIES ? "tmdb_id" : "name",
+              fieldWhere,
               "in",
               lastBatchArray.map((result) => result.id)
             )
@@ -93,7 +104,7 @@ export const uploadData = async (rawData, docName) => {
           const querySnapshots = await Promise.all([getDocs(q)]);
           querySnapshots.forEach((querySnap) => {
             querySnap.forEach((q) => {
-              if (docName === STATIC_WORDS.MOVIES) {
+              if (validDocNames.includes(docName)) {
                 tmpArrForCheck.push(q.data().tmdb_id);
               } else {
                 tmpArrForCheck.push(q.data().name);
@@ -152,12 +163,31 @@ export const uploadData = async (rawData, docName) => {
 
 const modifiedData = async (rawData, docName) => {
   console.log(docName);
+  const validDocNames = [
+    STATIC_WORDS.MOVIES,
+    STATIC_WORDS.TVSERIES,
+    STATIC_WORDS.SEASONS,
+    STATIC_WORDS.EPISODES,
+  ];
+
   if (docName === STATIC_WORDS.ACTORS || docName === STATIC_WORDS.DIRECTORS) {
     const imageUrlPromise = await fetchRelatedImage(rawData, docName);
     for (let i = 0; i < rawData.length; i++) {
       rawData[i].image = imageUrlPromise[i];
     }
   }
+
+  if (validDocNames.includes(docName)) {
+    const [posterUrlPromise, thumbnailUrlPromise] = await fetchRelatedImage(
+      rawData,
+      docName
+    );
+    for (let i = 0; i < rawData.length; i++) {
+      rawData[i].thumbnail = thumbnailUrlPromise[i];
+      rawData[i].poster = posterUrlPromise[i];
+    }
+  }
+
   if (docName === STATIC_WORDS.GENRES) {
     let increment = 1;
     if (await isDocumentEmpty(STATIC_WORDS.GENRES)) {
@@ -192,16 +222,6 @@ const modifiedData = async (rawData, docName) => {
       });
     }
   }
-  if (docName === STATIC_WORDS.MOVIES) {
-    const [posterUrlPromise, thumbnailUrlPromise] = await fetchRelatedImage(
-      rawData,
-      docName
-    );
-    for (let i = 0; i < rawData.length; i++) {
-      rawData[i].thumbnail = thumbnailUrlPromise[i];
-      rawData[i].poster = posterUrlPromise[i];
-    }
-  }
 
   return rawData;
 };
@@ -215,13 +235,17 @@ const fetchRelatedImage = async (rawData, docName) => {
   const actorRefs = [];
   const directorBlobs = [];
   const directorRefs = [];
+  const validDocNames = [
+    STATIC_WORDS.MOVIES,
+    STATIC_WORDS.TVSERIES,
+    STATIC_WORDS.SEASONS,
+    STATIC_WORDS.EPISODES,
+  ];
 
   rawData.forEach((data) => {
     if (docName === STATIC_WORDS.ACTORS) {
       if (data.image !== null && data.image !== "") {
-        console.log("dfk");
         const imagePath = data.image.replace("tmdb_", "");
-        console.log(data.image);
         const actor = `https://image.tmdb.org/t/p/w300/${imagePath}`;
         const actorRef = ref(storage, `actors/${imagePath}`);
         const blob = fromURL(actor, 80, 0, 0, "webp");
@@ -245,8 +269,8 @@ const fetchRelatedImage = async (rawData, docName) => {
         directorBlobs.push(Promise.resolve(null));
       }
     }
-    if (docName === STATIC_WORDS.MOVIES) {
-      if (data.poster !== null && data.poster !== "") {
+    if (validDocNames.includes(docName)) {
+      if (data.poster && data.poster !== null && data.poster !== "") {
         const posterPath = data.poster.replace("poster_", "");
         const poster = `https://image.tmdb.org/t/p/original/${posterPath}`;
         const posterRef = ref(storage, `posters/${posterPath}`);
@@ -283,11 +307,9 @@ const fetchRelatedImage = async (rawData, docName) => {
       actorBlobPromise = await Promise.all(actorBlobs);
     }
     if (docName === STATIC_WORDS.DIRECTORS) {
-      console.log("asdf");
       directorBlobPromise = await Promise.all(directorBlobs);
-      console.log(directorBlobPromise);
     }
-    if (docName === STATIC_WORDS.MOVIES) {
+    if (validDocNames.includes(docName)) {
       posterBlobPromise = await Promise.all(posterBlobs);
       thumbnailBlobPromise = await Promise.all(thumbnailBlobs);
     }
@@ -323,7 +345,7 @@ const fetchRelatedImage = async (rawData, docName) => {
         uploadDirectors.push(Promise.resolve(null));
       }
     }
-    if (docName === STATIC_WORDS.MOVIES) {
+    if (validDocNames.includes(docName)) {
       if (posterBlobPromise[i] !== null) {
         const uploadPoster = uploadBytesResumable(
           posterRefs[i],
@@ -352,7 +374,7 @@ const fetchRelatedImage = async (rawData, docName) => {
     if (docName === STATIC_WORDS.DIRECTORS) {
       await Promise.all(uploadDirectors);
     }
-    if (docName === STATIC_WORDS.MOVIES) {
+    if (validDocNames.includes(docName)) {
       await Promise.all(uploadPosters);
       await Promise.all(uploadThumbnails);
     }
@@ -382,7 +404,7 @@ const fetchRelatedImage = async (rawData, docName) => {
         directorUrls.push(Promise.resolve(null));
       }
     }
-    if (docName === STATIC_WORDS.MOVIES) {
+    if (validDocNames.includes(docName)) {
       if (posterBlobPromise[i] !== null) {
         const posterUrl = getDownloadURL(posterRefs[i]);
         posterUrls.push(posterUrl);
@@ -413,7 +435,7 @@ const fetchRelatedImage = async (rawData, docName) => {
       directorUrlPromise = await Promise.all(directorUrls);
       returnUrls = directorUrlPromise;
     }
-    if (docName === STATIC_WORDS.MOVIES) {
+    if (validDocNames.includes(docName)) {
       posterUrlPromise = await Promise.all(posterUrls);
       thumbnailUrlPromise = await Promise.all(thumbnailUrls);
       returnUrls = [posterUrlPromise, thumbnailUrlPromise];

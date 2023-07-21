@@ -2,7 +2,7 @@ import "../../style/new.scss";
 import "../../style/modal.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Loading from "react-loading";
 import {
   addDoc,
@@ -21,13 +21,15 @@ import { ForActors } from "../new/NewMovieHelper/ForActors";
 import { ForDirectors } from "../new/NewMovieHelper/ForDirectors";
 import { ForGenres } from "../new/NewMovieHelper/ForGenres";
 import { CustomModal } from "../../components/widget/CustomModal";
-import { SearchObjects } from "../new/NewMovieHelper/FetchObjects";
+import { ListObjects, SearchObjects } from "../new/NewMovieHelper/FetchObjects";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { isDocumentEmpty } from "../../helper/Helpers";
+import { Modal } from "react-overlays";
 
 const NewMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [customURL, setCustomURL] = useState();
   const [searchByToggle, setSearchByToggle] = useState(false);
   const [searchBy, setSearchBy] = useState("");
   const [movieTitle, setMovieTitle] = useState("");
@@ -45,22 +47,46 @@ const NewMovie = ({ title }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectKey, setSelectKey] = useState(null);
   const [selectTMDB, setSelectTMDB] = useState("tmdb");
+  const [objects, setObjects] = useState([]);
+  const renderBackdrop = (props) => <div className="backdrop" {...props} />;
 
-  var handleClose = () => setShowModal(false);
-  const handleSearch = (data, e) => {
+  // useEffect(() => {
+  //   if (!showModal) {
+
+  //     return () => {
+  //       abortController.abort();
+  //     };
+  //   }
+  // }, [showModal]);
+
+  const handleSearch = async (e) => {
     if (e.key === "Enter") {
-      const fetchObj = SearchObjects(data);
-      console.log(data);
-      console.log(fetchObj);
+      const search = e.target.value;
+      const fetchObj = await SearchObjects(search);
+      setObjects(fetchObj);
+      // console.log(fetchedObjects);
+      // setSearchQuery(search);
     }
   };
-  var handleSuccess = () => {
-    console.log("success");
-  };
 
-  const handleSelectChange = (event) => {
-    setSelectedOption(event.target.value);
-  };
+  useEffect(() => {
+    const getObjects = async () => {
+      try {
+        const fetchedObjects = await ListObjects();
+        setObjects(fetchedObjects);
+      } catch (error) {
+        console.error("Error fetching objects:", error);
+      }
+    };
+    getObjects();
+  }, []);
+  console.log(objects);
+  const handleShowModal = () => setShowModal(true);
+  var handleClose = () => setShowModal(false);
+  var handleSuccess = () => console.log("success");
+
+  const handleSelectChange = (event) => setSelectedOption(event.target.value);
+
   const handleSelect = (key) => {
     setSelectKey(key);
     setShowModal(false);
@@ -355,6 +381,8 @@ const NewMovie = ({ title }) => {
                       <input
                         type="text"
                         id="iframeUrl"
+                        value={customURL}
+                        onChange={setCustomURL}
                         placeholder="Enter Custom URL or Vimeo or Youtube URL"
                       />
                     </div>
@@ -370,10 +398,7 @@ const NewMovie = ({ title }) => {
                         />
                       </div>
                       <div className="form-block-inside">
-                        <button
-                          type="button"
-                          onClick={() => setShowModal(true)}
-                        >
+                        <button type="button" onClick={handleShowModal}>
                           Choose A Video
                         </button>
                       </div>
@@ -389,10 +414,7 @@ const NewMovie = ({ title }) => {
                         />
                       </div>
                       <div className="form-block-inside">
-                        <button
-                          type="button"
-                          onClick={() => setShowModal(true)}
-                        >
+                        <button type="button" onClick={handleShowModal}>
                           Choose A Video
                         </button>
                       </div>
@@ -405,10 +427,7 @@ const NewMovie = ({ title }) => {
                         />
                       </div>
                       <div className="form-block-inside">
-                        <button
-                          type="button"
-                          onClick={() => setShowModal(true)}
-                        >
+                        <button type="button" onClick={handleShowModal}>
                           Choose A Video
                         </button>
                       </div>
@@ -421,10 +440,7 @@ const NewMovie = ({ title }) => {
                         />
                       </div>
                       <div className="form-block-inside">
-                        <button
-                          type="button"
-                          onClick={() => setShowModal(true)}
-                        >
+                        <button type="button" onClick={handleShowModal}>
                           Choose A Video
                         </button>
                       </div>
@@ -437,10 +453,7 @@ const NewMovie = ({ title }) => {
                         />
                       </div>
                       <div className="form-block-inside">
-                        <button
-                          type="button"
-                          onClick={() => setShowModal(true)}
-                        >
+                        <button type="button" onClick={handleShowModal}>
                           Choose A Video
                         </button>
                       </div>
@@ -584,13 +597,69 @@ const NewMovie = ({ title }) => {
                 <textarea name="" id="descriptionMyanmar" cols="30"></textarea>
               </div>
             </div>
-            <CustomModal
+            {/* <CustomModal
               showModal={showModal}
               handleClose={handleClose}
               handleSuccess={handleSuccess}
               handleSelect={handleSelect}
-              // handleSearch={handleSearch}
-            />
+              handleSearch={handleSearch}
+              objects={objects}
+            /> */}
+            <Modal
+              className="modal"
+              show={showModal}
+              onHide={handleClose}
+              renderBackdrop={renderBackdrop}
+            >
+              <div className="modal-start">
+                <div className="modal-header">
+                  <div className="modal-title">Modal Heading</div>
+                  <div>
+                    <span className="close-button" onClick={handleClose}>
+                      &#215;
+                    </span>
+                  </div>
+                </div>
+                <div className="modal-search">
+                  <input type="text" onKeyDown={handleSearch} />
+                </div>
+                <div className="modal-desc">
+                  {/* {isLoading ? (
+            <div>Loading...</div>
+          ) : ( */}
+                  {objects &&
+                    objects.length > 0 &&
+                    objects.map((d, key) => (
+                      <div
+                        className="modal-card"
+                        key={key}
+                        onClick={() => handleSelect(d.path)}
+                      >
+                        <div className="modal-card-extension">
+                          {d.extension}
+                        </div>
+                        <div className="modal-card-title">
+                          {d.name
+                            ? d.name.split("").slice(0, 20).join("") + " ..."
+                            : d.name}
+                        </div>
+                        <div className="modal-meta-data">
+                          <div className="card-ratings">{d.size}</div>
+                          <div className="card-genre">{d.fileTime}</div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+                <div className="modal-footer">
+                  <button className="secondary-button" onClick={handleClose}>
+                    Close
+                  </button>
+                  <button className="primary-button" onClick={handleSuccess}>
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </Modal>
             <div className="form-block">
               <button type="submit">Create</button>
             </div>

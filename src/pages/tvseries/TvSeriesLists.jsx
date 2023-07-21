@@ -117,10 +117,10 @@ const TvSeriesLists = () => {
         <div>All TVSeries</div>
         <div className="title-right">
           <div className="title-right-first">
-            {/* <ImportCSV
-              docName={STATIC_WORDS.MOVIES}
+            <ImportCSV
+              docName={STATIC_WORDS.TVSERIES}
               isLoading={handleIsLoading}
-            /> */}
+            />
           </div>
           <Link to="/tvseries/new" className="link">
             Add New

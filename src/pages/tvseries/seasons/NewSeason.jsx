@@ -22,6 +22,7 @@ import { fromURL } from "image-resize-compress";
 import { ForActors } from "../../new/NewMovieHelper/ForActors";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { Delete, Edit, SettingsSuggest } from "@mui/icons-material";
+import ImportCSV from "../../../components/import/ImportCSV";
 
 const NewSeason = ({ title }) => {
   const { id } = useParams();
@@ -34,6 +35,10 @@ const NewSeason = ({ title }) => {
   const location = useLocation();
   const tmdb_id = location.state;
 
+  const handleIsLoading = (value) => {
+    setIsLoading(value);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       let list = [];
@@ -41,7 +46,7 @@ const NewSeason = ({ title }) => {
         const querySnapshot = await getDocs(
           query(
             collection(db, STATIC_WORDS.SEASONS),
-            where("tv_series_id", "==", id)
+            where("tvSeriesId", "==", id)
           )
         );
         if (querySnapshot) {
@@ -98,8 +103,8 @@ const NewSeason = ({ title }) => {
 
     try {
       const obj = {
-        tv_series_id: id,
-        tmdb_id: tmdb_id,
+        tvSeriesId: id,
+        tmdb_id: season_data["data"]["id"],
         season_no: seasonNumber,
         season_slug: seasonSlug,
         tmdb: "Y",
@@ -116,6 +121,7 @@ const NewSeason = ({ title }) => {
         password: null,
         trailer_url: trailerUrl,
         created_by: null,
+        tv_tmdb_id: tmdb_id,
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
       };
@@ -195,7 +201,10 @@ const NewSeason = ({ title }) => {
               <Link to="/tvseries">
                 <button className="btn">Back</button>
               </Link>
-              <div className="btn">Import CSV</div>
+              <ImportCSV
+                docName={STATIC_WORDS.SEASONS}
+                isLoading={handleIsLoading}
+              />
               <div className="btn">Add Seasons</div>
             </div>
             {edit ? (
@@ -408,8 +417,8 @@ const NewSeason = ({ title }) => {
                           <Link
                             to={`/tvseries/season/${doc.id}/episode`}
                             state={{
-                              tmdb_id: doc.data.tmdb_id,
-                              tv_series_id: id,
+                              tmdb_id: doc.data.tv_tmdb_id,
+                              tvSeriesId: id,
                               season_number: doc.data.season_no,
                             }}
                           >

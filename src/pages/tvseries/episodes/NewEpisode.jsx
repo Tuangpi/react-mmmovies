@@ -21,6 +21,7 @@ import axios from "axios";
 import { fromURL } from "image-resize-compress";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { Delete, Edit } from "@mui/icons-material";
+import ImportCSV from "../../../components/import/ImportCSV";
 
 const NewEpisode = ({ title }) => {
   const { id } = useParams();
@@ -35,6 +36,9 @@ const NewEpisode = ({ title }) => {
   const location = useLocation();
   const { tmdb_id, tv_series_id, season_number } = location.state;
 
+  const handleIsLoading = (value) => {
+    setIsLoading(value);
+  };
   useEffect(() => {
     const fetchData = async () => {
       let list = [];
@@ -42,7 +46,7 @@ const NewEpisode = ({ title }) => {
         const querySnapshot = await getDocs(
           query(
             collection(db, STATIC_WORDS.EPISODES),
-            where("seasons_id", "==", id)
+            where("seasonsId", "==", id)
           )
         );
         if (querySnapshot) {
@@ -107,8 +111,8 @@ const NewEpisode = ({ title }) => {
 
     try {
       const obj = {
-        seasons_id: id,
-        tmdb_id: tmdb_id,
+        seasonsId: id,
+        tmdb_id: episode_data["data"]["id"],
         thumbnail: thumbnailUrl,
         episode_no: episodeNumber,
         title: episodeTitle,
@@ -179,7 +183,10 @@ const NewEpisode = ({ title }) => {
               <Link to={`/tvseries/${tv_series_id}/season`}>
                 <button className="btn">Back</button>
               </Link>
-              <div className="btn">Import CSV</div>
+              <ImportCSV
+                docName={STATIC_WORDS.EPISODES}
+                isLoading={handleIsLoading}
+              />
               <div className="btn">Add Episode</div>
             </div>
             {edit ? (
