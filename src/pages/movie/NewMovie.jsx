@@ -25,7 +25,6 @@ import { ListObjects, SearchObjects } from "../new/NewMovieHelper/FetchObjects";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { isDocumentEmpty } from "../../helper/Helpers";
-import { Modal } from "react-overlays";
 
 const NewMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -48,43 +47,61 @@ const NewMovie = ({ title }) => {
   const [selectKey, setSelectKey] = useState(null);
   const [selectTMDB, setSelectTMDB] = useState("tmdb");
   const [objects, setObjects] = useState([]);
-  const renderBackdrop = (props) => <div className="backdrop" {...props} />;
-
-  // useEffect(() => {
-  //   if (!showModal) {
-
-  //     return () => {
-  //       abortController.abort();
-  //     };
-  //   }
-  // }, [showModal]);
+  const [continuationToken, setContinuationToken] = useState(null);
 
   const handleSearch = async (e) => {
     if (e.key === "Enter") {
       const search = e.target.value;
-      const fetchObj = await SearchObjects(search);
-      setObjects(fetchObj);
-      // console.log(fetchedObjects);
-      // setSearchQuery(search);
+      try {
+        const fetchObj = await SearchObjects("movies_upload_wasabi/" + search);
+        setObjects(fetchObj);
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 
   useEffect(() => {
-    const getObjects = async () => {
+    const fetchData = async () => {
       try {
-        const fetchedObjects = await ListObjects();
-        setObjects(fetchedObjects);
+        const { objects: fetchedObjects, continuationToken: nextToken } =
+          await ListObjects(continuationToken);
+        setObjects((prevObjects) => [...prevObjects, ...fetchedObjects]);
+        setContinuationToken(nextToken);
       } catch (error) {
         console.error("Error fetching objects:", error);
       }
     };
-    getObjects();
-  }, []);
-  console.log(objects);
-  const handleShowModal = () => setShowModal(true);
+
+    const handleScrollEvent = (e) => {
+      const isNearBottom =
+        e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+      if (isNearBottom && continuationToken) {
+        fetchData();
+      }
+    };
+
+    if (showModal) {
+      const modalContentElement = document.getElementById("custom-modal");
+      fetchData();
+
+      if (modalContentElement) {
+        modalContentElement.addEventListener("scroll", handleScrollEvent);
+      }
+    }
+
+    return () => {
+      const modalContentElement = document.getElementById("custom-modal");
+      if (modalContentElement) {
+        modalContentElement.removeEventListener("scroll", handleScrollEvent);
+      }
+    };
+  }, [showModal, continuationToken]);
+
+  console.log(objects, objects.length, showModal);
+
   var handleClose = () => setShowModal(false);
   var handleSuccess = () => console.log("success");
-
   const handleSelectChange = (event) => setSelectedOption(event.target.value);
 
   const handleSelect = (key) => {
@@ -97,25 +114,16 @@ const NewMovie = ({ title }) => {
     event.target.checked ? setSearchBy("title") : setSearchBy("byId");
   };
 
-  const handleMovieTitleChange = (event) => {
-    setMovieTitle(event.target.value);
-  };
+  const handleMovieTitleChange = (event) => setMovieTitle(event.target.value);
 
   const handleUpcomingToggle = (event) => {
     setIsUpcoming(event.target.checked);
   };
 
-  const handleUpcomingDateChange = (event) => {
+  const handleUpcomingDateChange = (event) =>
     setUpcomingDate(event.target.value);
-  };
-
-  const handleVideoUploadChange = (event) => {
-    setVideoUpload(event.target.value);
-  };
-
-  const handleMovieSlug = (event) => {
-    setMovieSlug(event.target.value);
-  };
+  const handleVideoUploadChange = (event) => setVideoUpload(event.target.value);
+  const handleMovieSlug = (event) => setMovieSlug(event.target.value);
 
   async function fetchDataAndStore() {
     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
@@ -283,6 +291,7 @@ const NewMovie = ({ title }) => {
                 <button className="back-btn">Back</button>
               </Link>
             </div>
+
             <div className="form-block">
               <div className="form-block-inside">
                 <div>Search Movie By TMDB ID</div>
@@ -398,7 +407,10 @@ const NewMovie = ({ title }) => {
                         />
                       </div>
                       <div className="form-block-inside">
-                        <button type="button" onClick={handleShowModal}>
+                        <button
+                          type="button"
+                          onClick={() => setShowModal(true)}
+                        >
                           Choose A Video
                         </button>
                       </div>
@@ -414,7 +426,10 @@ const NewMovie = ({ title }) => {
                         />
                       </div>
                       <div className="form-block-inside">
-                        <button type="button" onClick={handleShowModal}>
+                        <button
+                          type="button"
+                          onClick={() => setShowModal(true)}
+                        >
                           Choose A Video
                         </button>
                       </div>
@@ -427,7 +442,10 @@ const NewMovie = ({ title }) => {
                         />
                       </div>
                       <div className="form-block-inside">
-                        <button type="button" onClick={handleShowModal}>
+                        <button
+                          type="button"
+                          onClick={() => setShowModal(true)}
+                        >
                           Choose A Video
                         </button>
                       </div>
@@ -440,7 +458,10 @@ const NewMovie = ({ title }) => {
                         />
                       </div>
                       <div className="form-block-inside">
-                        <button type="button" onClick={handleShowModal}>
+                        <button
+                          type="button"
+                          onClick={() => setShowModal(true)}
+                        >
                           Choose A Video
                         </button>
                       </div>
@@ -453,7 +474,10 @@ const NewMovie = ({ title }) => {
                         />
                       </div>
                       <div className="form-block-inside">
-                        <button type="button" onClick={handleShowModal}>
+                        <button
+                          type="button"
+                          onClick={() => setShowModal(true)}
+                        >
                           Choose A Video
                         </button>
                       </div>
@@ -597,69 +621,14 @@ const NewMovie = ({ title }) => {
                 <textarea name="" id="descriptionMyanmar" cols="30"></textarea>
               </div>
             </div>
-            {/* <CustomModal
+            <CustomModal
               showModal={showModal}
               handleClose={handleClose}
               handleSuccess={handleSuccess}
               handleSelect={handleSelect}
               handleSearch={handleSearch}
               objects={objects}
-            /> */}
-            <Modal
-              className="modal"
-              show={showModal}
-              onHide={handleClose}
-              renderBackdrop={renderBackdrop}
-            >
-              <div className="modal-start">
-                <div className="modal-header">
-                  <div className="modal-title">Modal Heading</div>
-                  <div>
-                    <span className="close-button" onClick={handleClose}>
-                      &#215;
-                    </span>
-                  </div>
-                </div>
-                <div className="modal-search">
-                  <input type="text" onKeyDown={handleSearch} />
-                </div>
-                <div className="modal-desc">
-                  {/* {isLoading ? (
-            <div>Loading...</div>
-          ) : ( */}
-                  {objects &&
-                    objects.length > 0 &&
-                    objects.map((d, key) => (
-                      <div
-                        className="modal-card"
-                        key={key}
-                        onClick={() => handleSelect(d.path)}
-                      >
-                        <div className="modal-card-extension">
-                          {d.extension}
-                        </div>
-                        <div className="modal-card-title">
-                          {d.name
-                            ? d.name.split("").slice(0, 20).join("") + " ..."
-                            : d.name}
-                        </div>
-                        <div className="modal-meta-data">
-                          <div className="card-ratings">{d.size}</div>
-                          <div className="card-genre">{d.fileTime}</div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-                <div className="modal-footer">
-                  <button className="secondary-button" onClick={handleClose}>
-                    Close
-                  </button>
-                  <button className="primary-button" onClick={handleSuccess}>
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            </Modal>
+            />
             <div className="form-block">
               <button type="submit">Create</button>
             </div>
