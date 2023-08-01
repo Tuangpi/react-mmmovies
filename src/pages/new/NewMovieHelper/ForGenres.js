@@ -19,7 +19,7 @@ export const ForGenres = async (data) => {
       try {
         const docRef = await addDoc(collection(db, STATIC_WORDS.GENRES), {
           name: data.genres[0].name,
-          image: null,
+          image: '',
           position: 1,
           created_at: serverTimestamp(),
           updated_at: serverTimestamp(),
@@ -61,7 +61,7 @@ export const ForGenres = async (data) => {
         try {
           const docRef = await addDoc(collection(db, STATIC_WORDS.GENRES), {
             name: data.genres[i].name,
-            image: null,
+            image: '',
             position: increment,
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),

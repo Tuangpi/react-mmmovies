@@ -70,13 +70,13 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
               collection(db, STATIC_WORDS.DIRECTORS),
               {
                 name: directors[0].data.name,
-                image: directorURL,
+                image: directorURL ?? '',
                 biography: directors[0].data.biography,
                 place_of_birth: directors[0].data.place_of_birth,
                 DOB: directors[0].data.birthday,
                 created_at: serverTimestamp(),
                 updated_at: serverTimestamp(),
-                slug: null,
+                slug: '',
               }
             );
             directorIds.push(docRef);
@@ -161,13 +161,13 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
           if (directorsURL[initial === 1 ? i - 1 : i]) {
             const docRef = addDoc(collection(db, STATIC_WORDS.DIRECTORS), {
               name: directors[i].data.name,
-              image: directorsURL[initial === 1 ? i - 1 : i],
+              image: directorsURL[initial === 1 ? i - 1 : i] ?? '',
               biography: directors[i].data.biography,
               place_of_birth: directors[i].data.place_of_birth,
               DOB: directors[i].data.birthday,
               created_at: serverTimestamp(),
               updated_at: serverTimestamp(),
-              slug: null,
+              slug: '',
             });
             directorDocsRefs.push(docRef);
           }
@@ -175,13 +175,13 @@ export const ForDirectors = async (TMDB_API_KEY, credits) => {
         if (directors && directorDocsRefs.length === 0) {
           const docRef = addDoc(collection(db, STATIC_WORDS.DIRECTORS), {
             name: directors[initial].data.name,
-            image: null,
+            image: '',
             biography: directors[initial].data.biography,
             place_of_birth: directors[initial].data.place_of_birth,
             DOB: directors[initial].data.birthday,
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),
-            slug: null,
+            slug: '',
           });
           directorDocsRefs.push(docRef);
         }
