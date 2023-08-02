@@ -103,7 +103,7 @@ const NewTvSeries = ({ title }) => {
     }
 
     try {
-      await addDoc(collection(db, "tvseries"), {
+      const docRef = await addDoc(collection(db, "tvseries"), {
         tmdb_id: String(data["id"]),
         title: data["name"],
         slug: movieSlug,
@@ -134,6 +134,7 @@ const NewTvSeries = ({ title }) => {
         updated_by: "",
         channel: 0,
       });
+      await updateDoc(docRef, { id: docRef.id });
     } catch (error) {
       console.log(error);
     }

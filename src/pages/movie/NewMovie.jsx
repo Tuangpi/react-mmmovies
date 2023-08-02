@@ -234,6 +234,7 @@ const NewMovie = ({ title }) => {
         updated_by: "",
         channel: 0,
       });
+      await updateDoc(docRef, { id: docRef.id });
       movieRef = docRef;
     } catch (error) {
       console.log(error);

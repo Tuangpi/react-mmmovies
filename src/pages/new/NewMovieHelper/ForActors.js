@@ -60,12 +60,13 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
             name: actors[0].data.name,
             image: actorURL ?? '',
             biography: actors[0].data.biography,
-            place_of_birth: actors[0].data.place_of_birth,
-            DOB: actors[0].data.birthday,
+            place_of_birth: actors[0].data.place_of_birth ?? '',
+            DOB: actors[0].data.birthday ?? '',
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),
             slug: '',
           });
+          await updateDoc(docRef, { id: docRef.id });
           actorIds.push(docRef);
         } catch (error) {
           console.log(error, "actors error");
@@ -148,12 +149,13 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
             name: actors[i].data.name,
             image: actorsURL[initial === 1 ? i - 1 : i] ?? '',
             biography: actors[i].data.biography,
-            place_of_birth: actors[i].data.place_of_birth,
-            DOB: actors[i].data.birthday,
+            place_of_birth: actors[i].data.place_of_birth ?? '',
+            DOB: actors[i].data.birthday ?? '',
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),
             slug: '',
           });
+          await updateDoc(docRef, { id: docRef.id });
           actorDocsRefs.push(docRef);
         }
         try {
