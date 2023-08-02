@@ -5,12 +5,12 @@ import Navbar from "../../components/navbar/Navbar";
 import { useState } from "react";
 import Loading from "react-loading";
 import {
-  addDoc,
   collection,
+  doc,
   getDocs,
   query,
   serverTimestamp,
-  updateDoc,
+  setDoc,
   where,
 } from "firebase/firestore";
 import { db, storage } from "../../configs/firebase";
@@ -104,7 +104,9 @@ const NewTvSeries = ({ title }) => {
     }
 
     try {
-      const docRef = await addDoc(collection(db, "tvseries"), {
+      const docRef = doc(collection(db, STATIC_WORDS.TVSERIES));
+
+      await setDoc(docRef, {
         tmdb_id: String(data["id"]),
         title: data["name"],
         slug: movieSlug,
@@ -134,8 +136,8 @@ const NewTvSeries = ({ title }) => {
         desc_myan: "",
         updated_by: "",
         channel: 0,
+        id: docRef.id,
       });
-      await updateDoc(docRef, { id: docRef.id });
     } catch (error) {
       console.log(error);
     }

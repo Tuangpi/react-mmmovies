@@ -7,10 +7,11 @@ import Loading from "react-loading";
 import {
   addDoc,
   collection,
+  doc,
   getDocs,
   query,
   serverTimestamp,
-  updateDoc,
+  setDoc,
   where,
 } from "firebase/firestore";
 import { db, storage } from "../../configs/firebase";
@@ -200,7 +201,9 @@ const NewMovie = ({ title }) => {
 
     let movieRef = null;
     try {
-      const docRef = await addDoc(collection(db, STATIC_WORDS.MOVIES), {
+      const docRef = doc(collection(db, STATIC_WORDS.MOVIES));
+
+      await setDoc(docRef, {
         tmdb_id: String(data["id"]),
         title: data["title"],
         slug: movieSlug,
@@ -234,8 +237,8 @@ const NewMovie = ({ title }) => {
         desc_myan: "",
         updated_by: "",
         channel: 0,
+        id: docRef.id,
       });
-      await updateDoc(docRef, { id: docRef.id });
       movieRef = docRef;
     } catch (error) {
       console.log(error);

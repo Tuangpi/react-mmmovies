@@ -1,11 +1,11 @@
 import axios from "axios";
 import {
-  addDoc,
   collection,
+  doc,
   getDocs,
   query,
   serverTimestamp,
-  updateDoc,
+  setDoc,
   where,
 } from "firebase/firestore";
 import { db, storage } from "../../../configs/firebase";
@@ -57,7 +57,9 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
         }
 
         try {
-          const docRef = await addDoc(collection(db, STATIC_WORDS.ACTORS), {
+          const docRef = doc(collection(db, STATIC_WORDS.ACTORS));
+
+          await setDoc(docRef, {
             name: actors[0].data.name,
             image: actorURL ?? '',
             biography: actors[0].data.biography,
@@ -66,8 +68,8 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),
             slug: '',
+            id: docRef.id,
           });
-          await updateDoc(docRef, { id: docRef.id });
           actorIds.push(docRef);
         } catch (error) {
           console.log(error, "actors error");
@@ -146,7 +148,9 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
         let actorDocsRefs = [];
 
         for (let i = initial; i < actors.length; i++) {
-          const docRef = addDoc(collection(db, STATIC_WORDS.ACTORS), {
+          const docRef = doc(collection(db, STATIC_WORDS.ACTORS));
+
+          await setDoc(docRef, {
             name: actors[i].data.name,
             image: actorsURL[initial === 1 ? i - 1 : i] ?? '',
             biography: actors[i].data.biography,
@@ -155,8 +159,8 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),
             slug: '',
+            id: docRef.id,
           });
-          await updateDoc(docRef, { id: docRef.id });
           actorDocsRefs.push(docRef);
         }
         try {
