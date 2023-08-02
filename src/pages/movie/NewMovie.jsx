@@ -10,6 +10,7 @@ import {
   getDocs,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db, storage } from "../../configs/firebase";
