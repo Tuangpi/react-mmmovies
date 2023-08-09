@@ -87,7 +87,7 @@ const prepareDisplay = async (s3, objects, fromSearch) => {
                 sameElse: "DD/MM/YYYY",
               }),
               size: formatBytes(metaData.ContentLength),
-              name: obj.Key.replace(/^(movies_upload_wasabi|tvshow_upload_wasabi)\//, ""),
+              name: obj.Key.replace(/^(movies|tvshow)_upload_wasabi\/(url_[0-9]+\/)?/, ""),
               extension: metaData.ContentType.replace(/^video\//, ""),
               path: obj.Key,
             };
