@@ -1,19 +1,27 @@
 import axios from "axios";
 import { STATIC_WORDS } from "../../../assets/STATIC_WORDS";
 
-export const GetData = async (searchBy, TMDB_API_KEY, movieTitle, from) => {
+export const GetData = async (searchBy, TMDB_API_KEY, query, from) => {
   let response = null;
   let source = "tv";
   if (from === STATIC_WORDS.MOVIES) source = "movie";
-  if (searchBy) {
+  console.log(source, searchBy);
+  if (searchBy === 'byId') {
     response = await axios.get(
-      `https://api.themoviedb.org/3/search/${source}?api_key=${TMDB_API_KEY}&query=${movieTitle}`
+      `https://api.themoviedb.org/3/${source}/${query}?api_key=${TMDB_API_KEY}`
     );
-    return response.data.results[0];
+    console.log(response.data);
+    return response.data;
+
   } else {
-    response = await axios.get(
-      `https://api.themoviedb.org/3/${source}/${movieTitle}?api_key=${TMDB_API_KEY}`
+    const response1 = await axios.get(
+      `https://api.themoviedb.org/3/search/${source}?api_key=${TMDB_API_KEY}&query=${query}`
     );
+    if (response1.data.results[0].id) {
+      response = await axios.get(
+        `https://api.themoviedb.org/3/${source}/${response1.data.results[0].id}?api_key=${TMDB_API_KEY}`
+      );
+    }
     return response.data;
   }
 };

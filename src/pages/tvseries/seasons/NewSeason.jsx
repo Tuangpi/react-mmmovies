@@ -23,6 +23,7 @@ import { ForActors } from "../../new/NewMovieHelper/ForActors";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { Delete, Edit, SettingsSuggest } from "@mui/icons-material";
 import ImportCSV from "../../../components/import/ImportCSV";
+import Loading from "react-loading";
 
 const NewSeason = ({ title }) => {
   const { id } = useParams();
@@ -30,7 +31,9 @@ const NewSeason = ({ title }) => {
   const [seasonSlug, setSeasonSlug] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectTMDB, setSelectTMDB] = useState("tmdb");
-  const [edit, setEdit] = useState(true);
+  const [isProtected, setIsProtected] = useState(false);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [edit, setEdit] = useState(false);
   const [data, setData] = useState([]);
   const location = useLocation();
   const tmdb_id = location.state;
@@ -104,7 +107,7 @@ const NewSeason = ({ title }) => {
     try {
       const obj = {
         tvSeriesId: id,
-        tmdb_id: season_data["data"]["id"],
+        tmdb_id: String(season_data["data"]["id"]),
         season_no: seasonNumber,
         season_slug: seasonSlug,
         tmdb: "Y",
@@ -115,12 +118,12 @@ const NewSeason = ({ title }) => {
         a_language: "",
         detail: season_data["data"]["overview"],
         views: "",
-        featured: false,
+        featured: isFeatured,
         type: "S",
-        is_protected: false,
+        is_protected: isProtected,
         password: "",
-        trailer_url: trailerUrl,
-        created_by: "",
+        trailer_url: trailerUrl ?? "",
+        // created_by: "",
         tv_tmdb_id: tmdb_id,
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
@@ -133,23 +136,21 @@ const NewSeason = ({ title }) => {
   }
 
   const handleEdit = (id) => {
-    console.log("asdf");
     const fetchData = async (docRef) => {
       try {
+        setIsLoading(true);
         const querySnapshot = await getDoc(
           doc(db, `${STATIC_WORDS.SEASONS}/${docRef}`)
         );
         const data = querySnapshot.data();
         setSeasonNumber(data.season_no);
+        setSeasonSlug(data.season_slug);
+        setIsLoading(false);
       } catch (err) {
         console.log(err);
       }
     };
-
-    if (edit) {
-      console.log("edit");
-      if (id) fetchData(id);
-    }
+    if (id) fetchData(id);
   };
 
   const handleSubmit = async (e) => {
@@ -178,9 +179,11 @@ const NewSeason = ({ title }) => {
   };
 
   const handleDelete = async (id) => {
+    setIsLoading(true);
     try {
       await deleteDoc(doc(db, STATIC_WORDS.SEASONS, id));
       setData(data.filter((item) => item.id !== id));
+      setIsLoading(false);
     } catch (err) {
       console.log(err);
     }
@@ -188,6 +191,11 @@ const NewSeason = ({ title }) => {
 
   return (
     <div className="new">
+      {isLoading && (
+        <div className="loading-container">
+          <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
+        </div>
+      )}
       <Sidebar />
       <div className="newContainer">
         <Navbar />
@@ -199,106 +207,19 @@ const NewSeason = ({ title }) => {
             <div className="right-header">
               <div className="right-header-title">Manage Season Of Series</div>
               <Link to="/tvseries">
-                <button className="btn">Back</button>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
+                  Back
+                </button>
               </Link>
               <ImportCSV
                 docName={STATIC_WORDS.SEASONS}
                 isLoading={handleIsLoading}
               />
-              <div className="btn">Add Seasons</div>
+              <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
+                Add Seasons
+              </button>
             </div>
             {edit ? (
-              <form onSubmit={handleSubmit}>
-                <div className="season-no">
-                  <label htmlFor="seasonNo">Season No.</label>
-                  <input
-                    id="seasonNo"
-                    type="number"
-                    value={seasonNumber}
-                    onChange={(e) => setSeasonNumber(e.target.value)}
-                  />
-                </div>
-                <div className="season-slug">
-                  <label htmlFor="seasonSlug">Season Slug</label>
-                  <input
-                    id="seasonSlug"
-                    type="text"
-                    //   value={movieTitle}
-                    //   onChange={handleMovieTitleChange}
-                  />
-                </div>
-                <div className="audio-languages">
-                  <label htmlFor="audioLanguages">Audio Languages</label>
-                  <input
-                    id="audioLanguages"
-                    type="text"
-                    //   value={movieTitle}
-                    //   onChange={handleMovieTitleChange}
-                  />
-                </div>
-                <div className="custom-thumbnail">
-                  <div>Choose Custom Thumbnail and Poster</div>
-                  <label htmlFor="customThumbnail" className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      id="customThumbnail"
-                      //   onChange={() => setIsFeatured(!isFeatured)}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                <div className="protected">
-                  <div>Protected Video?</div>
-                  <label htmlFor="protected" className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      id="protected"
-                      //   onChange={() => setIsFeatured(!isFeatured)}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                <div>Want IMDB Ratings And More Or Custom?</div>
-                <div className="radio-group">
-                  <div>
-                    <input
-                      type="radio"
-                      id="tmdb"
-                      name="details"
-                      value="tmdb"
-                      className="hidden-radio"
-                      // onChange={(e) => setSelectTMDB(e.target.value)}
-                      // checked={selectTMDB === "tmdb"}
-                    />
-                    <label htmlFor="tmdb" className="button-style">
-                      TMDB
-                    </label>
-                  </div>
-                  <div>
-                    <input
-                      type="radio"
-                      id="custom"
-                      name="details"
-                      value="custom"
-                      className="hidden-radio"
-                      // onChange={(e) => setSelectTMDB(e.target.value)}
-                      // checked={selectTMDB === "custom"}
-                    />
-                    <label htmlFor="custom" className="button-style">
-                      Custom
-                    </label>
-                  </div>
-                </div>
-                <div className="bottom-create">
-                  <button type="reset" className="btn">
-                    Reset
-                  </button>
-                  <button type="submit" className="btn">
-                    Create
-                  </button>
-                </div>
-              </form>
-            ) : (
               <form onSubmit={handleSubmitEdit}>
                 <div className="season-no">
                   <label htmlFor="seasonNo">Season No.</label>
@@ -306,6 +227,7 @@ const NewSeason = ({ title }) => {
                     id="seasonNo"
                     type="number"
                     value={seasonNumber}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     onChange={(e) => setSeasonNumber(e.target.value)}
                   />
                 </div>
@@ -314,8 +236,9 @@ const NewSeason = ({ title }) => {
                   <input
                     id="seasonSlug"
                     type="text"
-                    //   value={movieTitle}
-                    //   onChange={handleMovieTitleChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={seasonSlug}
+                    onChange={(e) => setSeasonSlug(e.target.value)}
                   />
                 </div>
                 <div className="audio-languages">
@@ -323,6 +246,7 @@ const NewSeason = ({ title }) => {
                   <input
                     id="audioLanguages"
                     type="text"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     //   value={movieTitle}
                     //   onChange={handleMovieTitleChange}
                   />
@@ -344,13 +268,14 @@ const NewSeason = ({ title }) => {
                     <input
                       type="checkbox"
                       id="protected"
-                      //   onChange={() => setIsFeatured(!isFeatured)}
+                      value={isProtected}
+                      onChange={() => setIsProtected(!isProtected)}
                     />
                     <span className="slider"></span>
                   </label>
                 </div>
                 <div>Want IMDB Ratings And More Or Custom?</div>
-                <div className="radio-group">
+                <div style={{ display: "flex" }}>
                   <div>
                     <input
                       type="radio"
@@ -381,11 +306,117 @@ const NewSeason = ({ title }) => {
                   </div>
                 </div>
                 <div className="bottom-create">
-                  <button type="reset" className="btn">
+                  <button
+                    type="reset"
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded mr-6"
+                  >
                     Reset
                   </button>
-                  <button type="submit" className="btn">
+                  <button
+                    type="submit"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                  >
                     Edit
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <div className="season-no">
+                  <label htmlFor="seasonNo">Season No.</label>
+                  <input
+                    id="seasonNo"
+                    type="number"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    onChange={(e) => setSeasonNumber(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="season-slug">
+                  <label htmlFor="seasonSlug">Season Slug</label>
+                  <input
+                    id="seasonSlug"
+                    type="text"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    onChange={(e) => setSeasonSlug(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="audio-languages">
+                  <label htmlFor="audioLanguages">Audio Languages</label>
+                  <input
+                    id="audioLanguages"
+                    type="text"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    //   value={movieTitle}
+                    //   onChange={handleMovieTitleChange}
+                  />
+                </div>
+                <div className="custom-thumbnail">
+                  <div>Choose Custom Thumbnail and Poster</div>
+                  <label htmlFor="customThumbnail" className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="customThumbnail"
+                      onChange={() => setIsFeatured(!isFeatured)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+                <div className="protected">
+                  <div>Protected Video?</div>
+                  <label htmlFor="protected" className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="protected"
+                      onChange={() => setIsProtected(!isProtected)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+                <div>Want IMDB Ratings And More Or Custom?</div>
+                <div style={{ display: "flex" }}>
+                  <div>
+                    <input
+                      type="radio"
+                      id="tmdb"
+                      name="details"
+                      value="tmdb"
+                      className="hidden-radio"
+                      onChange={(e) => setSelectTMDB(e.target.value)}
+                      checked={selectTMDB === "tmdb"}
+                    />
+                    <label htmlFor="tmdb" className="button-style">
+                      TMDB
+                    </label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      id="custom"
+                      name="details"
+                      value="custom"
+                      className="hidden-radio"
+                      onChange={(e) => setSelectTMDB(e.target.value)}
+                      checked={selectTMDB === "custom"}
+                    />
+                    <label htmlFor="custom" className="button-style">
+                      Custom
+                    </label>
+                  </div>
+                </div>
+                <div className="bottom-create mt-6">
+                  <button
+                    type="reset"
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded mr-6"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                  >
+                    Create
                   </button>
                 </div>
               </form>

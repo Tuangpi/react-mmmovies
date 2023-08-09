@@ -15,7 +15,14 @@ import ImageComponent from "../../components/widget/ImageComponent";
 import Loading from "react-loading";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { motion } from "framer-motion";
-import { Delete, Edit, Settings } from "@mui/icons-material";
+import {
+  Delete,
+  Edit,
+  Settings,
+  Star,
+  StarBorderOutlined,
+} from "@mui/icons-material";
+import { starRating } from "../../helper/Helpers";
 
 const TvSeriesLists = () => {
   const [data, setData] = useState([]);
@@ -193,39 +200,35 @@ const TvSeriesLists = () => {
                     <div className="dot">...</div>
                   </div>
                 </div>
-                <h2 className="card-title">{item.data.title}</h2>
-                <div className="card-info">
-                  <div className="card-year">
-                    YEAR
-                    <br />
-                    {item.data.released}
-                  </div>
-                  <div className="card-length">
-                    LENGTH
-                    <br />
-                    68 mins
-                  </div>
+                <h2 className="card-title text-base font-extrabold">
+                  {item.data.title}
+                </h2>
+                <div className="card-genre">
+                  <div className="text-sm font-extrabold">GENRE</div>
+                  <div className="text-xs">Action, Triller, Drama</div>
                 </div>
                 <div className="card-ratings">
-                  RATINGS
-                  <br />
-                  <span className="star-rating">{item.data.rating}/10</span>
-                </div>
-                <div className="card-genre">
-                  GENRE
-                  <br />
-                  Action
+                  <div className="text-sm font-extrabold">RATINGS</div>
+                  {starRating(item.data.rating).map((i) =>
+                    i === "full" ? (
+                      <Star htmlColor="#e3ba15" />
+                    ) : (
+                      <StarBorderOutlined htmlColor="#e3ba15" />
+                    )
+                  )}
                 </div>
                 <div className="card-creator-status">
                   <div className="card-creator">
-                    CREATED BY
-                    <br />
-                    Admin
+                    <div className="text-sm font-extrabold">CREATED BY</div>
+                    <div className="text-xs">Admin</div>
                   </div>
                   <div className="card-status">
-                    STATUS
-                    <br />
-                    Active
+                    <div className="text-sm font-extrabold">STATUS</div>
+                    {item.data.status ? (
+                      <div className="text-xs">Active</div>
+                    ) : (
+                      <div className="text-xs">Inactive</div>
+                    )}
                   </div>
                 </div>
               </div>

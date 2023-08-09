@@ -1,3 +1,4 @@
+import "../../index.css";
 import "../../style/new.scss";
 import "../../style/modal.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -5,6 +6,7 @@ import Navbar from "../../components/navbar/Navbar";
 import { useEffect, useState } from "react";
 import Loading from "react-loading";
 import {
+  Timestamp,
   addDoc,
   collection,
   doc,
@@ -26,36 +28,44 @@ import { CustomModal } from "../../components/widget/CustomModal";
 import { ListObjects, SearchObjects } from "../new/NewMovieHelper/FetchObjects";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
-import { isDocumentEmpty } from "../../helper/Helpers";
+import { generatePresignedUrl, isDocumentEmpty } from "../../helper/Helpers";
+import { COUNTRY } from "../../assets/COUNTRY";
 
 const NewMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [customURL, setCustomURL] = useState();
+  const [customURL, setCustomURL] = useState(null);
   const [searchByToggle, setSearchByToggle] = useState(false);
-  const [searchBy, setSearchBy] = useState("");
+  const [searchBy, setSearchBy] = useState("byId");
   const [movieTitle, setMovieTitle] = useState("");
+  const [movieID, setMovieID] = useState("");
+  const [movieSlug, setMovieSlug] = useState("");
   const [isUpcoming, setIsUpcoming] = useState(false);
+  const [upcomingDate, setUpcomingDate] = useState("");
+  const [selectedOption, setSelectedOption] = useState("url");
   const [isSeries, setIsSeries] = useState(false);
   const [isFeatured, setIsFeatured] = useState(false);
   const [hasSubTitle, setHasSubTitle] = useState(false);
   const [isProtected, setIsProtected] = useState(false);
   const [checkMenuAll, setCheckMenuAll] = useState(false);
   const [hasCustomThumbnail, setHasCustomThumbnail] = useState(false);
-  const [upcomingDate, setUpcomingDate] = useState("");
-  const [videoUpload, setVideoUpload] = useState("");
-  const [selectedOption, setSelectedOption] = useState("url");
-  const [movieSlug, setMovieSlug] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [selectKey, setSelectKey] = useState(null);
+  const [selectKey, setSelectKey] = useState("");
+  const [selectedMaturity, setSelectedMaturity] = useState("all age");
+  const [selectedCountry, setSelectedCountry] = useState([]);
+  const [metaKeyWord, setMetaKeyWord] = useState("");
+  const [metaDesc, setMetaDesc] = useState("");
+  const [myanDesc, setMyanDesc] = useState("");
   const [selectTMDB, setSelectTMDB] = useState("tmdb");
+
+  const [objectKey, setObjectKey] = useState("movies_upload_wasabi");
   const [objects, setObjects] = useState([]);
   const [continuationToken, setContinuationToken] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const handleSearch = async (e) => {
     if (e.key === "Enter") {
       const search = e.target.value;
       try {
-        const fetchObj = await SearchObjects("movies_upload_wasabi/" + search);
+        const fetchObj = await SearchObjects(search);
         setObjects(fetchObj);
       } catch (err) {
         console.log(err);
@@ -64,10 +74,10 @@ const NewMovie = ({ title }) => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (key) => {
       try {
         const { objects: fetchedObjects, continuationToken: nextToken } =
-          await ListObjects(continuationToken);
+          await ListObjects(continuationToken, key);
         setObjects((prevObjects) => [...prevObjects, ...fetchedObjects]);
         setContinuationToken(nextToken);
       } catch (error) {
@@ -77,38 +87,40 @@ const NewMovie = ({ title }) => {
 
     const handleScrollEvent = (e) => {
       const isNearBottom =
-        e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+        e.target.scrollHeight - e.target.scrollTop < e.target.clientHeight + 5;
       if (isNearBottom && continuationToken) {
-        fetchData();
+        fetchData(objectKey);
       }
     };
 
-    if (showModal) {
-      const modalContentElement = document.getElementById("custom-modal");
-      fetchData();
+    const modalContentElement = document.getElementById("custom-modal");
 
-      if (modalContentElement) {
-        modalContentElement.addEventListener("scroll", handleScrollEvent);
-      }
+    if (showModal) {
+      if (continuationToken === null) fetchData(objectKey);
+      console.log(continuationToken);
+      modalContentElement.addEventListener("scroll", handleScrollEvent);
     }
 
     return () => {
-      const modalContentElement = document.getElementById("custom-modal");
       if (modalContentElement) {
         modalContentElement.removeEventListener("scroll", handleScrollEvent);
       }
     };
-  }, [showModal, continuationToken]);
+  }, [showModal, continuationToken, objectKey]);
 
   console.log(objects, objects.length, showModal);
 
-  var handleClose = () => setShowModal(false);
+  var handleClose = () => {
+    setShowModal(false);
+    setObjects([]);
+    setContinuationToken(null);
+  };
   var handleSuccess = () => console.log("success");
-  const handleSelectChange = (event) => setSelectedOption(event.target.value);
 
   const handleSelect = (key) => {
     setSelectKey(key);
     setShowModal(false);
+    setContinuationToken(null);
   };
 
   const handleSearchByToggle = (event) => {
@@ -116,24 +128,13 @@ const NewMovie = ({ title }) => {
     event.target.checked ? setSearchBy("title") : setSearchBy("byId");
   };
 
-  const handleMovieTitleChange = (event) => setMovieTitle(event.target.value);
-
-  const handleUpcomingToggle = (event) => {
-    setIsUpcoming(event.target.checked);
-  };
-
-  const handleUpcomingDateChange = (event) =>
-    setUpcomingDate(event.target.value);
-  const handleVideoUploadChange = (event) => setVideoUpload(event.target.value);
-  const handleMovieSlug = (event) => setMovieSlug(event.target.value);
-
   async function fetchDataAndStore() {
     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
 
     if (!(await isDocumentEmpty(STATIC_WORDS.MOVIES))) {
       const q = query(
         collection(db, STATIC_WORDS.MOVIES),
-        where("tmdb_id", "==", movieTitle)
+        where("tmdb_id", "==", movieID)
       );
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
@@ -142,12 +143,10 @@ const NewMovie = ({ title }) => {
       }
     }
 
-    const data = await GetData(
-      searchBy,
-      TMDB_API_KEY,
-      movieTitle,
-      STATIC_WORDS.MOVIES
-    );
+    const data = movieID
+      ? await GetData(searchBy, TMDB_API_KEY, movieID, STATIC_WORDS.MOVIES)
+      : await GetData(searchBy, TMDB_API_KEY, movieTitle, STATIC_WORDS.MOVIES);
+
     let credits = null;
     if (data["id"]) {
       credits = await axios.get(
@@ -202,12 +201,15 @@ const NewMovie = ({ title }) => {
     let movieRef = null;
     try {
       const docRef = doc(collection(db, STATIC_WORDS.MOVIES));
+      movieRef = docRef;
 
       await setDoc(docRef, {
-        tmdb_id: String(data["id"]),
+        tmdb_id: String(data["id"]) ?? "",
         title: data["title"],
         slug: movieSlug,
-        duration: 'data["runtime"]',
+        keyword: metaKeyWord,
+        description: metaDesc,
+        duration: String(data["runtime"]),
         thumbnail: thumbnailURL,
         poster: posterURL,
         tmdb: "Y",
@@ -219,34 +221,37 @@ const NewMovie = ({ title }) => {
         detail: data["overview"],
         views: "",
         rating: data["vote_average"],
-        maturity_rating: "all age",
-        subtitle: "",
-        publish_year: "",
-        released: data["release_date"].split("-")[0],
+        maturity_rating: selectedMaturity,
+        subtitle: hasSubTitle,
+        publish_year: data["release_date"].split("-")[0],
+        released: "",
         upload_video: "",
-        featured: true,
-        series: false,
-        type: "M",
+        featured: isFeatured,
+        series: isSeries,
+        type: isSeries ? "S" : "M",
         status: true,
-        created_by: "",
+        is_protected: isProtected,
+        // created_by: "",
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
-        is_upcoming: false,
-        upcoming_date: "",
+        is_upcoming: isUpcoming,
+        upcoming_date: isUpcoming
+          ? new Date(upcomingDate)
+          : new Timestamp(0, 0),
         is_kids: false,
-        desc_myan: "",
-        updated_by: "",
+        country: selectedCountry,
+        desc_myan: myanDesc,
+        // updated_by: "",
         channel: 0,
-        id: docRef.id,
+        id: movieRef,
       });
-      movieRef = docRef;
     } catch (error) {
       console.log(error);
     }
     try {
       await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
         movie_id: movieRef,
-        episode_id: "",
+        // episode_id: "",
         type: "upload_video",
         url_360: "",
         url_480: "",
@@ -254,7 +259,7 @@ const NewMovie = ({ title }) => {
         url_1080: "",
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
-        upload_video: selectKey ?? "",
+        upload_video: await generatePresignedUrl(selectKey),
       });
     } catch (error) {
       console.log(error);
@@ -293,7 +298,9 @@ const NewMovie = ({ title }) => {
             <div className="form-header">
               <div className="form-header-title">Create Movie</div>
               <Link to="/movies">
-                <button className="back-btn">Back</button>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
+                  Back
+                </button>
               </Link>
             </div>
 
@@ -305,6 +312,7 @@ const NewMovie = ({ title }) => {
                     type="checkbox"
                     checked={searchByToggle}
                     onChange={handleSearchByToggle}
+                    className="p-2 text-sm"
                   />
 
                   <span className="slider"></span>
@@ -316,9 +324,9 @@ const NewMovie = ({ title }) => {
                   <input
                     type="text"
                     id="movieName"
-                    value={movieTitle}
-                    onChange={handleMovieTitleChange}
+                    onChange={(e) => setMovieTitle(e.target.value)}
                     placeholder="Enter Movie Title"
+                    className="p-2 text-sm"
                   />
                 </div>
               ) : (
@@ -327,9 +335,9 @@ const NewMovie = ({ title }) => {
                   <input
                     id="movieTMDB"
                     type="text"
-                    value={movieTitle}
-                    onChange={handleMovieTitleChange}
+                    onChange={(e) => setMovieID(e.target.value)}
                     placeholder="Enter TMDB ID"
+                    className="p-2 text-sm"
                   />
                 </div>
               )}
@@ -339,8 +347,10 @@ const NewMovie = ({ title }) => {
                 <input
                   type="text"
                   id="movieSlug"
-                  onChange={handleMovieSlug}
+                  onChange={(e) => setMovieSlug(e.target.value)}
                   placeholder="Enter Movie Slug"
+                  className="p-2 text-sm"
+                  required
                 />
               </div>
             </div>
@@ -352,7 +362,7 @@ const NewMovie = ({ title }) => {
                     type="checkbox"
                     id="upcomingMovie"
                     checked={isUpcoming}
-                    onChange={handleUpcomingToggle}
+                    onChange={(e) => setIsUpcoming(e.target.checked)}
                   />
 
                   <span className="slider"></span>
@@ -363,8 +373,8 @@ const NewMovie = ({ title }) => {
                   <label>Upcoming Date:</label>
                   <input
                     type="date"
-                    value={upcomingDate}
-                    onChange={handleUpcomingDateChange}
+                    onChange={(e) => setUpcomingDate(e.target.value)}
+                    className="p-2 text-sm"
                   />
                 </div>
               ) : (
@@ -373,10 +383,8 @@ const NewMovie = ({ title }) => {
                     <label htmlFor="videoType">Video Type:</label>
                     <select
                       id="videoType"
-                      // value={videoUpload}
-                      // onChange={handleVideoUploadChange}
-                      value={selectedOption}
-                      onChange={handleSelectChange}
+                      onChange={(e) => setSelectedOption(e.target.value)}
+                      className="p-2 text-sm cursor-pointer"
                     >
                       <option value="url">
                         Customer URL/Youtube URL/Vimeo URL
@@ -395,8 +403,8 @@ const NewMovie = ({ title }) => {
                       <input
                         type="text"
                         id="iframeUrl"
-                        value={customURL}
-                        onChange={setCustomURL}
+                        onChange={(e) => setCustomURL(e.target.value)}
+                        className="p-2 text-sm"
                         placeholder="Enter Custom URL or Vimeo or Youtube URL"
                       />
                     </div>
@@ -408,13 +416,18 @@ const NewMovie = ({ title }) => {
                           type="text"
                           id="upload"
                           value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
                           placeholder="Choose A Video"
+                          className="p-2 text-sm"
                         />
                       </div>
                       <div className="form-block-inside">
                         <button
                           type="button"
-                          onClick={() => setShowModal(true)}
+                          onClick={() => {
+                            setShowModal(true);
+                            setObjectKey("movies_upload_wasabi/");
+                          }}
                         >
                           Choose A Video
                         </button>
@@ -426,14 +439,20 @@ const NewMovie = ({ title }) => {
                         <label htmlFor="url_360">Upload Video in 360p:</label>
                         <input
                           type="text"
-                          id="url_360"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
                           placeholder="Choose A Video"
+                          className="p-2 text-sm"
+                          id="url_360"
                         />
                       </div>
                       <div className="form-block-inside">
                         <button
                           type="button"
-                          onClick={() => setShowModal(true)}
+                          onClick={() => {
+                            setShowModal(true);
+                            setObjectKey("movies_upload_wasabi/url_360/");
+                          }}
                         >
                           Choose A Video
                         </button>
@@ -441,15 +460,21 @@ const NewMovie = ({ title }) => {
                       <div className="form-block-inside">
                         <label htmlFor="url_480">Upload Video in 480p:</label>
                         <input
-                          type="text"
                           id="url_480"
+                          type="text"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
                           placeholder="Choose A Video"
+                          className="p-2 text-sm"
                         />
                       </div>
                       <div className="form-block-inside">
                         <button
                           type="button"
-                          onClick={() => setShowModal(true)}
+                          onClick={() => {
+                            setShowModal(true);
+                            setObjectKey("movies_upload_wasabi/url_480/");
+                          }}
                         >
                           Choose A Video
                         </button>
@@ -458,14 +483,20 @@ const NewMovie = ({ title }) => {
                         <label htmlFor="url_720">Upload Video in 720p:</label>
                         <input
                           type="text"
-                          id="url_720"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
                           placeholder="Choose A Video"
+                          className="p-2 text-sm"
+                          id="url_720"
                         />
                       </div>
                       <div className="form-block-inside">
                         <button
                           type="button"
-                          onClick={() => setShowModal(true)}
+                          onClick={() => {
+                            setShowModal(true);
+                            setObjectKey("movies_upload_wasabi/url_720");
+                          }}
                         >
                           Choose A Video
                         </button>
@@ -474,14 +505,20 @@ const NewMovie = ({ title }) => {
                         <label htmlFor="url_1080">Upload Video in 1080p:</label>
                         <input
                           type="text"
-                          id="url_1080"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
                           placeholder="Choose A Video"
+                          className="p-2 text-sm"
+                          id="url_1080"
                         />
                       </div>
                       <div className="form-block-inside">
                         <button
                           type="button"
-                          onClick={() => setShowModal(true)}
+                          onClick={() => {
+                            setShowModal(true);
+                            setObjectKey("movies_upload_wasabi/url_1080/");
+                          }}
                         >
                           Choose A Video
                         </button>
@@ -493,24 +530,58 @@ const NewMovie = ({ title }) => {
             </div>
             <div className="form-block">
               <div className="form-block-inside">
-                <label htmlFor="audioLanguages">Audio Languages:</label>
-                <input type="text" id="audioLanguages" placeholder="" />
-              </div>
-              <div className="form-block-inside">
                 <label htmlFor="maturityRating">Maturity Rating:</label>
-                <input type="text" id="maturityRating" />
+                <select
+                  id="maturityRating"
+                  onChange={(e) => setSelectedMaturity(e.target.value)}
+                  className="p-2 text-sm cursor-pointer"
+                >
+                  <option value="all age">All Age</option>
+                  <option value="18+">18+</option>
+                  <option value="16+">16+</option>
+                  <option value="13+">13+</option>
+                  <option value="10+">10+</option>
+                  <option value="8+">8+</option>
+                  <option value="5+">5+</option>
+                  <option value="2+">2+</option>
+                </select>
               </div>
               <div className="form-block-inside">
                 <label htmlFor="country">Country:</label>
-                <input type="text" id="country" />
+                <select
+                  id="country"
+                  value={selectedCountry}
+                  multiple
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  className="p-2 text-sm cursor-pointer"
+                >
+                  <option value=""></option>
+                  {COUNTRY.map((country, key) => (
+                    <option key={key} value={country}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="form-block-inside">
                 <label htmlFor="metaKeyword">Meta Keyword:</label>
-                <input type="text" id="metaKeyword" />
+                <input
+                  type="text"
+                  id="metaKeyword"
+                  className="p-2 text-sm"
+                  onChange={(e) => setMetaKeyWord(e.target.value)}
+                />
               </div>
               <div className="form-block-inside">
                 <label htmlFor="metaDescription">Meta Description:</label>
-                <textarea name="" id="metaDescription" cols="30"></textarea>
+                <textarea
+                  name=""
+                  id="metaDescription"
+                  onChange={(e) => setMetaDesc(e.target.value)}
+                  cols="30"
+                  rows="6"
+                  className="p-2 text-sm"
+                ></textarea>
               </div>
             </div>
             <div className="form-block">
@@ -617,13 +688,24 @@ const NewMovie = ({ title }) => {
             <div className="form-block-myanmar">
               <div className="form-block-inside">
                 <label htmlFor="descriptionSource">Get Description From:</label>
-                <input type="text" id="descriptionSource" />
+                <input
+                  type="text"
+                  id="descriptionSource"
+                  className="p-2 text-sm"
+                />
               </div>
               <div className="form-block-inside">
                 <label htmlFor="descriptionMyanmar">
                   Description in Myanmar:
                 </label>
-                <textarea name="" id="descriptionMyanmar" cols="30"></textarea>
+                <textarea
+                  name=""
+                  id="descriptionMyanmar"
+                  cols="30"
+                  rows="6"
+                  className="p-2 text-sm"
+                  onChange={(e) => setMyanDesc(e.target.value)}
+                ></textarea>
               </div>
             </div>
             <CustomModal
@@ -635,7 +717,12 @@ const NewMovie = ({ title }) => {
               objects={objects}
             />
             <div className="form-block">
-              <button type="submit">Create</button>
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+              >
+                Create
+              </button>
             </div>
           </div>
         </form>

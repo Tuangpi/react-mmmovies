@@ -2,22 +2,51 @@ import { S3 } from "aws-sdk";
 import awsConfig, { myBucket } from "../../../configs/wasabi";
 import moment from "moment";
 
-export const SearchObjects = async (searchPattern) => {
+// export const SearchObjects = async (searchPattern) => {
+//   const s3 = new S3(awsConfig);
+//   const param = {
+//     Bucket: myBucket,
+//     Prefix: searchPattern,
+//     MaxKeys: 50,
+//   };
+//   const data = await s3.listObjectsV2(param).promise();
+//   console.log("Filtered Objects:", data);
+//   return await prepareDisplay(s3, data, true);
+// };
+
+export const SearchObjects = (searchPattern) => {
   const s3 = new S3(awsConfig);
   const param = {
     Bucket: myBucket,
-    Prefix: searchPattern,
-    MaxKeys: 50,
+    Prefix: 'movies_upload_wasabi'
   };
-  const data = await s3.listObjectsV2(param).promise();
-  console.log("Filtered Objects:", data);
-  return await prepareDisplay(s3, data, true);
+  return new Promise((resolve, reject) => {
+    s3.listObjectsV2(param, async (err, data) => {
+      if (err) {
+        console.error("Wasabi Error:", err);
+        reject(err);
+      } else {
+        const filteredObjects = data.Contents.filter((object) => {
+          const regex = new RegExp(searchPattern.replace(/%/g, ".*"), "i");
+          return regex.test(object.Key);
+        });
+        console.log("Filtered Objects:", filteredObjects);
+        try {
+          const result = await prepareDisplay(s3, filteredObjects, false);
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
+  });
 };
 
-export const ListObjects = async (continuationToken = null) => {
+export const ListObjects = async (continuationToken = null, key) => {
   const params = {
     Bucket: myBucket,
     MaxKeys: 30,
+    Prefix: key,
     ContinuationToken: continuationToken,
   };
 
@@ -33,10 +62,10 @@ export const ListObjects = async (continuationToken = null) => {
     throw error;
   }
 };
-
 const prepareDisplay = async (s3, objects, fromSearch) => {
   let resultObj = [];
   objects = fromSearch ? objects.Contents : objects;
+
   if (objects && objects.length > 0) {
     await Promise.all(
       objects.map(async (obj) => {
@@ -58,7 +87,7 @@ const prepareDisplay = async (s3, objects, fromSearch) => {
                 sameElse: "DD/MM/YYYY",
               }),
               size: formatBytes(metaData.ContentLength),
-              name: obj.Key.replace(/^movies_upload_wasabi\//, ""),
+              name: obj.Key.replace(/^(movies_upload_wasabi|tvshow_upload_wasabi)\//, ""),
               extension: metaData.ContentType.replace(/^video\//, ""),
               path: obj.Key,
             };

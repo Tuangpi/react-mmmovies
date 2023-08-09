@@ -18,13 +18,19 @@ import { ForGenres } from "../new/NewMovieHelper/ForGenres";
 import { GetData } from "../new/NewMovieHelper/GetData";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
+import { COUNTRY } from "../../assets/COUNTRY";
 
 const EditTvSeries = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchByToggle, setSearchByToggle] = useState(false);
   const [searchBy, setSearchBy] = useState("");
   const [movieTitle, setMovieTitle] = useState("");
-  const [movieSlug, setMovieSlug] = useState("");
+  const [movieID, setMovieID] = useState("");
+  const [selectedMaturity, setSelectedMaturity] = useState("all age");
+  const [selectedCountry, setSelectedCountry] = useState([]);
+  const [metaKeyWord, setMetaKeyWord] = useState("");
+  const [metaDesc, setMetaDesc] = useState("");
+  const [myanDesc, setMyanDesc] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [selectTMDB, setSelectTMDB] = useState("tmdb");
   const [checkMenuAll, setCheckMenuAll] = useState(false);
@@ -35,10 +41,6 @@ const EditTvSeries = ({ title }) => {
     event.target.checked ? setSearchBy("title") : setSearchBy("byId");
   };
 
-  const handleMovieTitleChange = (event) => {
-    setMovieTitle(event.target.value);
-  };
-
   useEffect(() => {
     const fetchData = async (docRef) => {
       try {
@@ -46,8 +48,14 @@ const EditTvSeries = ({ title }) => {
           doc(db, `${STATIC_WORDS.TVSERIES}/${docRef}`)
         );
         const data = querySnapshot.data();
-        setMovieSlug(data.movieSlug);
+        setMovieID(data.tmdb_id);
         setMovieTitle(data.title);
+        setSelectedMaturity(data.maturity_rating);
+        setSelectedCountry(data.country);
+        setMetaKeyWord(data.keyword);
+        setMetaDesc(data.description);
+        setIsFeatured(data.featured);
+        setMyanDesc(data.desc_myan);
       } catch (err) {
         console.log(err);
       }
@@ -169,7 +177,9 @@ const EditTvSeries = ({ title }) => {
               <div className="form-header">
                 <div className="form-header-title">Edit TvSeries</div>
                 <Link to="/tvseries">
-                  <button className="back-btn">Back</button>
+                  <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
+                    Back
+                  </button>
                 </Link>
               </div>
               <div className="form-block">
@@ -191,7 +201,8 @@ const EditTvSeries = ({ title }) => {
                       type="text"
                       id="movieName"
                       value={movieTitle}
-                      onChange={handleMovieTitleChange}
+                      className="p-2 text-sm"
+                      onChange={(e) => setMovieTitle(e.target.value)}
                     />
                   </div>
                 ) : (
@@ -200,26 +211,67 @@ const EditTvSeries = ({ title }) => {
                     <input
                       id="movieTMDB"
                       type="text"
-                      value={movieTitle}
-                      onChange={handleMovieTitleChange}
+                      value={movieID}
+                      className="p-2 text-sm"
+                      onChange={(e) => setMovieID(e.target.value)}
                     />
                   </div>
                 )}
                 <div className="form-block-inside">
                   <label htmlFor="maturityRating">Maturity Rating:</label>
-                  <input type="text" id="maturityRating" />
+                  <select
+                    id="maturityRating"
+                    onChange={(e) => setSelectedMaturity(e.target.value)}
+                    className="p-2 text-sm cursor-pointer"
+                    value={selectedMaturity}
+                  >
+                    <option value="all age">All Age</option>
+                    <option value="18+">18+</option>
+                    <option value="16+">16+</option>
+                    <option value="13+">13+</option>
+                    <option value="10+">10+</option>
+                    <option value="8+">8+</option>
+                    <option value="5+">5+</option>
+                    <option value="2+">2+</option>
+                  </select>
                 </div>
                 <div className="form-block-inside">
                   <label htmlFor="country">Country:</label>
-                  <input type="text" id="country" />
+                  <select
+                    id="country"
+                    multiple
+                    // value={selectedCountry}
+                    // onChange={(e) => setSelectedCountry(e.target.value)}
+                    className="p-2 text-sm cursor-pointer"
+                  >
+                    <option value=""></option>
+                    {COUNTRY.map((country, key) => (
+                      <option key={key} value={country}>
+                        {country}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-block-inside">
                   <label htmlFor="metaKeyword">Meta Keyword:</label>
-                  <input type="text" id="metaKeyword" />
+                  <input
+                    type="text"
+                    id="metaKeyword"
+                    value={metaKeyWord}
+                    onChange={(e) => setMetaKeyWord(e.target.value)}
+                    className="p-2 text-sm"
+                  />
                 </div>
                 <div className="form-block-inside">
                   <label htmlFor="metaDescription">Meta Description:</label>
-                  <textarea name="" id="metaDescription" cols="30"></textarea>
+                  <textarea
+                    name=""
+                    id="metaDescription"
+                    value={metaDesc}
+                    onChange={(e) => setMetaDesc(e.target.value)}
+                    className="p-2 text-sm"
+                    cols="30"
+                  ></textarea>
                 </div>
               </div>
               <div className="form-block">
@@ -229,6 +281,7 @@ const EditTvSeries = ({ title }) => {
                     <input
                       type="checkbox"
                       id="featured"
+                      checked={isFeatured}
                       onChange={() => setIsFeatured(!isFeatured)}
                     />
                     <span className="slider"></span>
@@ -284,22 +337,33 @@ const EditTvSeries = ({ title }) => {
                   <label htmlFor="descriptionSource">
                     Get Description From:
                   </label>
-                  <input type="text" id="descriptionSource" />
+                  <input
+                    type="text"
+                    className="p-2 text-sm"
+                    id="descriptionSource"
+                  />
                 </div>
                 <div className="form-block-inside">
                   <label htmlFor="descriptionMyanmar">
                     Description in Myanmar:
                   </label>
                   <textarea
-                    name=""
+                    value={myanDesc}
                     id="descriptionMyanmar"
                     cols="30"
+                    className="p-2 text-sm"
+                    onChange={(e) => setMyanDesc(e.target.value)}
                   ></textarea>
                 </div>
               </div>
 
               <div className="form-block">
-                <button type="submit">Create</button>
+                <button
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                  type="submit"
+                >
+                  Update
+                </button>
               </div>
             </div>
           </form>

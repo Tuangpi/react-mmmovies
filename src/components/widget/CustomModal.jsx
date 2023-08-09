@@ -1,6 +1,7 @@
 import "../../style/modalcard.scss";
 import { Modal } from "react-overlays";
 import "../../style/modal.scss";
+import { motion } from "framer-motion";
 
 export const CustomModal = ({
   showModal,
@@ -29,12 +30,17 @@ export const CustomModal = ({
           </div>
         </div>
         <div className="modal-search">
-          <input type="text" onKeyDown={handleSearch} />
+          <input type="text" onKeyDown={handleSearch} className="p-2 text-sm" />
         </div>
-        <div className="modal-desc">
+
+        <div className="modal-desc" id="custom-modal-desc">
           {objects &&
             objects.map((d, key) => (
-              <div
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="modal-card"
                 key={key}
                 onClick={() => handleSelect(d.path)}
@@ -49,9 +55,10 @@ export const CustomModal = ({
                   <div className="card-ratings">{d.size}</div>
                   <div className="card-genre">{d.fileTime}</div>
                 </div>
-              </div>
+              </motion.div>
             ))}
         </div>
+
         <div className="modal-footer">
           <button className="secondary-button" onClick={handleClose}>
             Close

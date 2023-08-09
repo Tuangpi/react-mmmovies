@@ -11,7 +11,7 @@ import {
 import { db, storage } from "../../../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { STATIC_WORDS } from "../../../assets/STATIC_WORDS";
-import { isDocumentEmpty } from "../../../helper/Helpers";
+import { convertToSlug, isDocumentEmpty } from "../../../helper/Helpers";
 
 export const ForActors = async (TMDB_API_KEY, credits) => {
   let actorIds = [];
@@ -62,13 +62,13 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
           await setDoc(docRef, {
             name: actors[0].data.name,
             image: actorURL ?? '',
-            biography: actors[0].data.biography,
+            biography: actors[0].data.biography ?? '',
             place_of_birth: actors[0].data.place_of_birth ?? '',
             DOB: actors[0].data.birthday ?? '',
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),
-            slug: '',
-            id: docRef.id,
+            slug: convertToSlug(actors[0].data.name),
+            id: docRef,
           });
           actorIds.push(docRef);
         } catch (error) {
@@ -153,13 +153,13 @@ export const ForActors = async (TMDB_API_KEY, credits) => {
           await setDoc(docRef, {
             name: actors[i].data.name,
             image: actorsURL[initial === 1 ? i - 1 : i] ?? '',
-            biography: actors[i].data.biography,
+            biography: actors[i].data.biography ?? '',
             place_of_birth: actors[i].data.place_of_birth ?? '',
             DOB: actors[i].data.birthday ?? '',
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),
-            slug: '',
-            id: docRef.id,
+            slug: convertToSlug(actors[i].data.name),
+            id: docRef,
           });
           actorDocsRefs.push(docRef);
         }

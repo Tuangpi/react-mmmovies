@@ -20,8 +20,14 @@ import {
 import axios from "axios";
 import { fromURL } from "image-resize-compress";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { Delete, Edit } from "@mui/icons-material";
+import { Delete, Edit, TroubleshootSharp } from "@mui/icons-material";
 import ImportCSV from "../../../components/import/ImportCSV";
+import Loading from "react-loading";
+import { CustomModal } from "../../../components/widget/CustomModal";
+import {
+  ListObjects,
+  SearchObjects,
+} from "../../new/NewMovieHelper/FetchObjects";
 
 const NewEpisode = ({ title }) => {
   const { id } = useParams();
@@ -30,15 +36,85 @@ const NewEpisode = ({ title }) => {
   const [episodeNumber, setEpisodeNumber] = useState();
   const [episodeTitle, setEpisodeTitle] = useState();
   const [selectTMDB, setSelectTMDB] = useState("tmdb");
-  const [edit, setEdit] = useState(true);
+  const [edit, setEdit] = useState(false);
   const [duration, setDuration] = useState();
   const [data, setData] = useState([]);
   const location = useLocation();
-  const { tmdb_id, tv_series_id, season_number } = location.state;
+  const [selectedOption, setSelectedOption] = useState("url");
+  const { tmdb_id, tvSeriesId, season_number } = location.state;
+  const [customURL, setCustomURL] = useState(null);
+  const [selectKey, setSelectKey] = useState("");
+  const [objectKey, setObjectKey] = useState("tvshow_upload_wasabi");
+  const [showModal, setShowModal] = useState(false);
+  const [objects, setObjects] = useState([]);
+  const [continuationToken, setContinuationToken] = useState(null);
+
+  const handleSearch = async (e) => {
+    if (e.key === "Enter") {
+      const search = e.target.value;
+      try {
+        const fetchObj = await SearchObjects(search);
+        setObjects(fetchObj);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
+  var handleClose = () => {
+    setShowModal(false);
+    setObjects([]);
+    setContinuationToken(null);
+  };
+
+  var handleSuccess = () => console.log("success");
+
+  const handleSelect = (key) => {
+    setSelectKey(key);
+    setShowModal(false);
+    setContinuationToken(null);
+  };
 
   const handleIsLoading = (value) => {
     setIsLoading(value);
   };
+
+  useEffect(() => {
+    const fetchData = async (key) => {
+      try {
+        console.log(key);
+        const { objects: fetchedObjects, continuationToken: nextToken } =
+          await ListObjects(continuationToken, key);
+        setObjects((prevObjects) => [...prevObjects, ...fetchedObjects]);
+        setContinuationToken(nextToken);
+      } catch (error) {
+        console.error("Error fetching objects:", error);
+      }
+    };
+
+    const handleScrollEvent = (e) => {
+      const isNearBottom =
+        e.target.scrollHeight - e.target.scrollTop < e.target.clientHeight + 5;
+      if (isNearBottom && continuationToken) {
+        fetchData(objectKey);
+      }
+    };
+
+    const modalContentElement = document.getElementById("custom-modal");
+
+    if (showModal) {
+      if (continuationToken === null) fetchData(objectKey);
+      modalContentElement.addEventListener("scroll", handleScrollEvent);
+    }
+
+    return () => {
+      if (modalContentElement) {
+        modalContentElement.removeEventListener("scroll", handleScrollEvent);
+      }
+    };
+  }, [showModal, continuationToken, objectKey]);
+
+  console.log(objects);
   useEffect(() => {
     const fetchData = async () => {
       let list = [];
@@ -63,9 +139,9 @@ const NewEpisode = ({ title }) => {
   }, []);
 
   const handleEdit = (id) => {
-    console.log("asdf");
     const fetchData = async (docRef) => {
       try {
+        setIsLoading(true);
         const querySnapshot = await getDoc(
           doc(db, `${STATIC_WORDS.EPISODES}/${docRef}`)
         );
@@ -73,15 +149,13 @@ const NewEpisode = ({ title }) => {
         setEpisodeNumber(data.episode_no);
         setEpisodeTitle(data.title);
         setDuration(data.duration);
+        setIsLoading(false);
       } catch (err) {
         console.log(err);
       }
     };
 
-    if (edit) {
-      console.log("edit");
-      if (id) fetchData(id);
-    }
+    if (id) fetchData(id);
   };
 
   async function fetchDataAndStore() {
@@ -123,7 +197,7 @@ const NewEpisode = ({ title }) => {
         subtitle: "",
         release: "",
         type: "E",
-        created_by: "",
+        // created_by: "",
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
       };
@@ -161,8 +235,10 @@ const NewEpisode = ({ title }) => {
 
   const handleDelete = async (id) => {
     try {
+      setIsLoading(true);
       await deleteDoc(doc(db, STATIC_WORDS.EPISODES, id));
       setData(data.filter((item) => item.id !== id));
+      setIsLoading(false);
     } catch (err) {
       console.log(err);
     }
@@ -170,6 +246,11 @@ const NewEpisode = ({ title }) => {
 
   return (
     <div className="new">
+      {isLoading && (
+        <div className="loading-container">
+          <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
+        </div>
+      )}
       <Sidebar />
       <div className="newContainer">
         <Navbar />
@@ -180,107 +261,20 @@ const NewEpisode = ({ title }) => {
           <div className="right-side">
             <div className="right-header">
               <div className="right-header-title">Manage Season Of Series</div>
-              <Link to={`/tvseries/${tv_series_id}/season`}>
-                <button className="btn">Back</button>
+              <Link to={`/tvseries/${tvSeriesId}/season`}>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
+                  Back
+                </button>
               </Link>
               <ImportCSV
                 docName={STATIC_WORDS.EPISODES}
                 isLoading={handleIsLoading}
               />
-              <div className="btn">Add Episode</div>
+              <div className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
+                Add Episode
+              </div>
             </div>
             {edit ? (
-              <form onSubmit={handleSubmit}>
-                <div className="season-no">
-                  <label htmlFor="episodeTitle">Episode Title</label>
-                  <input
-                    id="episodeTitle"
-                    type="text"
-                    value={episodeTitle}
-                    onChange={(e) => setEpisodeTitle(e.target.value)}
-                  />
-                </div>
-                <div className="season-no">
-                  <label htmlFor="episodeNo">Episode No.</label>
-                  <input
-                    id="episodeNo"
-                    type="number"
-                    value={episodeNumber}
-                    onChange={(e) => setEpisodeNumber(e.target.value)}
-                  />
-                </div>
-                <div className="season-slug">
-                  <label htmlFor="duration">Duration</label>
-                  <input
-                    id="duration"
-                    type="text"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                  />
-                </div>
-                <div className="custom-thumbnail">
-                  <div>Choose Custom Thumbnail and Poster</div>
-                  <label htmlFor="customThumbnail" className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      id="customThumbnail"
-                      //   onChange={() => setIsFeatured(!isFeatured)}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                <div className="protected">
-                  <div>Subtitle</div>
-                  <label htmlFor="subtitle" className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      id="subtitle"
-                      //   onChange={() => setIsFeatured(!isFeatured)}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                <div>Want IMDB Ratings And More Or Custom?</div>
-                <div className="radio-group">
-                  <div>
-                    <input
-                      type="radio"
-                      id="tmdb"
-                      name="details"
-                      value="tmdb"
-                      className="hidden-radio"
-                      onChange={(e) => setSelectTMDB(e.target.value)}
-                      checked={selectTMDB === "tmdb"}
-                    />
-                    <label htmlFor="tmdb" className="button-style">
-                      TMDB
-                    </label>
-                  </div>
-                  <div>
-                    <input
-                      type="radio"
-                      id="custom"
-                      name="details"
-                      value="custom"
-                      className="hidden-radio"
-                      onChange={(e) => setSelectTMDB(e.target.value)}
-                      checked={selectTMDB === "custom"}
-                    />
-                    <label htmlFor="custom" className="button-style">
-                      Custom
-                    </label>
-                  </div>
-                </div>
-                <div className="bottom-create">
-                  <button type="reset" className="btn">
-                    Reset
-                  </button>
-                  <button type="submit" className="btn">
-                    Create
-                  </button>
-                </div>
-              </form>
-            ) : (
               <form onSubmit={handleSubmitEdit}>
                 <div className="season-no">
                   <label htmlFor="episodeTitle">Episode Title</label>
@@ -288,6 +282,7 @@ const NewEpisode = ({ title }) => {
                     id="episodeTitle"
                     type="text"
                     value={episodeTitle}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     onChange={(e) => setEpisodeTitle(e.target.value)}
                   />
                 </div>
@@ -296,6 +291,7 @@ const NewEpisode = ({ title }) => {
                   <input
                     id="episodeNo"
                     type="number"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={episodeNumber}
                     onChange={(e) => setEpisodeNumber(e.target.value)}
                   />
@@ -305,6 +301,7 @@ const NewEpisode = ({ title }) => {
                   <input
                     id="duration"
                     type="text"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
                   />
@@ -320,6 +317,154 @@ const NewEpisode = ({ title }) => {
                     <span className="slider"></span>
                   </label>
                 </div>
+
+                <div className="form-block-inside">
+                  <label htmlFor="videoType">Video Type:</label>
+                  <select
+                    id="videoType"
+                    onChange={(e) => setSelectedOption(e.target.value)}
+                    className="p-2 text-sm cursor-pointer"
+                  >
+                    <option value="url">
+                      Customer URL/Youtube URL/Vimeo URL
+                    </option>
+                    <option value="upload">Upload Video</option>
+                    <option value="multi">
+                      Multi Quality Custom URL & URL Upload
+                    </option>
+                  </select>
+                </div>
+                {selectedOption === "url" ? (
+                  <div className="form-block-inside">
+                    <label htmlFor="iframeUrl">
+                      Enter Custom URL or Vimeo or Youtube URL:
+                    </label>
+                    <input
+                      type="text"
+                      id="iframeUrl"
+                      onChange={(e) => setCustomURL(e.target.value)}
+                      className="p-2 text-sm"
+                      placeholder="Enter Custom URL or Vimeo or Youtube URL"
+                    />
+                  </div>
+                ) : selectedOption === "upload" ? (
+                  <>
+                    <div className="form-block-inside">
+                      <label htmlFor="upload">Upload Video:</label>
+                      <input
+                        type="text"
+                        id="upload"
+                        value={selectKey}
+                        onChange={(e) => setSelectKey(e.target.value)}
+                        placeholder="Choose A Video"
+                        className="p-2 text-sm"
+                      />
+                    </div>
+                    <div className="form-block-inside">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setObjectKey("tvshow_upload_wasabi/");
+                        }}
+                      >
+                        Choose A Video
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="form-block-inside">
+                      <label htmlFor="url_360">Upload Video in 360p:</label>
+                      <input
+                        type="text"
+                        value={selectKey}
+                        onChange={(e) => setSelectKey(e.target.value)}
+                        placeholder="Choose A Video"
+                        className="p-2 text-sm"
+                        id="url_360"
+                      />
+                    </div>
+                    <div className="form-block-inside">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setObjectKey("tvshow_upload_wasabi/url_360/");
+                        }}
+                      >
+                        Choose A Video
+                      </button>
+                    </div>
+                    <div className="form-block-inside">
+                      <label htmlFor="url_480">Upload Video in 480p:</label>
+                      <input
+                        id="url_480"
+                        type="text"
+                        value={selectKey}
+                        onChange={(e) => setSelectKey(e.target.value)}
+                        placeholder="Choose A Video"
+                        className="p-2 text-sm"
+                      />
+                    </div>
+                    <div className="form-block-inside">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setObjectKey("tvshow_upload_wasabi/url_480/");
+                        }}
+                      >
+                        Choose A Video
+                      </button>
+                    </div>
+                    <div className="form-block-inside">
+                      <label htmlFor="url_720">Upload Video in 720p:</label>
+                      <input
+                        type="text"
+                        value={selectKey}
+                        onChange={(e) => setSelectKey(e.target.value)}
+                        placeholder="Choose A Video"
+                        className="p-2 text-sm"
+                        id="url_720"
+                      />
+                    </div>
+                    <div className="form-block-inside">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setObjectKey("tvshow_upload_wasabi/url_720/");
+                        }}
+                      >
+                        Choose A Video
+                      </button>
+                    </div>
+                    <div className="form-block-inside">
+                      <label htmlFor="url_1080">Upload Video in 1080p:</label>
+                      <input
+                        type="text"
+                        value={selectKey}
+                        onChange={(e) => setSelectKey(e.target.value)}
+                        placeholder="Choose A Video"
+                        className="p-2 text-sm"
+                        id="url_1080"
+                      />
+                    </div>
+                    <div className="form-block-inside">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setObjectKey("tvshow_upload_wasabi/url_1080/");
+                        }}
+                      >
+                        Choose A Video
+                      </button>
+                    </div>
+                  </>
+                )}
+
                 <div className="protected">
                   <div>Subtitle</div>
                   <label htmlFor="subtitle" className="toggle-switch">
@@ -332,7 +477,7 @@ const NewEpisode = ({ title }) => {
                   </label>
                 </div>
                 <div>Want IMDB Ratings And More Or Custom?</div>
-                <div className="radio-group">
+                <div style={{ display: "flex" }}>
                   <div>
                     <input
                       type="radio"
@@ -363,11 +508,270 @@ const NewEpisode = ({ title }) => {
                   </div>
                 </div>
                 <div className="bottom-create">
-                  <button type="reset" className="btn">
+                  <button
+                    type="reset"
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded mr-6"
+                  >
                     Reset
                   </button>
-                  <button type="submit" className="btn">
+                  <button
+                    type="submit"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                  >
                     Edit
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <div className="season-no">
+                  <label htmlFor="episodeTitle">Episode Title</label>
+                  <input
+                    id="episodeTitle"
+                    type="text"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    onChange={(e) => setEpisodeTitle(e.target.value)}
+                  />
+                </div>
+                <div className="season-no">
+                  <label htmlFor="episodeNo">Episode No.</label>
+                  <input
+                    id="episodeNo"
+                    type="number"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    onChange={(e) => setEpisodeNumber(e.target.value)}
+                  />
+                </div>
+                <div className="season-slug">
+                  <label htmlFor="duration">Duration</label>
+                  <input
+                    id="duration"
+                    type="text"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    onChange={(e) => setDuration(e.target.value)}
+                  />
+                </div>
+                <div className="custom-thumbnail">
+                  <div>Choose Custom Thumbnail and Poster</div>
+                  <label htmlFor="customThumbnail" className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="customThumbnail"
+                      //   onChange={() => setIsFeatured(!isFeatured)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+
+                <div className="form-block-inside">
+                  <label htmlFor="videoType">Video Type:</label>
+                  <select
+                    id="videoType"
+                    onChange={(e) => setSelectedOption(e.target.value)}
+                    className="p-2 text-sm cursor-pointer"
+                  >
+                    <option value="url">
+                      Customer URL/Youtube URL/Vimeo URL
+                    </option>
+                    <option value="upload">Upload Video</option>
+                    <option value="multi">
+                      Multi Quality Custom URL & URL Upload
+                    </option>
+                  </select>
+                </div>
+                {selectedOption === "url" ? (
+                  <div className="form-block-inside">
+                    <label htmlFor="iframeUrl">
+                      Enter Custom URL or Vimeo or Youtube URL:
+                    </label>
+                    <input
+                      type="text"
+                      id="iframeUrl"
+                      onChange={(e) => setCustomURL(e.target.value)}
+                      className="p-2 text-sm"
+                      placeholder="Enter Custom URL or Vimeo or Youtube URL"
+                    />
+                  </div>
+                ) : selectedOption === "upload" ? (
+                  <>
+                    <div className="form-block-inside">
+                      <label htmlFor="upload">Upload Video:</label>
+                      <input
+                        type="text"
+                        id="upload"
+                        value={selectKey}
+                        onChange={(e) => setSelectKey(e.target.value)}
+                        placeholder="Choose A Video"
+                        className="p-2 text-sm"
+                      />
+                    </div>
+                    <div className="form-block-inside">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setObjectKey("tvshow_upload_wasabi/");
+                        }}
+                      >
+                        Choose A Video
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="form-block-inside">
+                      <label htmlFor="url_360">Upload Video in 360p:</label>
+                      <input
+                        type="text"
+                        value={selectKey}
+                        onChange={(e) => setSelectKey(e.target.value)}
+                        placeholder="Choose A Video"
+                        className="p-2 text-sm"
+                        id="url_360"
+                      />
+                    </div>
+                    <div className="form-block-inside">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setObjectKey("tvshow_upload_wasabi/url_360/");
+                        }}
+                      >
+                        Choose A Video
+                      </button>
+                    </div>
+                    <div className="form-block-inside">
+                      <label htmlFor="url_480">Upload Video in 480p:</label>
+                      <input
+                        id="url_480"
+                        type="text"
+                        value={selectKey}
+                        onChange={(e) => setSelectKey(e.target.value)}
+                        placeholder="Choose A Video"
+                        className="p-2 text-sm"
+                      />
+                    </div>
+                    <div className="form-block-inside">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setObjectKey("tvshow_upload_wasabi/url_480/");
+                        }}
+                      >
+                        Choose A Video
+                      </button>
+                    </div>
+                    <div className="form-block-inside">
+                      <label htmlFor="url_720">Upload Video in 720p:</label>
+                      <input
+                        type="text"
+                        value={selectKey}
+                        onChange={(e) => setSelectKey(e.target.value)}
+                        placeholder="Choose A Video"
+                        className="p-2 text-sm"
+                        id="url_720"
+                      />
+                    </div>
+                    <div className="form-block-inside">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setObjectKey("tvshow_upload_wasabi/url_720/");
+                        }}
+                      >
+                        Choose A Video
+                      </button>
+                    </div>
+                    <div className="form-block-inside">
+                      <label htmlFor="url_1080">Upload Video in 1080p:</label>
+                      <input
+                        type="text"
+                        value={selectKey}
+                        onChange={(e) => setSelectKey(e.target.value)}
+                        placeholder="Choose A Video"
+                        className="p-2 text-sm"
+                        id="url_1080"
+                      />
+                    </div>
+                    <div className="form-block-inside">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setObjectKey("tvshow_upload_wasabi/url_1080/");
+                        }}
+                      >
+                        Choose A Video
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                <div className="protected">
+                  <div>Subtitle</div>
+                  <label htmlFor="subtitle" className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="subtitle"
+                      //   onChange={() => setIsFeatured(!isFeatured)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+                <div>Want IMDB Ratings And More Or Custom?</div>
+                <div style={{ display: "flex" }}>
+                  <div>
+                    <input
+                      type="radio"
+                      id="tmdb"
+                      name="details"
+                      value="tmdb"
+                      className="hidden-radio"
+                      onChange={(e) => setSelectTMDB(e.target.value)}
+                      checked={selectTMDB === "tmdb"}
+                    />
+                    <label htmlFor="tmdb" className="button-style">
+                      TMDB
+                    </label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      id="custom"
+                      name="details"
+                      value="custom"
+                      className="hidden-radio"
+                      onChange={(e) => setSelectTMDB(e.target.value)}
+                      checked={selectTMDB === "custom"}
+                    />
+                    <label htmlFor="custom" className="button-style">
+                      Custom
+                    </label>
+                  </div>
+                </div>
+                <CustomModal
+                  showModal={showModal}
+                  handleClose={handleClose}
+                  handleSuccess={handleSuccess}
+                  handleSelect={handleSelect}
+                  handleSearch={handleSearch}
+                  objects={objects}
+                />
+                <div className="bottom-create">
+                  <button
+                    type="reset"
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded mr-6"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                  >
+                    Create
                   </button>
                 </div>
               </form>

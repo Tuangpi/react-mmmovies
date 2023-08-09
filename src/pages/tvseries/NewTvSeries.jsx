@@ -5,6 +5,7 @@ import Navbar from "../../components/navbar/Navbar";
 import { useState } from "react";
 import Loading from "react-loading";
 import {
+  Timestamp,
   collection,
   doc,
   getDocs,
@@ -21,24 +22,26 @@ import { GetData } from "../new/NewMovieHelper/GetData";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { isDocumentEmpty } from "../../helper/Helpers";
+import { COUNTRY } from "../../assets/COUNTRY";
 
 const NewTvSeries = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchByToggle, setSearchByToggle] = useState(false);
-  const [searchBy, setSearchBy] = useState("");
+  const [searchBy, setSearchBy] = useState("byId");
   const [movieTitle, setMovieTitle] = useState("");
-  const [movieSlug, setMovieSlug] = useState("");
+  const [movieID, setMovieID] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [selectTMDB, setSelectTMDB] = useState("tmdb");
   const [checkMenuAll, setCheckMenuAll] = useState(false);
+  const [selectedMaturity, setSelectedMaturity] = useState("all age");
+  const [selectedCountry, setSelectedCountry] = useState([]);
+  const [metaKeyWord, setMetaKeyWord] = useState("");
+  const [metaDesc, setMetaDesc] = useState("");
+  const [myanDesc, setMyanDesc] = useState("");
 
   const handleSearchByToggle = (event) => {
     setSearchByToggle(event.target.checked);
     event.target.checked ? setSearchBy("title") : setSearchBy("byId");
-  };
-
-  const handleMovieTitleChange = (event) => {
-    setMovieTitle(event.target.value);
   };
 
   async function fetchDataAndStore() {
@@ -56,12 +59,14 @@ const NewTvSeries = ({ title }) => {
       }
     }
 
-    const data = await GetData(
-      searchBy,
-      TMDB_API_KEY,
-      movieTitle,
-      STATIC_WORDS.TVSERIES
-    );
+    const data = movieID
+      ? await GetData(searchBy, TMDB_API_KEY, movieID, STATIC_WORDS.TVSERIES)
+      : await GetData(
+          searchBy,
+          TMDB_API_KEY,
+          movieTitle,
+          STATIC_WORDS.TVSERIES
+        );
 
     //for genre
     const genre_id = await ForGenres(data);
@@ -107,10 +112,10 @@ const NewTvSeries = ({ title }) => {
       const docRef = doc(collection(db, STATIC_WORDS.TVSERIES));
 
       await setDoc(docRef, {
-        tmdb_id: String(data["id"]),
+        keyword: metaKeyWord,
+        description: metaDesc,
         title: data["name"],
-        slug: movieSlug,
-        duration: 'data["runtime"]',
+        tmdb_id: String(data["id"]),
         thumbnail: thumbnailURL,
         poster: posterURL,
         tmdb: "Y",
@@ -120,23 +125,23 @@ const NewTvSeries = ({ title }) => {
         detail: data["overview"],
         views: "",
         rating: data["vote_average"],
-        maturity_rating: "all age",
-        subtitle: "",
+        maturity_rating: selectedMaturity,
         publish_year: "",
-        released: data["first_air_date"].split("-")[0],
-        featured: false,
+        released: data["first_air_date"].split("-")[0] ?? "",
+        featured: isFeatured,
         type: "T",
         status: true,
-        created_by: "",
+        // created_by: "",
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
         is_upcoming: false,
-        upcoming_date: "",
+        upcoming_date: new Timestamp(0, 0),
         is_kids: false,
-        desc_myan: "",
-        updated_by: "",
+        country: selectedCountry,
+        desc_myan: myanDesc,
+        // updated_by: "",
         channel: 0,
-        id: docRef.id,
+        id: docRef,
       });
     } catch (error) {
       console.log(error);
@@ -174,7 +179,9 @@ const NewTvSeries = ({ title }) => {
             <div className="form-header">
               <div className="form-header-title">Create TvSeries</div>
               <Link to="/tvseries">
-                <button className="back-btn">Back</button>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
+                  Back
+                </button>
               </Link>
             </div>
             <div className="form-block">
@@ -195,8 +202,8 @@ const NewTvSeries = ({ title }) => {
                   <input
                     type="text"
                     id="movieName"
-                    value={movieTitle}
-                    onChange={handleMovieTitleChange}
+                    onChange={(e) => setMovieTitle(e.target.value)}
+                    className="p-2 text-sm"
                   />
                 </div>
               ) : (
@@ -205,26 +212,63 @@ const NewTvSeries = ({ title }) => {
                   <input
                     id="movieTMDB"
                     type="text"
-                    value={movieTitle}
-                    onChange={handleMovieTitleChange}
+                    onChange={(e) => setMovieID(e.target.value)}
+                    className="p-2 text-sm"
                   />
                 </div>
               )}
               <div className="form-block-inside">
                 <label htmlFor="maturityRating">Maturity Rating:</label>
-                <input type="text" id="maturityRating" />
+                <select
+                  id="maturityRating"
+                  onChange={(e) => setSelectedMaturity(e.target.value)}
+                  className="p-2 text-sm cursor-pointer"
+                >
+                  <option value="all age">All Age</option>
+                  <option value="18+">18+</option>
+                  <option value="16+">16+</option>
+                  <option value="13+">13+</option>
+                  <option value="10+">10+</option>
+                  <option value="8+">8+</option>
+                  <option value="5+">5+</option>
+                  <option value="2+">2+</option>
+                </select>
               </div>
               <div className="form-block-inside">
                 <label htmlFor="country">Country:</label>
-                <input type="text" id="country" />
+                <select
+                  id="country"
+                  value={selectedCountry}
+                  multiple
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  className="p-2 text-sm cursor-pointer"
+                >
+                  <option value=""></option>
+                  {COUNTRY.map((country, key) => (
+                    <option key={key} value={country}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="form-block-inside">
                 <label htmlFor="metaKeyword">Meta Keyword:</label>
-                <input type="text" id="metaKeyword" />
+                <input
+                  type="text"
+                  id="metaKeyword"
+                  className="p-2 text-sm"
+                  onChange={(e) => setMetaKeyWord(e.target.value)}
+                />
               </div>
               <div className="form-block-inside">
                 <label htmlFor="metaDescription">Meta Description:</label>
-                <textarea name="" id="metaDescription" cols="30"></textarea>
+                <textarea
+                  name=""
+                  id="metaDescription"
+                  onChange={(e) => setMetaDesc(e.target.value)}
+                  cols="30"
+                  className="p-2 textsm"
+                ></textarea>
               </div>
             </div>
             <div className="form-block">
@@ -287,18 +331,33 @@ const NewTvSeries = ({ title }) => {
             <div className="form-block-myanmar">
               <div className="form-block-inside">
                 <label htmlFor="descriptionSource">Get Description From:</label>
-                <input type="text" id="descriptionSource" />
+                <input
+                  type="text"
+                  id="descriptionSource"
+                  className="p-2 text-sm"
+                />
               </div>
               <div className="form-block-inside">
                 <label htmlFor="descriptionMyanmar">
                   Description in Myanmar:
                 </label>
-                <textarea name="" id="descriptionMyanmar" cols="30"></textarea>
+                <textarea
+                  name=""
+                  id="descriptionMyanmar"
+                  cols="30"
+                  onChange={(e) => setMyanDesc(e.target.value)}
+                  className="p-2 text-sm"
+                ></textarea>
               </div>
             </div>
 
             <div className="form-block">
-              <button type="submit">Create</button>
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+              >
+                Create
+              </button>
             </div>
           </div>
         </form>
