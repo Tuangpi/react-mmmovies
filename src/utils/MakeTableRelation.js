@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteField,
   doc,
   getDocs,
   query,
@@ -121,7 +122,7 @@ export const MakeTableRelation = async (docName) => {
     }
     return "Connected Movies Relations";
   }
-  return "Document Empty";
+  return "Some of Documents Empty";
 };
 
 const updateTVSeriesDoc = async (readyForUpdateData, docName) => {
@@ -136,6 +137,7 @@ const updateTVSeriesDoc = async (readyForUpdateData, docName) => {
         if (data.ref) {
           const update = updateDoc(docRef, {
             genreId: data.ref,
+            genre_id: deleteField(),
           });
           updates.push(update);
         }
@@ -144,15 +146,16 @@ const updateTVSeriesDoc = async (readyForUpdateData, docName) => {
         if (data.ref) {
           const update = updateDoc(docRef, {
             tvSeriesId: data.ref,
+            tv_series_id: deleteField(),
           });
-          console.log(data.ref);
           updates.push(update);
         }
       }
       if (docName === STATIC_WORDS.ACTORS) {
         if (data.ref) {
           const update = updateDoc(docRef, {
-            actorId: data.ref,
+            actorsId: data.ref,
+            actor_id: deleteField(),
           });
           updates.push(update);
         }
@@ -161,6 +164,7 @@ const updateTVSeriesDoc = async (readyForUpdateData, docName) => {
         if (data.ref) {
           const update = updateDoc(docRef, {
             seasonsId: data.ref,
+            season_id: deleteField(),
           });
           updates.push(update);
         }
@@ -183,7 +187,8 @@ const updateMovieDoc = async (readyForUpdateData, docName) => {
       if (docName === STATIC_WORDS.ACTORS) {
         if (data.ref) {
           const update = updateDoc(docRef, {
-            actorId: data.ref,
+            actorsId: data.ref,
+            actor_id: deleteField(),
           });
           updates.push(update);
         }
@@ -191,7 +196,8 @@ const updateMovieDoc = async (readyForUpdateData, docName) => {
       if (docName === STATIC_WORDS.DIRECTORS) {
         if (data.ref) {
           const update = updateDoc(docRef, {
-            directorId: data.ref,
+            directorsId: data.ref,
+            director_id: deleteField(),
           });
           updates.push(update);
         }
@@ -200,6 +206,7 @@ const updateMovieDoc = async (readyForUpdateData, docName) => {
         if (data.ref) {
           const update = updateDoc(docRef, {
             genreId: data.ref,
+            genere_id: deleteField()
           });
           updates.push(update);
         }
@@ -235,7 +242,23 @@ const modifiedArray = async (ars, docName) => {
     default:
       break;
   }
+  let id = '';
 
+  if (docName === STATIC_WORDS.ACTORS) {
+    id = 'actor_id';
+  }
+  if (docName === STATIC_WORDS.DIRECTORS) {
+    id = 'director_id';
+  }
+  if (docName === STATIC_WORDS.TVSERIES) {
+    id = 'tvseries_id';
+  }
+  if (docName === STATIC_WORDS.SEASONS) {
+    id = 'season_id';
+  }
+  if (docName === STATIC_WORDS.GENRES) {
+    id = 'genre_id';
+  }
   if (ids && ids.length > 0) {
     let lastBatchArray = [];
     for (let i = 0; i < ids.length; i++) {
@@ -243,7 +266,7 @@ const modifiedArray = async (ars, docName) => {
         lastBatchArray = [];
         const q = query(
           collection(db, docName),
-          where("id", "in", ids.slice(i - 20, i))
+          where(id, "in", ids.slice(i - 20, i))
         );
         const querySnapShot = await getDocs(q);
         if (!querySnapShot.empty) {
@@ -252,7 +275,7 @@ const modifiedArray = async (ars, docName) => {
               if (docName === STATIC_WORDS.ACTORS) {
                 if (ar.actorId) {
                   ar.actorId.forEach((id) => {
-                    if (id === doc.data().id)
+                    if (id === doc.data().actor_id)
                       ar.ref ? ar.ref.push(doc.ref) : (ar.ref = [doc.ref]);
                   });
                 }
@@ -260,7 +283,7 @@ const modifiedArray = async (ars, docName) => {
               if (docName === STATIC_WORDS.DIRECTORS) {
                 if (ar.directorId) {
                   ar.directorId.forEach((id) => {
-                    if (id === doc.data().id)
+                    if (id === doc.data().director_id)
                       ar.ref ? ar.ref.push(doc.ref) : (ar.ref = [doc.ref]);
                   });
                 }
@@ -268,20 +291,19 @@ const modifiedArray = async (ars, docName) => {
               if (docName === STATIC_WORDS.GENRES) {
                 if (ar.genreId) {
                   ar.genreId.forEach((id) => {
-                    if (id === doc.data().id)
+                    if (id === doc.data().genre_id)
                       ar.ref ? ar.ref.push(doc.ref) : (ar.ref = [doc.ref]);
                   });
                 }
               }
               if (docName === STATIC_WORDS.TVSERIES) {
                 if (ar.tvSeriesId) {
-                  console.log(doc.id, doc.ref.path, doc.ref.id);
-                  if (ar.tvSeriesId === doc.data().id) ar.ref = doc.id;
+                  if (ar.tvSeriesId === doc.data().tvseries_id) ar.ref = doc.id;
                 }
               }
               if (docName === STATIC_WORDS.SEASONS) {
                 if (ar.seasonsId) {
-                  if (ar.seasonsId === doc.data().id) ar.ref = doc.id;
+                  if (ar.seasonsId === doc.data().season_id) ar.ref = doc.id;
                 }
               }
             });
@@ -293,8 +315,9 @@ const modifiedArray = async (ars, docName) => {
     if (lastBatchArray.length > 0) {
       const q = query(
         collection(db, docName),
-        where("id", "in", lastBatchArray)
+        where(id, "in", lastBatchArray)
       );
+
       const querySnapShot = await getDocs(q);
       if (!querySnapShot.empty) {
         querySnapShot.docs.forEach((doc) => {
@@ -302,7 +325,7 @@ const modifiedArray = async (ars, docName) => {
             if (docName === STATIC_WORDS.ACTORS) {
               if (ar.actorId) {
                 ar.actorId.forEach((id) => {
-                  if (id === doc.data().id)
+                  if (id === doc.data().actor_id)
                     ar.ref ? ar.ref.push(doc.ref) : (ar.ref = [doc.ref]);
                 });
               }
@@ -310,7 +333,7 @@ const modifiedArray = async (ars, docName) => {
             if (docName === STATIC_WORDS.DIRECTORS) {
               if (ar.directorId) {
                 ar.directorId.forEach((id) => {
-                  if (id === doc.data().id)
+                  if (id === doc.data().director_id)
                     ar.ref ? ar.ref.push(doc.ref) : (ar.ref = [doc.ref]);
                 });
               }
@@ -318,19 +341,19 @@ const modifiedArray = async (ars, docName) => {
             if (docName === STATIC_WORDS.GENRES) {
               if (ar.genreId) {
                 ar.genreId.forEach((id) => {
-                  if (id === doc.data().id)
+                  if (id === doc.data().genre_id)
                     ar.ref ? ar.ref.push(doc.ref) : (ar.ref = [doc.ref]);
                 });
               }
             }
             if (docName === STATIC_WORDS.TVSERIES) {
               if (ar.tvSeriesId) {
-                if (ar.tvSeriesId === doc.data().id) ar.ref = doc.id;
+                if (ar.tvSeriesId === doc.data().tvseries_id) ar.ref = doc.id;
               }
             }
             if (docName === STATIC_WORDS.SEASONS) {
               if (ar.seasonsId) {
-                if (ar.seasonsId === doc.data().id) ar.ref = doc.id;
+                if (ar.seasonsId === doc.data().season_id) ar.ref = doc.id;
               }
             }
           });
@@ -360,17 +383,17 @@ const getUnRelatedIds = async () => {
   let episodes = [];
 
   movieQuerySnapshot.docs.forEach((doc) => {
-    if (!isTableConnected(doc.data().actor_id))
+    if (doc.data().actor_id && !isTableConnected(doc.data().actor_id))
       actors.push({
         docId: doc.id,
         actorId: convertToArray(modifiedId(doc.data().actor_id)),
       });
-    if (!isTableConnected(doc.data().director_id))
+    if (doc.data().director_id && !isTableConnected(doc.data().director_id))
       directors.push({
         docId: doc.id,
         directorId: convertToArray(modifiedId(doc.data().director_id)),
       });
-    if (!isTableConnected(doc.data().genre_id))
+    if (doc.data().genre_id && !isTableConnected(doc.data().genre_id))
       genres.push({
         docId: doc.id,
         genreId: convertToArray(modifiedId(doc.data().genre_id)),
@@ -378,19 +401,19 @@ const getUnRelatedIds = async () => {
   });
 
   tvQuerySnapshot.docs.forEach((doc) => {
-    if (!isTableConnected(doc.data().genre_id))
+    if (doc.data().genre_id && !isTableConnected(doc.data().genre_id))
       tvGenres.push({
         docId: doc.id,
         genreId: convertToArray(modifiedId(doc.data().genre_id)),
       });
   });
   seasonQuerySnapshot.docs.forEach((doc) => {
-    if (!isTableConnected(doc.data().tv_series_id))
+    if (doc.data().tv_series_id && !isTableConnected(doc.data().tv_series_id))
       seasons.push({
         docId: doc.id,
         tvSeriesId: doc.data().tv_series_id,
       });
-    if (!isTableConnected(doc.data().actor_id))
+    if (doc.data().actor_id && !isTableConnected(doc.data().actor_id))
       seasonActors.push({
         docId: doc.id,
         actorId: convertToArray(modifiedId(doc.data().actor_id)),
@@ -398,7 +421,7 @@ const getUnRelatedIds = async () => {
   });
 
   episodeQuerySnapshot.docs.forEach((doc) => {
-    if (!isTableConnected(doc.data().seasons_id))
+    if (doc.data().seasons_id && !isTableConnected(doc.data().seasons_id))
       episodes.push({
         docId: doc.id,
         seasonsId: doc.data().seasons_id,
@@ -408,13 +431,13 @@ const getUnRelatedIds = async () => {
 };
 
 const isTableConnected = (id) => {
-  if (id.includes("/")) return true;
+  if (id && id.includes("/")) return true;
   return false;
 };
 
 const modifiedId = (id) => {
-  if (id.includes("+")) id = id.split("E+")[0].replace(".", "");
-  if (!id.includes(",")) {
+  if (id && id.includes("+")) id = id.split("E+")[0].replace(".", "");
+  if (id && !id.includes(",")) {
     if (id.length > 6) id = parseInt(id).toLocaleString();
   }
   return id;

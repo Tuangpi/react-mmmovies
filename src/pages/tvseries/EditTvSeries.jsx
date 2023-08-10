@@ -55,7 +55,7 @@ const EditTvSeries = ({ title }) => {
         setMetaKeyWord(data.keyword);
         setMetaDesc(data.description);
         setIsFeatured(data.featured);
-        setMyanDesc(data.desc_myan);
+        setMyanDesc(data.description_myanmar);
       } catch (err) {
         console.log(err);
       }
@@ -137,7 +137,7 @@ const EditTvSeries = ({ title }) => {
   //         is_upcoming: 0,
   //         upcoming_date: null,
   //         is_kids: 0,
-  //         desc_myan: null,
+  //         description_myanmar: null,
   //         updated_by: null,
   //         channel: 0,
   //       });

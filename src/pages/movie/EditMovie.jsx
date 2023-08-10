@@ -148,7 +148,7 @@ const EditMovie = ({ title }) => {
         setMetaKeyWord(data.keyword);
         setHasSubTitle(data.subtitle);
         setIsProtected(data.is_protected);
-        setMyanDesc(data.desc_myan);
+        setMyanDesc(data.description_myanmar);
       } catch (err) {
         console.log(err);
       }
@@ -257,7 +257,7 @@ const EditMovie = ({ title }) => {
   //         is_upcoming: 0,
   //         upcoming_date: null,
   //         is_kids: 0,
-  //         desc_myan: null,
+  //         description_myanmar: null,
   //         updated_by: null,
   //         channel: 0,
   //       });

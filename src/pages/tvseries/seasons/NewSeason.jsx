@@ -114,7 +114,7 @@ const NewSeason = ({ title }) => {
         poster: posterURL ?? "",
         publish_year: season_data["data"]["air_date"].substring(0, 4),
         thumbnail: "",
-        actor_id: actor_id,
+        actorsId: actor_id,
         a_language: "",
         detail: season_data["data"]["overview"],
         views: "",

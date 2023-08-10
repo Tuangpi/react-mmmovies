@@ -1,4 +1,5 @@
 import {
+  Timestamp,
   addDoc,
   collection,
   getDocs,
@@ -173,7 +174,18 @@ const modifiedData = async (rawData, docName) => {
   if (docName === STATIC_WORDS.ACTORS || docName === STATIC_WORDS.DIRECTORS) {
     const imageUrlPromise = await fetchRelatedImage(rawData, docName);
     for (let i = 0; i < rawData.length; i++) {
-      rawData[i].image = imageUrlPromise[i];
+      rawData[i].image = imageUrlPromise[i] ?? '';
+      rawData[i].created_at = new Date(rawData[i].created_at);
+      rawData[i].updated_at = new Date(rawData[i].updated_at);
+      if (docName === STATIC_WORDS.ACTORS) {
+        rawData[i].actor_id = rawData[i].id;
+        delete rawData[i].id;
+      }
+
+      if (docName === STATIC_WORDS.DIRECTORS) {
+        rawData[i].director_id = rawData[i].id;
+        delete rawData[i].id;
+      }
     }
   }
 
@@ -183,8 +195,43 @@ const modifiedData = async (rawData, docName) => {
       docName
     );
     for (let i = 0; i < rawData.length; i++) {
-      rawData[i].thumbnail = thumbnailUrlPromise[i];
-      rawData[i].poster = posterUrlPromise[i];
+      rawData[i].thumbnail = thumbnailUrlPromise[i] ?? '';
+      rawData[i].poster = posterUrlPromise[i] ?? '';
+      rawData[i].created_at = new Date(rawData[i].created_at);
+      rawData[i].updated_at = new Date(rawData[i].updated_at);
+      rawData[i].tmdb_id = String(rawData[i].tmdb_id);
+
+      if (docName === STATIC_WORDS.MOVIES || docName === STATIC_WORDS.TVSERIES) {
+        delete rawData[i].created_by;
+        rawData[i].featured = rawData[i].featured === '1' ? true : false;
+        rawData[i].is_kids = rawData[i].is_kids === '1' ? true : false;
+        rawData[i].is_upcoming = rawData[i].is_upcoming === '1' ? true : false;
+        rawData[i].status = rawData[i].status === '1' ? true : false;
+        rawData[i].rating = parseFloat(rawData[i].rating);
+        rawData[i].upcoming_date = rawData[i].upcoming_date ? new Date(rawData[i].upcoming_date) : new Timestamp(0, 0);
+        delete rawData[i].updated_by;
+        rawData[i].country = [];
+        rawData[i].channel = Number(rawData[i].channel);
+      }
+
+      if (docName === STATIC_WORDS.MOVIES) {
+        rawData[i].movie_id = rawData[i].id;
+        delete rawData[i].id;
+        rawData[i].is_protected = rawData[i].is_protected === '1' ? true : false;
+        rawData[i].series = rawData[i].series === '1' ? true : false;
+        rawData[i].subtitle = rawData[i].subtitle === '1' ? true : false;
+      }
+
+      if (docName === STATIC_WORDS.TVSERIES) {
+        rawData[i].tvseries_id = rawData[i].id;
+        delete rawData[i].id;
+      }
+
+      if (docName === STATIC_WORDS.SEASONS) {
+        rawData[i].featured = rawData[i].featured === '1' ? true : false;
+        rawData[i].season_id = rawData[i].id;
+        delete rawData[i].id;
+      }
     }
   }
 
@@ -193,10 +240,18 @@ const modifiedData = async (rawData, docName) => {
     if (await isDocumentEmpty(STATIC_WORDS.GENRES)) {
       rawData.forEach((data) => {
         data.name = data.name.substring(7, data.name.length - 2);
+        data.created_at = new Date(data.created_at);
+        data.updated_at = new Date(data.updated_at);
+        data.genre_id = data.id;
+        delete data.id;
       });
     } else {
       rawData.forEach(async (data) => {
         data.name = data.name.substring(7, data.name.length - 2);
+        data.created_at = new Date(data.created_at);
+        data.updated_at = new Date(data.updated_at);
+        data.genre_id = data.id;
+        delete data.id;
         const q = query(
           collection(db, STATIC_WORDS.GENRES),
           where("name", "==", data.name)

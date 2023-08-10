@@ -33,6 +33,7 @@ import NewSeason from "./pages/tvseries/seasons/NewSeason";
 import NewEpisode from "./pages/tvseries/episodes/NewEpisode";
 import EditMovie from "./pages/movie/EditMovie";
 import EditTvSeries from "./pages/tvseries/EditTvSeries";
+import MediaManager from "./pages/mediaManager/MediaManager";
 
 function App() {
   const { darkMode } = useContext(DarkModeContext);
@@ -286,6 +287,16 @@ function App() {
                 element={
                   <RequireAuth>
                     <AppSetting />
+                  </RequireAuth>
+                }
+              />
+            </Route>
+            <Route path="media-manager">
+              <Route
+                index
+                element={
+                  <RequireAuth>
+                    <MediaManager />
                   </RequireAuth>
                 }
               />

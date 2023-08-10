@@ -14,11 +14,11 @@ import moment from "moment";
 //   return await prepareDisplay(s3, data, true);
 // };
 
-export const SearchObjects = (searchPattern) => {
+export const SearchObjects = (searchPattern, key) => {
   const s3 = new S3(awsConfig);
   const param = {
     Bucket: myBucket,
-    Prefix: 'movies_upload_wasabi'
+    Prefix: key,
   };
   return new Promise((resolve, reject) => {
     s3.listObjectsV2(param, async (err, data) => {

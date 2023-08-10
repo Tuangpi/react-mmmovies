@@ -65,7 +65,7 @@ const NewMovie = ({ title }) => {
     if (e.key === "Enter") {
       const search = e.target.value;
       try {
-        const fetchObj = await SearchObjects(search);
+        const fetchObj = await SearchObjects(search, objectKey);
         setObjects(fetchObj);
       } catch (err) {
         console.log(err);
@@ -97,7 +97,6 @@ const NewMovie = ({ title }) => {
 
     if (showModal) {
       if (continuationToken === null) fetchData(objectKey);
-      console.log(continuationToken);
       modalContentElement.addEventListener("scroll", handleScrollEvent);
     }
 
@@ -214,9 +213,9 @@ const NewMovie = ({ title }) => {
         poster: posterURL,
         tmdb: "Y",
         fetch_by: searchBy,
-        director_id: director_id,
-        actor_id: actor_id,
-        genre_id: genre_id,
+        directorsId: director_id,
+        actorsId: actor_id,
+        genreId: genre_id,
         trailer_url: "",
         detail: data["overview"],
         views: "",
@@ -240,7 +239,7 @@ const NewMovie = ({ title }) => {
           : new Timestamp(0, 0),
         is_kids: false,
         country: selectedCountry,
-        desc_myan: myanDesc,
+        description_myanmar: myanDesc,
         // updated_by: "",
         channel: 0,
         id: movieRef,
@@ -248,18 +247,41 @@ const NewMovie = ({ title }) => {
     } catch (error) {
       console.log(error);
     }
+
+    let url_360 = "";
+    let url_480 = "";
+    let url_720 = "";
+    let url_1080 = "";
+    let upload_video_url = "";
+
+    if (selectKey.includes("movies_upload_wasabi/url_360")) {
+      url_360 = await generatePresignedUrl(selectKey);
+    } else if (selectKey.includes("movies_upload_wasabi/url_480")) {
+      url_480 = await generatePresignedUrl(selectKey);
+    } else if (selectKey.includes("movies_upload_wasabi/url_720")) {
+      url_720 = await generatePresignedUrl(selectKey);
+    } else if (selectKey.includes("movies_upload_wasabi/url_1080")) {
+      url_1080 = await generatePresignedUrl(selectKey);
+    } else {
+      try {
+        upload_video_url = await generatePresignedUrl(selectKey);
+      } catch (e) {
+        console.log(e);
+        upload_video_url = "";
+      }
+    }
+
     try {
       await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
         movie_id: movieRef,
-        // episode_id: "",
         type: "upload_video",
-        url_360: "",
-        url_480: "",
-        url_720: "",
-        url_1080: "",
+        url_360: url_360,
+        url_480: url_480,
+        url_720: url_720,
+        url_1080: url_1080,
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
-        upload_video: await generatePresignedUrl(selectKey),
+        upload_video: upload_video_url,
       });
     } catch (error) {
       console.log(error);
@@ -495,7 +517,7 @@ const NewMovie = ({ title }) => {
                           type="button"
                           onClick={() => {
                             setShowModal(true);
-                            setObjectKey("movies_upload_wasabi/url_720");
+                            setObjectKey("movies_upload_wasabi/url_720/");
                           }}
                         >
                           Choose A Video

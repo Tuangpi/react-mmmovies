@@ -20,7 +20,7 @@ import {
 import axios from "axios";
 import { fromURL } from "image-resize-compress";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { Delete, Edit, TroubleshootSharp } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import ImportCSV from "../../../components/import/ImportCSV";
 import Loading from "react-loading";
 import { CustomModal } from "../../../components/widget/CustomModal";
@@ -28,10 +28,10 @@ import {
   ListObjects,
   SearchObjects,
 } from "../../new/NewMovieHelper/FetchObjects";
+import { generatePresignedUrl } from "../../../helper/Helpers";
 
 const NewEpisode = ({ title }) => {
   const { id } = useParams();
-  const [seasonSlug, setSeasonSlug] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [episodeNumber, setEpisodeNumber] = useState();
   const [episodeTitle, setEpisodeTitle] = useState();
@@ -53,7 +53,7 @@ const NewEpisode = ({ title }) => {
     if (e.key === "Enter") {
       const search = e.target.value;
       try {
-        const fetchObj = await SearchObjects(search);
+        const fetchObj = await SearchObjects(search, objectKey);
         setObjects(fetchObj);
       } catch (err) {
         console.log(err);
@@ -136,8 +136,8 @@ const NewEpisode = ({ title }) => {
       }
     };
     fetchData();
-  }, []);
-
+  }, [id]);
+  console.log(data);
   const handleEdit = (id) => {
     const fetchData = async (docRef) => {
       try {
@@ -160,7 +160,6 @@ const NewEpisode = ({ title }) => {
 
   async function fetchDataAndStore() {
     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
-    console.log("asdf");
     const episode_data = await axios.get(
       `https://api.themoviedb.org/3/tv/${tmdb_id}/season/${season_number}/episode/${episodeNumber}?api_key=${TMDB_API_KEY}`
     );
@@ -183,10 +182,11 @@ const NewEpisode = ({ title }) => {
       thumbnailUrl = await getDownloadURL(thumbnailRef);
     }
 
+    let episodeRef = null;
     try {
       const obj = {
         seasonsId: id,
-        tmdb_id: episode_data["data"]["id"],
+        tmdb_id: String(episode_data["data"]["id"]),
         thumbnail: thumbnailUrl ?? "",
         episode_no: episodeNumber,
         title: episodeTitle,
@@ -202,7 +202,45 @@ const NewEpisode = ({ title }) => {
         updated_at: serverTimestamp(),
       };
       const docRef = await addDoc(collection(db, STATIC_WORDS.EPISODES), obj);
+      episodeRef = docRef;
       setData([...data, { id: docRef.id, data: obj }]);
+    } catch (error) {
+      console.log(error);
+    }
+
+    let url_360 = "";
+    let url_480 = "";
+    let url_720 = "";
+    let url_1080 = "";
+
+    if (selectKey.includes("tvshow_upload_wasabi/url_360")) {
+      url_360 = await generatePresignedUrl(selectKey);
+    } else if (selectKey.includes("tvshow_upload_wasabi/url_480")) {
+      url_480 = await generatePresignedUrl(selectKey);
+    } else if (selectKey.includes("tvshow_upload_wasabi/url_720")) {
+      url_720 = await generatePresignedUrl(selectKey);
+    } else if (selectKey.includes("tvshow_upload_wasabi/url_1080")) {
+      url_1080 = await generatePresignedUrl(selectKey);
+    } else {
+      try {
+        url_360 = await generatePresignedUrl(selectKey);
+      } catch (e) {
+        console.log(e);
+        url_360 = "";
+      }
+    }
+
+    try {
+      await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
+        episode_id: episodeRef,
+        type: "upload_video",
+        url_360: url_360,
+        url_480: url_480,
+        url_720: url_720,
+        url_1080: url_1080,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp(),
+      });
     } catch (error) {
       console.log(error);
     }
