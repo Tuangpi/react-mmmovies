@@ -16,7 +16,7 @@ const ViewMediaManager = () => {
     if (e.key === "Enter") {
       const search = e.target.value;
       try {
-        const fetchObj = await SearchObjects(search);
+        const fetchObj = await SearchObjects(search, objectKey);
         setObjects(fetchObj);
       } catch (err) {
         console.log(err);
