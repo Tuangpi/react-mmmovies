@@ -1,5 +1,3 @@
-import "../../style/new.scss";
-import "../../style/modal.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import { useEffect, useState } from "react";
@@ -14,8 +12,8 @@ import {
 import { db, storage } from "../../configs/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link, useParams } from "react-router-dom";
-import { ForGenres } from "../new/NewMovieHelper/ForGenres";
-import { GetData } from "../new/NewMovieHelper/GetData";
+import { ForGenres } from "../../helper/ForGenres";
+import { GetData } from "../../helper/GetData";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { COUNTRY } from "../../assets/COUNTRY";
@@ -160,15 +158,11 @@ const EditTvSeries = ({ title }) => {
     }
   };
   return (
-    <div className="new">
-      <Sidebar />
-      <div className="newContainer">
-        <Navbar />
-        <div className="top">
-          <h1>{title}</h1>
-        </div>
+    <div className="tw-flex tw-bg-slate-100 tw-pt-5">
+      <div className="tw-mx-5">
+        <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
         {isLoading ? (
-          <div className="loading-container">
+          <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-bg-slate-100 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
             <Loading type="spokes" color="#3f51b5" height={"3%"} width={"3%"} />{" "}
           </div>
         ) : (

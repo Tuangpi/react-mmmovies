@@ -1,18 +1,17 @@
 import { S3 } from "aws-sdk";
-import awsConfig, { myBucket } from "../../../configs/wasabi";
+import awsConfig, { myBucket } from "../configs/wasabi";
 import moment from "moment";
 
-// export const SearchObjects = async (searchPattern) => {
-//   const s3 = new S3(awsConfig);
-//   const param = {
-//     Bucket: myBucket,
-//     Prefix: searchPattern,
-//     MaxKeys: 50,
-//   };
-//   const data = await s3.listObjectsV2(param).promise();
-//   console.log("Filtered Objects:", data);
-//   return await prepareDisplay(s3, data, true);
-// };
+export const getObjects = async (path) => {
+  const s3 = new S3(awsConfig);
+  const param = {
+    Bucket: myBucket,
+    Prefix: path,
+  };
+  const data = await s3.listObjectsV2(param).promise();
+  console.log("Filtered Objects:", data);
+  return await prepareDisplay(s3, data, true);
+};
 
 export const SearchObjects = (searchPattern, key) => {
   const s3 = new S3(awsConfig);

@@ -7,40 +7,42 @@ import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutl
 
 const Featured = () => {
   return (
-    <div className="featured">
-      <div className="top">
-        <h1 className="title">Total Revenue</h1>
+    <div className="featured tw-p-3">
+      <div className="tw-flex tw-items-center tw-justify-between tw-text-slate-700">
+        <h1 className="tw-font-medium tw-text-base">Total Revenue</h1>
         <MoreVertIcon fontSize="small" />
       </div>
-      <div className="bottom">
-        <div className="featuredChart">
+      <div className="tw-flex tw-items-center tw-justify-center tw-flex-col tw-p-5 tw-gap-4">
+        <div className="tw-w-28 tw-h-28">
           <CircularProgressbar value={70} text={"70%"} strokeWidth={5} />
         </div>
-        <p className="title">Total sales made today</p>
-        <p className="amount">$420</p>
-        <p className="desc">
+        <p className="tw-font-medium tw-text-slate-700">
+          Total sales made today
+        </p>
+        <p className="tw-text-3xl">$420</p>
+        <p className="tw-font-light tw-text-xs tw-text-slate-600 tw-text-center">
           Previous transactions processing. Last payments may not be included.
         </p>
-        <div className="summary">
-          <div className="item">
-            <div className="itemTitle">Target</div>
-            <div className="itemResult negative">
-              <KeyboardArrowDownIcon fontSize="small"/>
-              <div className="resultAmount">$12.4k</div>
+        <div className="tw-flex tw-w-full tw-justify-between tw-items-center">
+          <div className="tw-text-center">
+            <div className="tw-text-sm tw-text-slate-800">Target</div>
+            <div className="tw-flex tw-items-center tw-mt-3 tw-text-sm tw-text-red-700">
+              <KeyboardArrowDownIcon fontSize="small" />
+              <div>$12.4k</div>
             </div>
           </div>
-          <div className="item">
-            <div className="itemTitle">Last Week</div>
-            <div className="itemResult positive">
-              <KeyboardArrowUpOutlinedIcon fontSize="small"/>
-              <div className="resultAmount">$12.4k</div>
+          <div className="tw-text-center">
+            <div className="tw-text-sm tw-text-slate-800">Last Week</div>
+            <div className="tw-flex tw-items-center tw-mt-3 tw-text-sm tw-text-green-700">
+              <KeyboardArrowUpOutlinedIcon fontSize="small" />
+              <div>$12.4k</div>
             </div>
           </div>
-          <div className="item">
-            <div className="itemTitle">Last Month</div>
-            <div className="itemResult positive">
-              <KeyboardArrowUpOutlinedIcon fontSize="small"/>
-              <div className="resultAmount">$12.4k</div>
+          <div className="tw-text-center">
+            <div className="tw-text-sm tw-text-slate-800">Last Month</div>
+            <div className="tw-flex tw-items-center tw-mt-3 tw-text-sm tw-text-green-700">
+              <KeyboardArrowUpOutlinedIcon fontSize="small" />
+              <div>$12.4k</div>
             </div>
           </div>
         </div>

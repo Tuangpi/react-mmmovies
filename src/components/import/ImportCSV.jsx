@@ -1,6 +1,6 @@
 import { ChangeCSVtoJson } from "../../helper/Helpers";
-import { MakeTableRelation } from "../../utils/MakeTableRelation";
-import { uploadData } from "./uploadData";
+import { MakeTableRelation } from "../../helper/MakeTableRelation";
+import { uploadData } from "../../helper/uploadData";
 
 const ImportCSV = ({ docName, isLoading }) => {
   const handleFileUpload = async (e) => {
@@ -25,7 +25,7 @@ const ImportCSV = ({ docName, isLoading }) => {
 
   return (
     <>
-      Import From CSV
+      Import {docName}
       <input type="file" onChange={handleFileUpload} accept=".csv" />
     </>
   );

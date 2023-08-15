@@ -8,11 +8,11 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { db, storage } from "../../configs/firebase";
+import { db, storage } from "../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { fromURL } from "image-resize-compress";
-import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
-import { isDocumentEmpty } from "../../helper/Helpers";
+import { STATIC_WORDS } from "../assets/STATIC_WORDS";
+import { getPresignedUrlMovie, getPresignedUrlSeries, isDocumentEmpty } from "./Helpers";
 
 export const uploadData = async (rawData, docName) => {
   const data = await modifiedData(rawData, docName);
@@ -34,6 +34,8 @@ export const uploadData = async (rawData, docName) => {
       let checkValue = object.name;
       if (validDocNames.includes(docName)) checkValue = object.tmdb_id;
 
+      if (docName === STATIC_WORDS.VIDEO_LINKS) checkValue = object.id;
+
       if (checkValue !== "" && checkValue !== null) {
         batchArray.push({ id: checkValue, data: object });
       } else {
@@ -47,6 +49,8 @@ export const uploadData = async (rawData, docName) => {
       let tmpArrForCheck = [];
       let fieldWhere = "name";
       if (validDocNames.includes(docName)) fieldWhere = "tmdb_id";
+
+      if (docName === STATIC_WORDS.VIDEO_LINKS) fieldWhere = "id";
 
       for (let i = 0; i < batchArray.length; i++) {
         if (i % 20 === 0 && i !== 0) {
@@ -66,6 +70,8 @@ export const uploadData = async (rawData, docName) => {
               querySnap.forEach((q) => {
                 if (validDocNames.includes(docName)) {
                   tmpArrForCheck.push(q.data().tmdb_id);
+                } else if (docName === STATIC_WORDS.VIDEO_LINKS) {
+                  tmpArrForCheck.push(q.data().id);
                 } else {
                   tmpArrForCheck.push(q.data().name);
                 }
@@ -107,6 +113,8 @@ export const uploadData = async (rawData, docName) => {
             querySnap.forEach((q) => {
               if (validDocNames.includes(docName)) {
                 tmpArrForCheck.push(q.data().tmdb_id);
+              } else if (docName === STATIC_WORDS.VIDEO_LINKS) {
+                tmpArrForCheck.push(q.data().id);
               } else {
                 tmpArrForCheck.push(q.data().name);
               }
@@ -170,6 +178,26 @@ const modifiedData = async (rawData, docName) => {
     STATIC_WORDS.SEASONS,
     STATIC_WORDS.EPISODES,
   ];
+
+  if (docName === STATIC_WORDS.VIDEO_LINKS) {
+    rawData.forEach(async (data) => {
+      data.created_at = new Date(data.created_at);
+      data.updated_at = new Date(data.updated_at);
+      if (data.episode_id && data.episode_id !== '') {
+        data.url_360 = await getPresignedUrlSeries(data.url_360, "url_360");
+        data.url_480 = await getPresignedUrlSeries(data.url_480, "url_480");
+        data.url_720 = await getPresignedUrlSeries(data.url_720, "url_720");
+        data.url_1080 = await getPresignedUrlSeries(data.url_1080, "url_1080");
+        data.upload_video = data.upload_video ? data.upload_video : '';
+      } else if (data.movie_id && data.movie_id !== '') {
+        data.url_360 = await getPresignedUrlMovie(data.url_360, "url_360");
+        data.url_480 = await getPresignedUrlMovie(data.url_480, "url_480");
+        data.url_720 = await getPresignedUrlMovie(data.url_720, "url_720");
+        data.url_1080 = await getPresignedUrlMovie(data.url_1080, "url_1080");
+        data.upload_video = await getPresignedUrlMovie(data.upload_video, 'upload_video');
+      }
+    })
+  }
 
   if (docName === STATIC_WORDS.ACTORS || docName === STATIC_WORDS.DIRECTORS) {
     const imageUrlPromise = await fetchRelatedImage(rawData, docName);

@@ -22,6 +22,7 @@
     "react-dom": "^18.2.0",
     "react-loading": "^2.0.3",
     "react-overlays": "^5.2.1",
+    "react-paginate": "^8.2.0",
     "react-papaparse": "^4.1.0",
     "react-router-dom": "^6.14.1",
     "react-scripts": "5.0.1",

@@ -8,10 +8,10 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
-import { db, storage } from "../../../configs/firebase";
+import { db, storage } from "../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { STATIC_WORDS } from "../../../assets/STATIC_WORDS";
-import { convertToSlug, isDocumentEmpty } from "../../../helper/Helpers";
+import { STATIC_WORDS } from "../assets/STATIC_WORDS";
+import { convertToSlug, isDocumentEmpty } from "./Helpers";
 
 export const ForActors = async (TMDB_API_KEY, credits) => {
   let actorIds = [];

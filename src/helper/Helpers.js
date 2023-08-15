@@ -32,26 +32,6 @@ export const ChangeCSVtoJson = (csvFile) => {
   return parsedData.data;
 };
 
-export const generatePresignedUrl = async (objectKey) => {
-  const s3 = new S3(awsConfig);
-
-  const params = {
-    Bucket: myBucket,
-    Key: objectKey,
-    Expires: Number.MAX_SAFE_INTEGER,
-  };
-
-  return new Promise((resolve, reject) => {
-    s3.getSignedUrl('getObject', params, (error, url) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(url);
-      }
-    });
-  });
-}
-
 export const convertToSlug = (str) => {
   return str.toLowerCase().replace(/\s+/g, '-');
 }
@@ -67,4 +47,60 @@ export const starRating = (rating) => {
     }
   }
   return arr;
+}
+
+export const getPresignedUrlMovie = async (path, movie_type) => {
+  if (movie_type === 'url_360') {
+    if (path === '') return '';
+    if (path && path !== '' && path.includes("movies_upload_wasabi/url_360")) return await generatePresignedUrl(path);
+  } else if (movie_type === 'url_480') {
+    if (path === '') return '';
+    if (path && path !== '' && path.includes("movies_upload_wasabi/url_480")) return await generatePresignedUrl(path);
+  } else if (movie_type === 'url_720') {
+    if (path === '') return '';
+    if (path && path !== '' && path.includes("movies_upload_wasabi/url_720")) return await generatePresignedUrl(path);
+  } else if (movie_type === 'url_1080') {
+    if (path === '') return '';
+    if (path && path !== '' && path.includes("movies_upload_wasabi/url_1080")) return await generatePresignedUrl(path);
+  } else if (movie_type === 'upload_video') {
+    if (path === '') return '';
+    if (path && path !== '') return await generatePresignedUrl(path);
+  }
+}
+
+export const getPresignedUrlSeries = async (path, video_type) => {
+  if (video_type === 'url_360') {
+    if (path === '') return '';
+    if (path && path !== '' && path.includes("tvshow_upload_wasabi/url_360")) return await generatePresignedUrl(path);
+  } else if (video_type === 'url_480') {
+    if (path === '') return '';
+    if (path && path !== '' && path.includes("tvshow_upload_wasabi/url_480")) return await generatePresignedUrl(path);
+  } else if (video_type === 'url_720') {
+    if (path === '') return '';
+    if (path && path !== '' && path.includes("tvshow_upload_wasabi/url_720")) return await generatePresignedUrl(path);
+  } else if (video_type === 'url_1080') {
+    if (path === '') return '';
+    if (path && path !== '' && path.includes("tvshow_upload_wasabi/url_1080")) return await generatePresignedUrl(path);
+  }
+}
+
+const generatePresignedUrl = async (objectKey) => {
+  const s3 = new S3(awsConfig);
+
+  const params = {
+    Bucket: myBucket,
+    Key: objectKey,
+    Expires: Number.MAX_SAFE_INTEGER,
+  };
+  console.log(params);
+
+  return new Promise((resolve, reject) => {
+    s3.getSignedUrl('getObject', params, (error, url) => {
+      if (error) {
+        reject('');
+      } else {
+        resolve(url);
+      }
+    });
+  });
 }

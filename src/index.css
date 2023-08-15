@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.flex-1{
+    flex: 1 1 18%;
+}
+.flex-6{
+    flex: 6 1 82%;
+}
+
+.hide-scroll{
+    scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+}
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}

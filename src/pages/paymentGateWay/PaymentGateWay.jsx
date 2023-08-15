@@ -1,14 +1,8 @@
-import Navbar from "../../components/navbar/Navbar";
-import Sidebar from "../../components/sidebar/Sidebar";
-import ShowAllPaymentGateWay from "./ShowAllPaymentGateWay";
-
 const PaymentGateWay = () => {
   return (
-    <div className="list">
-      <Sidebar />
-      <div className="listContainer">
-        <Navbar />
-        <ShowAllPaymentGateWay />
+    <div className="tw-bg-slate-100 tw-pt-5 tw-min-h-screen">
+      <div className="tw-font-bold tw-text-slate-500 tw-mx-5">
+        Payment GateWay
       </div>
     </div>
   );

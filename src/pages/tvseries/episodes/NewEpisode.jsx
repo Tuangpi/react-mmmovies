@@ -1,8 +1,4 @@
 import { Link, useLocation, useParams } from "react-router-dom";
-import Navbar from "../../../components/navbar/Navbar";
-import Sidebar from "../../../components/sidebar/Sidebar";
-import "../../../style/episode.scss";
-import "../../../style/new.scss";
 import { useEffect, useState } from "react";
 import { STATIC_WORDS } from "../../../assets/STATIC_WORDS";
 import { db, storage } from "../../../configs/firebase";
@@ -24,11 +20,8 @@ import { Delete, Edit } from "@mui/icons-material";
 import ImportCSV from "../../../components/import/ImportCSV";
 import Loading from "react-loading";
 import { CustomModal } from "../../../components/widget/CustomModal";
-import {
-  ListObjects,
-  SearchObjects,
-} from "../../new/NewMovieHelper/FetchObjects";
-import { generatePresignedUrl } from "../../../helper/Helpers";
+import { ListObjects, SearchObjects } from "../../../helper/FetchObjects";
+import { getPresignedUrlSeries } from "../../../helper/Helpers";
 
 const NewEpisode = ({ title }) => {
   const { id } = useParams();
@@ -208,36 +201,14 @@ const NewEpisode = ({ title }) => {
       console.log(error);
     }
 
-    let url_360 = "";
-    let url_480 = "";
-    let url_720 = "";
-    let url_1080 = "";
-
-    if (selectKey.includes("tvshow_upload_wasabi/url_360")) {
-      url_360 = await generatePresignedUrl(selectKey);
-    } else if (selectKey.includes("tvshow_upload_wasabi/url_480")) {
-      url_480 = await generatePresignedUrl(selectKey);
-    } else if (selectKey.includes("tvshow_upload_wasabi/url_720")) {
-      url_720 = await generatePresignedUrl(selectKey);
-    } else if (selectKey.includes("tvshow_upload_wasabi/url_1080")) {
-      url_1080 = await generatePresignedUrl(selectKey);
-    } else {
-      try {
-        url_360 = await generatePresignedUrl(selectKey);
-      } catch (e) {
-        console.log(e);
-        url_360 = "";
-      }
-    }
-
     try {
       await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
         episode_id: episodeRef,
         type: "upload_video",
-        url_360: url_360,
-        url_480: url_480,
-        url_720: url_720,
-        url_1080: url_1080,
+        url_360: await getPresignedUrlSeries(selectKey, "url_360"),
+        url_480: await getPresignedUrlSeries(selectKey, "url_480"),
+        url_720: await getPresignedUrlSeries(selectKey, "url_720"),
+        url_1080: await getPresignedUrlSeries(selectKey, "url_1080"),
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
       });
@@ -289,9 +260,7 @@ const NewEpisode = ({ title }) => {
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
-      <Sidebar />
       <div className="newContainer">
-        <Navbar />
         <div className="top">
           <h1>{title}</h1>
         </div>

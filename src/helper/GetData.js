@@ -1,5 +1,5 @@
 import axios from "axios";
-import { STATIC_WORDS } from "../../../assets/STATIC_WORDS";
+import { STATIC_WORDS } from "../assets/STATIC_WORDS";
 
 export const GetData = async (searchBy, TMDB_API_KEY, query, from) => {
   let response = null;

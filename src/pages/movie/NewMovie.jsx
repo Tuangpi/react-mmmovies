@@ -1,8 +1,3 @@
-import "../../index.css";
-import "../../style/new.scss";
-import "../../style/modal.scss";
-import Sidebar from "../../components/sidebar/Sidebar";
-import Navbar from "../../components/navbar/Navbar";
 import { useEffect, useState } from "react";
 import Loading from "react-loading";
 import {
@@ -20,15 +15,15 @@ import { db, storage } from "../../configs/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { GetData } from "../new/NewMovieHelper/GetData";
-import { ForActors } from "../new/NewMovieHelper/ForActors";
-import { ForDirectors } from "../new/NewMovieHelper/ForDirectors";
-import { ForGenres } from "../new/NewMovieHelper/ForGenres";
+import { GetData } from "../../helper/GetData";
+import { ForActors } from "../../helper/ForActors";
+import { ForDirectors } from "../../helper/ForDirectors";
+import { ForGenres } from "../../helper/ForGenres";
 import { CustomModal } from "../../components/widget/CustomModal";
-import { ListObjects, SearchObjects } from "../new/NewMovieHelper/FetchObjects";
+import { ListObjects, SearchObjects } from "../../helper/FetchObjects";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
-import { generatePresignedUrl, isDocumentEmpty } from "../../helper/Helpers";
+import { getPresignedUrlMovie, isDocumentEmpty } from "../../helper/Helpers";
 import { COUNTRY } from "../../assets/COUNTRY";
 
 const NewMovie = ({ title }) => {
@@ -119,6 +114,7 @@ const NewMovie = ({ title }) => {
   const handleSelect = (key) => {
     setSelectKey(key);
     setShowModal(false);
+    setObjects([]);
     setContinuationToken(null);
   };
 
@@ -248,40 +244,17 @@ const NewMovie = ({ title }) => {
       console.log(error);
     }
 
-    let url_360 = "";
-    let url_480 = "";
-    let url_720 = "";
-    let url_1080 = "";
-    let upload_video_url = "";
-
-    if (selectKey.includes("movies_upload_wasabi/url_360")) {
-      url_360 = await generatePresignedUrl(selectKey);
-    } else if (selectKey.includes("movies_upload_wasabi/url_480")) {
-      url_480 = await generatePresignedUrl(selectKey);
-    } else if (selectKey.includes("movies_upload_wasabi/url_720")) {
-      url_720 = await generatePresignedUrl(selectKey);
-    } else if (selectKey.includes("movies_upload_wasabi/url_1080")) {
-      url_1080 = await generatePresignedUrl(selectKey);
-    } else {
-      try {
-        upload_video_url = await generatePresignedUrl(selectKey);
-      } catch (e) {
-        console.log(e);
-        upload_video_url = "";
-      }
-    }
-
     try {
       await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
         movie_id: movieRef,
         type: "upload_video",
-        url_360: url_360,
-        url_480: url_480,
-        url_720: url_720,
-        url_1080: url_1080,
+        url_360: await getPresignedUrlMovie("", "url_360"),
+        url_480: await getPresignedUrlMovie("", "url_480"),
+        url_720: await getPresignedUrlMovie("", "url_720"),
+        url_1080: await getPresignedUrlMovie("", "url_1080"),
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
-        upload_video: upload_video_url,
+        upload_video: await getPresignedUrlMovie(selectKey, "upload_video"),
       });
     } catch (error) {
       console.log(error);
@@ -301,33 +274,28 @@ const NewMovie = ({ title }) => {
   };
 
   return (
-    <div className="new">
+    <div className="tw-bg-slate-100 tw-pt-5">
       {isLoading && (
-        <div className="loading-container">
+        <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-bg-slate-100 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
-
-      <Sidebar />
-      <div className="newContainer">
-        <Navbar />
-        <div className="top">
-          <h1>{title}</h1>
-        </div>
-
+      <div className="tw-mx-5">
+        <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
         <form onSubmit={handleSubmit}>
-          <div className="form-container">
-            <div className="form-header">
-              <div className="form-header-title">Create Movie</div>
-              <Link to="/movies">
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
-                  Back
-                </button>
+          <div className="tw-p-6 tw-bg-white">
+            <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+              <div className="tw-text-lg tw-font-bold">Create Movie</div>
+              <Link
+                to="/movies"
+                className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+              >
+                Back
               </Link>
             </div>
 
-            <div className="form-block">
-              <div className="form-block-inside">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+              <div className="tw-flex tw-flex-col">
                 <div>Search Movie By TMDB ID</div>
                 <label className="toggle-switch">
                   <input
@@ -341,7 +309,7 @@ const NewMovie = ({ title }) => {
                 </label>
               </div>
               {searchByToggle ? (
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="movieName">Movie Name:</label>
                   <input
                     type="text"
@@ -352,7 +320,7 @@ const NewMovie = ({ title }) => {
                   />
                 </div>
               ) : (
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="movieTMDB">Movie TMDB ID:</label>
                   <input
                     id="movieTMDB"
@@ -364,7 +332,7 @@ const NewMovie = ({ title }) => {
                 </div>
               )}
 
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="movieSlug">Movie Slug:</label>
                 <input
                   type="text"
@@ -376,8 +344,8 @@ const NewMovie = ({ title }) => {
                 />
               </div>
             </div>
-            <div className="form-block">
-              <div className="form-block-inside">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+              <div className="tw-flex tw-flex-col">
                 <div>Upcoming Movie?:</div>
                 <label htmlFor="upcomingMovie" className="toggle-switch">
                   <input
@@ -391,7 +359,7 @@ const NewMovie = ({ title }) => {
                 </label>
               </div>
               {isUpcoming ? (
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label>Upcoming Date:</label>
                   <input
                     type="date"
@@ -401,7 +369,7 @@ const NewMovie = ({ title }) => {
                 </div>
               ) : (
                 <>
-                  <div className="form-block-inside">
+                  <div className="tw-flex tw-flex-col">
                     <label htmlFor="videoType">Video Type:</label>
                     <select
                       id="videoType"
@@ -418,7 +386,7 @@ const NewMovie = ({ title }) => {
                     </select>
                   </div>
                   {selectedOption === "url" ? (
-                    <div className="form-block-inside">
+                    <div className="tw-flex tw-flex-col">
                       <label htmlFor="iframeUrl">
                         Enter Custom URL or Vimeo or Youtube URL:
                       </label>
@@ -432,7 +400,7 @@ const NewMovie = ({ title }) => {
                     </div>
                   ) : selectedOption === "upload" ? (
                     <>
-                      <div className="form-block-inside">
+                      <div className="tw-flex tw-flex-col">
                         <label htmlFor="upload">Upload Video:</label>
                         <input
                           type="text"
@@ -443,7 +411,7 @@ const NewMovie = ({ title }) => {
                           className="p-2 text-sm"
                         />
                       </div>
-                      <div className="form-block-inside">
+                      <div className="tw-flex tw-flex-col">
                         <button
                           type="button"
                           onClick={() => {
@@ -457,7 +425,7 @@ const NewMovie = ({ title }) => {
                     </>
                   ) : (
                     <>
-                      <div className="form-block-inside">
+                      <div className="tw-flex tw-flex-col">
                         <label htmlFor="url_360">Upload Video in 360p:</label>
                         <input
                           type="text"
@@ -468,7 +436,7 @@ const NewMovie = ({ title }) => {
                           id="url_360"
                         />
                       </div>
-                      <div className="form-block-inside">
+                      <div className="tw-flex tw-flex-col">
                         <button
                           type="button"
                           onClick={() => {
@@ -479,7 +447,7 @@ const NewMovie = ({ title }) => {
                           Choose A Video
                         </button>
                       </div>
-                      <div className="form-block-inside">
+                      <div className="tw-flex tw-flex-col">
                         <label htmlFor="url_480">Upload Video in 480p:</label>
                         <input
                           id="url_480"
@@ -490,7 +458,7 @@ const NewMovie = ({ title }) => {
                           className="p-2 text-sm"
                         />
                       </div>
-                      <div className="form-block-inside">
+                      <div className="tw-flex tw-flex-col">
                         <button
                           type="button"
                           onClick={() => {
@@ -501,7 +469,7 @@ const NewMovie = ({ title }) => {
                           Choose A Video
                         </button>
                       </div>
-                      <div className="form-block-inside">
+                      <div className="tw-flex tw-flex-col">
                         <label htmlFor="url_720">Upload Video in 720p:</label>
                         <input
                           type="text"
@@ -512,7 +480,7 @@ const NewMovie = ({ title }) => {
                           id="url_720"
                         />
                       </div>
-                      <div className="form-block-inside">
+                      <div className="tw-flex tw-flex-col">
                         <button
                           type="button"
                           onClick={() => {
@@ -523,7 +491,7 @@ const NewMovie = ({ title }) => {
                           Choose A Video
                         </button>
                       </div>
-                      <div className="form-block-inside">
+                      <div className="tw-flex tw-flex-col">
                         <label htmlFor="url_1080">Upload Video in 1080p:</label>
                         <input
                           type="text"
@@ -534,7 +502,7 @@ const NewMovie = ({ title }) => {
                           id="url_1080"
                         />
                       </div>
-                      <div className="form-block-inside">
+                      <div className="tw-flex tw-flex-col">
                         <button
                           type="button"
                           onClick={() => {
@@ -550,8 +518,8 @@ const NewMovie = ({ title }) => {
                 </>
               )}
             </div>
-            <div className="form-block">
-              <div className="form-block-inside">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="maturityRating">Maturity Rating:</label>
                 <select
                   id="maturityRating"
@@ -568,7 +536,7 @@ const NewMovie = ({ title }) => {
                   <option value="2+">2+</option>
                 </select>
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="country">Country:</label>
                 <select
                   id="country"
@@ -585,7 +553,7 @@ const NewMovie = ({ title }) => {
                   ))}
                 </select>
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="metaKeyword">Meta Keyword:</label>
                 <input
                   type="text"
@@ -594,7 +562,7 @@ const NewMovie = ({ title }) => {
                   onChange={(e) => setMetaKeyWord(e.target.value)}
                 />
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="metaDescription">Meta Description:</label>
                 <textarea
                   name=""
@@ -606,8 +574,8 @@ const NewMovie = ({ title }) => {
                 ></textarea>
               </div>
             </div>
-            <div className="form-block">
-              <div className="form-block-inside">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+              <div className="tw-flex tw-flex-col">
                 <div>Series:</div>
                 <label htmlFor="series" className="toggle-switch">
                   <input
@@ -618,7 +586,7 @@ const NewMovie = ({ title }) => {
                   <span className="slider"></span>
                 </label>
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <div>Featured:</div>
                 <label htmlFor="featured" className="toggle-switch">
                   <input
@@ -629,7 +597,7 @@ const NewMovie = ({ title }) => {
                   <span className="slider"></span>
                 </label>
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <div>Subtitle:</div>
                 <label htmlFor="subtitle" className="toggle-switch">
                   <input
@@ -640,7 +608,7 @@ const NewMovie = ({ title }) => {
                   <span className="slider"></span>
                 </label>
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <div>Protected Video?:</div>
                 <label htmlFor="protectedVideo" className="toggle-switch">
                   <input
@@ -651,7 +619,7 @@ const NewMovie = ({ title }) => {
                   <span className="slider"></span>
                 </label>
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <div>Choose Custom Thumbnail and Poster:</div>
                 <label htmlFor="customThumbnail" className="toggle-switch">
                   <input
@@ -662,7 +630,7 @@ const NewMovie = ({ title }) => {
                   <span className="slider"></span>
                 </label>
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="selectMenu">Select Menu*:</label>
                 <input
                   type="checkbox"
@@ -672,8 +640,8 @@ const NewMovie = ({ title }) => {
               </div>
             </div>
 
-            <div className="form-block">
-              <div className="form-block-inside">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+              <div className="tw-flex tw-flex-col">
                 <label>More Details: TMDB Or Custom?</label>
                 <div className="radio-group">
                   <div>
@@ -707,8 +675,8 @@ const NewMovie = ({ title }) => {
                 </div>
               </div>
             </div>
-            <div className="form-block-myanmar">
-              <div className="form-block-inside">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap-myanmar">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="descriptionSource">Get Description From:</label>
                 <input
                   type="text"
@@ -716,7 +684,7 @@ const NewMovie = ({ title }) => {
                   className="p-2 text-sm"
                 />
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="descriptionMyanmar">
                   Description in Myanmar:
                 </label>
@@ -738,10 +706,10 @@ const NewMovie = ({ title }) => {
               handleSearch={handleSearch}
               objects={objects}
             />
-            <div className="form-block">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
               >
                 Create
               </button>

@@ -1,8 +1,4 @@
 import { Link, useLocation, useParams } from "react-router-dom";
-import Navbar from "../../../components/navbar/Navbar";
-import Sidebar from "../../../components/sidebar/Sidebar";
-import "../../../style/episode.scss";
-import "../../../style/new.scss";
 import { STATIC_WORDS } from "../../../assets/STATIC_WORDS";
 import {
   addDoc,
@@ -19,7 +15,7 @@ import { db, storage } from "../../../configs/firebase";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { fromURL } from "image-resize-compress";
-import { ForActors } from "../../new/NewMovieHelper/ForActors";
+import { ForActors } from "../../../helper/ForActors";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { Delete, Edit, SettingsSuggest } from "@mui/icons-material";
 import ImportCSV from "../../../components/import/ImportCSV";
@@ -63,7 +59,7 @@ const NewSeason = ({ title }) => {
       }
     };
     fetchData();
-  }, []);
+  }, [id]);
 
   async function fetchDataAndStore() {
     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
@@ -196,9 +192,7 @@ const NewSeason = ({ title }) => {
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
-      <Sidebar />
       <div className="newContainer">
-        <Navbar />
         <div className="top">
           <h1>{title}</h1>
         </div>

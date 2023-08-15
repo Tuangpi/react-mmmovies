@@ -7,10 +7,10 @@ import {
   serverTimestamp,
   where,
 } from "firebase/firestore";
-import { db, storage } from "../../../configs/firebase";
+import { db, storage } from "../configs/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { STATIC_WORDS } from "../../../assets/STATIC_WORDS";
-import { isDocumentEmpty } from "../../../helper/Helpers";
+import { STATIC_WORDS } from "../assets/STATIC_WORDS";
+import { isDocumentEmpty } from "./Helpers";
 
 export const ForDirectors = async (TMDB_API_KEY, credits) => {
   let directorIds = [];

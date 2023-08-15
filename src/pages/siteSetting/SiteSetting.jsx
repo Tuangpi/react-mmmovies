@@ -1,15 +1,7 @@
-import Navbar from "../../components/navbar/Navbar";
-import Sidebar from "../../components/sidebar/Sidebar";
-import UpdateSiteSetting from "./UpdateSiteSetting";
-
 const SiteSetting = () => {
   return (
-    <div className="list">
-      <Sidebar />
-      <div className="listContainer">
-        <Navbar />
-        <UpdateSiteSetting />
-      </div>
+    <div className="tw-bg-slate-100 tw-pt-5 tw-min-h-screen">
+      <div className="tw-font-bold tw-text-slate-500 tw-mx-5">Site Setting</div>
     </div>
   );
 };

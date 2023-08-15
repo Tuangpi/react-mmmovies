@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import "../../style/cardlist.scss";
 
 function ImageComponent({ src, className, alt }) {
   const [isLoading, setIsLoading] = useState(true);

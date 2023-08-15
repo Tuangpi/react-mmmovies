@@ -1,7 +1,3 @@
-import "../../style/new.scss";
-import "../../style/modal.scss";
-import Sidebar from "../../components/sidebar/Sidebar";
-import Navbar from "../../components/navbar/Navbar";
 import { useState } from "react";
 import Loading from "react-loading";
 import {
@@ -17,8 +13,8 @@ import {
 import { db, storage } from "../../configs/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
-import { ForGenres } from "../new/NewMovieHelper/ForGenres";
-import { GetData } from "../new/NewMovieHelper/GetData";
+import { ForGenres } from "../../helper/ForGenres";
+import { GetData } from "../../helper/GetData";
 import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { isDocumentEmpty } from "../../helper/Helpers";
@@ -162,30 +158,27 @@ const NewTvSeries = ({ title }) => {
   };
 
   return (
-    <div className="new">
+    <div className="tw-bg-slate-100 tw-pt-5">
       {isLoading && (
-        <div className="loading-container">
+        <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-bg-slate-100 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#3f51b5" height={"3%"} width={"3%"} />{" "}
         </div>
       )}
-      <Sidebar />
-      <div className="newContainer">
-        <Navbar />
-        <div className="top">
-          <h1>{title}</h1>
-        </div>
+      <div className="tw-mx-5">
+        <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
         <form onSubmit={handleSubmit}>
-          <div className="form-container">
-            <div className="form-header">
-              <div className="form-header-title">Create TvSeries</div>
-              <Link to="/tvseries">
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
-                  Back
-                </button>
+          <div className="tw-p-6 tw-bg-white">
+            <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+              <div className="tw-text-lg tw-font-bold">Create TvSeries</div>
+              <Link
+                to="/tvseries"
+                className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+              >
+                Back
               </Link>
             </div>
-            <div className="form-block">
-              <div className="form-block-inside">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+              <div className="tw-flex tw-flex-col">
                 <div>Search TVSeries By TMDB ID</div>
                 <label className="toggle-switch">
                   <input
@@ -197,7 +190,7 @@ const NewTvSeries = ({ title }) => {
                 </label>
               </div>
               {searchByToggle ? (
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="movieName">Series Title:</label>
                   <input
                     type="text"
@@ -207,7 +200,7 @@ const NewTvSeries = ({ title }) => {
                   />
                 </div>
               ) : (
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="movieTMDB">Tv Series ID:</label>
                   <input
                     id="movieTMDB"
@@ -217,7 +210,7 @@ const NewTvSeries = ({ title }) => {
                   />
                 </div>
               )}
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="maturityRating">Maturity Rating:</label>
                 <select
                   id="maturityRating"
@@ -234,7 +227,7 @@ const NewTvSeries = ({ title }) => {
                   <option value="2+">2+</option>
                 </select>
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="country">Country:</label>
                 <select
                   id="country"
@@ -251,7 +244,7 @@ const NewTvSeries = ({ title }) => {
                   ))}
                 </select>
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="metaKeyword">Meta Keyword:</label>
                 <input
                   type="text"
@@ -260,7 +253,7 @@ const NewTvSeries = ({ title }) => {
                   onChange={(e) => setMetaKeyWord(e.target.value)}
                 />
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="metaDescription">Meta Description:</label>
                 <textarea
                   name=""
@@ -271,8 +264,8 @@ const NewTvSeries = ({ title }) => {
                 ></textarea>
               </div>
             </div>
-            <div className="form-block">
-              <div className="form-block-inside">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+              <div className="tw-flex tw-flex-col">
                 <div>Featured:</div>
                 <label htmlFor="featured" className="toggle-switch">
                   <input
@@ -283,7 +276,7 @@ const NewTvSeries = ({ title }) => {
                   <span className="slider"></span>
                 </label>
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="selectMenu">Select Menu*:</label>
                 <input
                   type="checkbox"
@@ -293,8 +286,8 @@ const NewTvSeries = ({ title }) => {
               </div>
             </div>
 
-            <div className="form-block">
-              <div className="form-block-inside">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+              <div className="tw-flex tw-flex-col">
                 <label>More Details: TMDB Or Custom?</label>
                 <div className="radio-group">
                   <div>
@@ -328,8 +321,8 @@ const NewTvSeries = ({ title }) => {
                 </div>
               </div>
             </div>
-            <div className="form-block-myanmar">
-              <div className="form-block-inside">
+            <div className="tw-flex tw-flex-col tw-bg-slate-300 tw-mb-4 tw-p-7">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="descriptionSource">Get Description From:</label>
                 <input
                   type="text"
@@ -337,7 +330,7 @@ const NewTvSeries = ({ title }) => {
                   className="p-2 text-sm"
                 />
               </div>
-              <div className="form-block-inside">
+              <div className="tw-flex tw-flex-col">
                 <label htmlFor="descriptionMyanmar">
                   Description in Myanmar:
                 </label>
@@ -351,10 +344,10 @@ const NewTvSeries = ({ title }) => {
               </div>
             </div>
 
-            <div className="form-block">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
               >
                 Create
               </button>

@@ -1,4 +1,3 @@
-import "../../style/cardlist.scss";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
@@ -69,95 +68,105 @@ const ActorLists = () => {
   ];
 
   return (
-    <div className="datatable">
+    <div className="tw-bg-slate-100 tw-pt-5 tw-min-h-screen">
       {isLoading && (
-        <div className="loading-container">
+        <div className="tw-m-auto tw-mt-56">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
-      <div className="datatableTitle">
-        <div>All Actor</div>
-        <div className="title-right">
-          <div className="title-right-first">
+      <div className="tw-flex tw-justify-between tw-items-center">
+        <div className="tw-font-bold tw-text-slate-500">All Actor</div>
+        <div className="tw-flex tw-justify-between">
+          <div>
             <ImportCSV
               docName={STATIC_WORDS.ACTORS}
               isLoading={handleIsLoading}
             />
           </div>
           <div>
-            <Link to="/actors/new" className="link">
+            <Link
+              to="/actors/new"
+              className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+            >
               Add New
             </Link>
           </div>
         </div>
       </div>
-      {isFetching ? (
-        <Loading
-          type="bars"
-          color="#017BFE"
-          height={"4%"}
-          width={"4%"}
-          className="loading-container-1"
-        />
-      ) : data.length > 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: "easeIn" }}
-          className="movie-card"
-        >
-          {data.map((item, id) => (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: "easeIn" }}
-              className="card"
-              key={id}
-            >
-              <ImageComponent
-                alter="Actor Poster"
-                src={item.image}
-                className="card-image"
-              />
-              <div className="card-details">
-                <h2 className="card-title">{item.name}</h2>
-                <div className="card-info">
-                  <div className="card-year">
-                    DOB
+      <div className="tw-mt-4">
+        {isFetching ? (
+          <Loading
+            type="bars"
+            color="#017BFE"
+            height={"4%"}
+            width={"4%"}
+            className="tw-m-auto tw-mt-56"
+          />
+        ) : data.length > 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeIn" }}
+            className="tw-w-full tw-flex tw-gap-4 tw-flex-wrap tw-m-auto"
+          >
+            {data.map((item, id) => (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeIn" }}
+                className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-56 tw-bg-slate-300 tw-shadow-lg tw-rounded-md"
+                key={id}
+              >
+                <ImageComponent
+                  alter="Actor Poster"
+                  src={item.image}
+                  className="tw-w-full tw-rounded-tr-md tw-rounded-tl-md"
+                />
+                <div className="tw-flex tw-justify-end tw-flex-col tw-relative tw-w-full tw-px-4">
+                  <h2 className="tw-my-4 tw-text-base tw-font-extrabold tw-cursor-default tw-text-slate-900">
+                    {item.name}
+                  </h2>
+                  <div className="card-info">
+                    <div className="card-year">
+                      DOB
+                      <br />
+                      {item.DOB}
+                    </div>
+                  </div>
+                  <div className="tw-text-sm tw-font-semibold tw-mb-1 tw-text-slate-700">
+                    PLACE OF BIRTH
                     <br />
-                    {item.DOB}
+                    {item.place_of_birth}
+                  </div>
+                  <div
+                    className="tw-text-sm tw-font-semibold tw-mb-1 tw-text-slate-700"
+                    title={item.biography}
+                  >
+                    BIOGRAPHY
+                    <br />
+                    {item.biography
+                      ? item.biography.split(" ").slice(0, 6).join(" ") + " ..."
+                      : item.biography}
                   </div>
                 </div>
-                <div className="card-ratings">
-                  PLACE OF BIRTH
-                  <br />
-                  {item.place_of_birth}
-                </div>
-                <div className="card-genre">
-                  BIOGRAPHY
-                  <br />
-                  {item.biography
-                    ? item.biography.split(" ").slice(0, 6).join(" ") + " ..."
-                    : item.biography}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          key="0"
-          className="nodata"
-        >
-          No Data
-        </motion.div>
-      )}
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            key="0"
+            className="tw-m-auto tw-mt-56 tw-text-center"
+          >
+            No Data
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 };
