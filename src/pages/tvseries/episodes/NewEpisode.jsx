@@ -203,7 +203,7 @@ const NewEpisode = ({ title }) => {
 
     try {
       await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
-        episode_id: episodeRef,
+        episodeId: episodeRef,
         type: "upload_video",
         url_360: await getPresignedUrlSeries(selectKey, "url_360"),
         url_480: await getPresignedUrlSeries(selectKey, "url_480"),

@@ -1,6 +1,15 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+} from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import { motion } from "framer-motion";
 import ImageComponent from "../../components/widget/ImageComponent";
@@ -9,6 +18,7 @@ import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import Loading from "react-loading";
 import { Delete, Edit, Star, StarBorderOutlined } from "@mui/icons-material";
 import { starRating } from "../../helper/Helpers";
+import ReactPaginate from "react-paginate";
 
 const MovieLists = () => {
   const [data, setData] = useState([]);
@@ -16,6 +26,7 @@ const MovieLists = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [editor, setEditor] = useState(false);
   const [showElement, setShowElement] = useState(null);
+  const [pageCount, setPageCount] = useState(0);
 
   const handleIsLoading = (value) => {
     setIsLoading(value);
@@ -31,8 +42,17 @@ const MovieLists = () => {
       setIsFetching(true);
       let list = [];
       try {
+        const queryAll = await getDocs(
+          query(collection(db, STATIC_WORDS.MOVIES))
+        );
+        setPageCount(Math.ceil(queryAll.docs.length / 8));
+
         const querySnapshot = await getDocs(
-          collection(db, STATIC_WORDS.MOVIES)
+          query(
+            collection(db, STATIC_WORDS.MOVIES),
+            orderBy("created_at"),
+            limit("1")
+          )
         );
         querySnapshot.forEach((doc) => {
           list.push({ data: doc.data(), id: doc.id });
@@ -56,8 +76,50 @@ const MovieLists = () => {
     }
   };
 
+  const handlePageClick = async (data) => {
+    const perPage = 8;
+    console.log("onPageChange", data);
+    const selected = data.selected;
+    const limits = ((selected + 1) * perPage - perPage).toString();
+    let querySnapshot = null;
+
+    if (selected === 0) {
+      querySnapshot = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.MOVIES),
+          orderBy("created_at"),
+          limit("8")
+        )
+      );
+    } else {
+      const next = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.MOVIES),
+          orderBy("created_at"),
+          limit(limits)
+        )
+      );
+
+      const startAfters = next.docs[next.docs.length - 1];
+      querySnapshot = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.MOVIES),
+          orderBy("created_at"),
+          startAfter(startAfters),
+          limit("8")
+        )
+      );
+    }
+
+    let list = [];
+    querySnapshot.forEach((doc) => {
+      list.push({ data: doc.data(), id: doc.id });
+    });
+    setData(list);
+  };
+
   return (
-    <div className="tw-px-5 tw-pt-5 tw-bg-slate-100 tw-w-screen">
+    <div className="tw-px-5 tw-pt-5 tw-bg-slate-100">
       {isLoading && (
         <div className="tw-m-auto tw-mt-56">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
@@ -65,27 +127,28 @@ const MovieLists = () => {
       )}
       <div className="tw-flex tw-justify-between tw-items-center">
         <div className="tw-font-bold tw-text-slate-500">All Movie</div>
-        <div className="tw-flex tw-justify-between">
-          {/* <div>
-            <ImportCSV
-              docName={STATIC_WORDS.MOVIES}
-              isLoading={handleIsLoading}
-            />
-          </div>
-          <div>
-            <ImportCSV
-              docName={STATIC_WORDS.VIDEO_LINKS}
-              isLoading={handleIsLoading}
-            />
-          </div> */}
-          <Link
-            to="/movies/new"
-            className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
-          >
-            Add New
-          </Link>
-        </div>
       </div>
+      <div className="tw-flex tw-justify-between">
+        <div>
+          <ImportCSV
+            docName={STATIC_WORDS.MOVIES}
+            isLoading={handleIsLoading}
+          />
+        </div>
+        <div>
+          <ImportCSV
+            docName={STATIC_WORDS.VIDEO_LINKS}
+            isLoading={handleIsLoading}
+          />
+        </div>
+        <Link
+          to="/movies/new"
+          className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+        >
+          Add New
+        </Link>
+      </div>
+
       <div className="tw-mt-4">
         {isFetching ? (
           <Loading
@@ -101,7 +164,7 @@ const MovieLists = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeIn" }}
-            className="tw-w-full tw-flex tw-gap-4 tw-flex-wrap tw-m-auto"
+            className="tw-max-w-fit tw-flex tw-gap-4 tw-flex-wrap tw-m-auto"
           >
             {data.map((item, id) => (
               <motion.div
@@ -109,7 +172,7 @@ const MovieLists = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-56 tw-bg-slate-300 tw-shadow-lg tw-rounded-md"
+                className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-64 tw-bg-slate-300 tw-shadow-lg tw-rounded-md"
                 key={id}
               >
                 <ImageComponent
@@ -210,6 +273,27 @@ const MovieLists = () => {
                 </div>
               </motion.div>
             ))}
+            <ReactPaginate
+              previousLabel="previous"
+              nextLabel="next"
+              breakLabel="..."
+              breakClassName="page-item"
+              breakLinkClassName="tw-mr-1"
+              pageCount={pageCount}
+              pageRangeDisplayed={4}
+              marginPagesDisplayed={3}
+              onPageChange={handlePageClick}
+              containerClassName="tw-flex tw-py-3 tw-justify-center tw-items-center tw-w-full"
+              pageClassName="tw-ml-3 tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1"
+              pageLinkClassName=""
+              previousClassName=""
+              previousLinkClassName="tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1 tw-capitalize"
+              nextClassName=""
+              nextLinkClassName="tw-ml-3 tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1 tw-capitalize"
+              activeClassName="tw-bg-slate-300"
+              activeLinkClassName=""
+              initialPage={0}
+            />
           </motion.div>
         ) : (
           <motion.div

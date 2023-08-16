@@ -246,7 +246,7 @@ const NewMovie = ({ title }) => {
 
     try {
       await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
-        movie_id: movieRef,
+        movieId: movieRef,
         type: "upload_video",
         url_360: await getPresignedUrlMovie("", "url_360"),
         url_480: await getPresignedUrlMovie("", "url_480"),

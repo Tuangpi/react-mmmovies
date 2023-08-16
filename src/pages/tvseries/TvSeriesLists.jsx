@@ -7,6 +7,9 @@ import {
   doc,
   query,
   where,
+  orderBy,
+  limit,
+  startAfter,
 } from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import ImportCSV from "../../components/import/ImportCSV";
@@ -22,12 +25,14 @@ import {
   StarBorderOutlined,
 } from "@mui/icons-material";
 import { starRating } from "../../helper/Helpers";
+import ReactPaginate from "react-paginate";
 
 const TvSeriesLists = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [showElement, setShowElement] = useState(null);
+  const [pageCount, setPageCount] = useState(0);
 
   const handleIsLoading = (value) => {
     setIsLoading(value);
@@ -43,17 +48,27 @@ const TvSeriesLists = () => {
       setIsFetching(true);
       let list = [];
       try {
-        const querySnapshot = await getDocs(
-          collection(db, STATIC_WORDS.TVSERIES)
+        const queryAll = await getDocs(
+          query(collection(db, STATIC_WORDS.MOVIES))
         );
+        setPageCount(Math.ceil(queryAll.docs.length / 8));
+
+        const querySnapshot = await getDocs(
+          query(
+            collection(db, STATIC_WORDS.TVSERIES),
+            orderBy("created_at"),
+            limit("1")
+          )
+        );
+
         querySnapshot.forEach((doc) => {
-          list.push({ id: doc.id, data: doc.data() });
+          list.push({ data: doc.data(), id: doc.id });
         });
         setData(list);
-        setIsFetching(false);
       } catch (err) {
         console.log(err);
       }
+      setIsFetching(false);
     };
     fetchData();
   }, []);
@@ -112,6 +127,48 @@ const TvSeriesLists = () => {
     }
   };
 
+  const handlePageClick = async (data) => {
+    const perPage = 8;
+    console.log("onPageChange", data);
+    const selected = data.selected;
+    const limits = ((selected + 1) * perPage - perPage).toString();
+    let querySnapshot = null;
+
+    if (selected === 0) {
+      querySnapshot = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.TVSERIES),
+          orderBy("created_at"),
+          limit("8")
+        )
+      );
+    } else {
+      const next = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.TVSERIES),
+          orderBy("created_at"),
+          limit(limits)
+        )
+      );
+
+      const startAfters = next.docs[next.docs.length - 1];
+      querySnapshot = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.TVSERIES),
+          orderBy("created_at"),
+          startAfter(startAfters),
+          limit("8")
+        )
+      );
+    }
+
+    let list = [];
+    querySnapshot.forEach((doc) => {
+      list.push({ data: doc.data(), id: doc.id });
+    });
+    setData(list);
+  };
+
   return (
     <div className="tw-flex tw-flex-col tw-px-5 tw-pt-5 tw-bg-slate-100">
       {isLoading && (
@@ -151,7 +208,7 @@ const TvSeriesLists = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeIn" }}
-            className="tw-w-full tw-flex tw-gap-4 tw-flex-wrap tw-m-auto"
+            className="tw-max-w-fit tw-flex tw-gap-4 tw-flex-wrap tw-m-auto"
           >
             {data.map((item, id) => (
               <motion.div
@@ -159,7 +216,7 @@ const TvSeriesLists = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-56 tw-bg-slate-200 tw-shadow-lg tw-rounded-md"
+                className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-64 tw-bg-slate-300 tw-shadow-lg tw-rounded-md"
                 key={id}
               >
                 <ImageComponent
@@ -244,6 +301,27 @@ const TvSeriesLists = () => {
                 </div>
               </motion.div>
             ))}
+            <ReactPaginate
+              previousLabel="previous"
+              nextLabel="next"
+              breakLabel="..."
+              breakClassName="page-item"
+              breakLinkClassName="tw-mr-1"
+              pageCount={pageCount}
+              pageRangeDisplayed={4}
+              marginPagesDisplayed={3}
+              onPageChange={handlePageClick}
+              containerClassName="tw-flex tw-py-3 tw-justify-center tw-items-center tw-w-full"
+              pageClassName="tw-ml-3 tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1"
+              pageLinkClassName=""
+              previousClassName=""
+              previousLinkClassName="tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1 tw-capitalize"
+              nextClassName=""
+              nextLinkClassName="tw-ml-3 tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1 tw-capitalize"
+              activeClassName="tw-bg-slate-300"
+              activeLinkClassName=""
+              initialPage={0}
+            />
           </motion.div>
         ) : (
           <motion.div

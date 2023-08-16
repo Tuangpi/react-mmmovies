@@ -373,12 +373,12 @@ const modifiedArray = async (ars, docName) => {
               }
               if (docName === STATIC_WORDS.EPISODES) {
                 if (ar.episodeId) {
-                  if (ar.episodeId === doc.data().episode_id) ar.ref = doc.id;
+                  if (ar.episodeId === doc.data().episode_id) ar.ref = doc.ref;
                 }
               }
               if (docName === STATIC_WORDS.MOVIES) {
                 if (ar.movieId) {
-                  if (ar.movieId === doc.data().movie_id) ar.ref = doc.id;
+                  if (ar.movieId === doc.data().movie_id) ar.ref = doc.ref;
                 }
               }
             });
@@ -430,12 +430,12 @@ const modifiedArray = async (ars, docName) => {
             }
             if (docName === STATIC_WORDS.EPISODES) {
               if (ar.episodeId) {
-                if (ar.episodeId === doc.data().episode_id) ar.ref = doc.id;
+                if (ar.episodeId === doc.data().episode_id) ar.ref = doc.ref;
               }
             }
             if (docName === STATIC_WORDS.MOVIES) {
               if (ar.movieId) {
-                if (ar.movieId === doc.data().movie_id) ar.ref = doc.id;
+                if (ar.movieId === doc.data().movie_id) ar.ref = doc.ref;
               }
             }
           });
