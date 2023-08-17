@@ -254,30 +254,29 @@ const NewEpisode = ({ title }) => {
   };
 
   return (
-    <div className="new">
+    <div className="tw-pt-5 tw-px-5">
       {isLoading && (
-        <div className="loading-container">
+        <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
-      <div className="newContainer">
-        <div className="top">
-          <h1>{title}</h1>
-        </div>
+      <div className="tw-mx-5">
+        <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
         <div className="new-episode-container">
           <div className="right-side">
             <div className="right-header">
               <div className="right-header-title">Manage Season Of Series</div>
-              <Link to={`/tvseries/${tvSeriesId}/season`}>
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
-                  Back
-                </button>
+              <Link
+                to={`/tvseries/${tvSeriesId}/season`}
+                className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+              >
+                Back
               </Link>
               <ImportCSV
                 docName={STATIC_WORDS.EPISODES}
                 isLoading={handleIsLoading}
               />
-              <div className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
+              <div className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50">
                 Add Episode
               </div>
             </div>
@@ -289,7 +288,7 @@ const NewEpisode = ({ title }) => {
                     id="episodeTitle"
                     type="text"
                     value={episodeTitle}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
                     onChange={(e) => setEpisodeTitle(e.target.value)}
                   />
                 </div>
@@ -298,7 +297,7 @@ const NewEpisode = ({ title }) => {
                   <input
                     id="episodeNo"
                     type="number"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
                     value={episodeNumber}
                     onChange={(e) => setEpisodeNumber(e.target.value)}
                   />
@@ -308,7 +307,7 @@ const NewEpisode = ({ title }) => {
                   <input
                     id="duration"
                     type="text"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
                   />
@@ -523,7 +522,7 @@ const NewEpisode = ({ title }) => {
                   </button>
                   <button
                     type="submit"
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                    className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
                   >
                     Edit
                   </button>
@@ -536,7 +535,7 @@ const NewEpisode = ({ title }) => {
                   <input
                     id="episodeTitle"
                     type="text"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
                     onChange={(e) => setEpisodeTitle(e.target.value)}
                   />
                 </div>
@@ -545,7 +544,7 @@ const NewEpisode = ({ title }) => {
                   <input
                     id="episodeNo"
                     type="number"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
                     onChange={(e) => setEpisodeNumber(e.target.value)}
                   />
                 </div>
@@ -554,7 +553,7 @@ const NewEpisode = ({ title }) => {
                   <input
                     id="duration"
                     type="text"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
                     onChange={(e) => setDuration(e.target.value)}
                   />
                 </div>
@@ -776,7 +775,7 @@ const NewEpisode = ({ title }) => {
                   </button>
                   <button
                     type="submit"
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                    className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
                   >
                     Create
                   </button>

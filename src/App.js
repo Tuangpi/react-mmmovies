@@ -7,6 +7,8 @@ import { AuthContext } from "./context/AuthContext";
 import Navbar from "./components/navbar/Navbar";
 import Sidebar from "./components/sidebar/Sidebar";
 import "./index.css";
+import Loading from "react-loading";
+import { motion } from 'framer-motion'
 
 const SiteSetting = lazy(() => import('./pages/siteSetting/SiteSetting'));
 const TvSeriesLists = lazy(() => import('./pages/tvseries/TvSeriesLists'));
@@ -54,9 +56,15 @@ function App() {
           <div className="hide-scroll flex-1 tw-h-screen tw-overflow-y-auto tw-bg-slate-900">
             {currentUser ? <Sidebar /> : ''}
           </div>
-          <div className={currentUser ? "hide-scroll flex-6 tw-h-screen tw-overflow-y-auto" : ''}>
+          <div className={currentUser ? "hide-scroll tw-bg-slate-100 flex-6 tw-h-screen tw-overflow-y-auto" : ''}>
             {currentUser ? <Navbar /> : ''}
-            <Suspense fallback={<div>asdf...loading</div>}>
+            <Suspense fallback={<motion.div initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1, ease: "easeIn" }} className="tw-w-full tw-flex tw-justify-center tw-mt-56"><Loading Loading type="bars"
+                color="#017BFE"
+                height={"4%"}
+                width={"4%"} /></motion.div>}>
               <Routes>
                 <Route path="/">
                   <Route path="login" element={<Login />} />

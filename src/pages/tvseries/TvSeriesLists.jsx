@@ -51,7 +51,7 @@ const TvSeriesLists = () => {
         const queryAll = await getDocs(
           query(collection(db, STATIC_WORDS.MOVIES))
         );
-        setPageCount(Math.ceil(queryAll.docs.length / 8));
+        setPageCount(Math.ceil(queryAll.docs.length / 12));
 
         const querySnapshot = await getDocs(
           query(
@@ -128,7 +128,7 @@ const TvSeriesLists = () => {
   };
 
   const handlePageClick = async (data) => {
-    const perPage = 8;
+    const perPage = 12;
     console.log("onPageChange", data);
     const selected = data.selected;
     const limits = ((selected + 1) * perPage - perPage).toString();
@@ -139,7 +139,7 @@ const TvSeriesLists = () => {
         query(
           collection(db, STATIC_WORDS.TVSERIES),
           orderBy("created_at"),
-          limit("8")
+          limit("12")
         )
       );
     } else {
@@ -157,7 +157,7 @@ const TvSeriesLists = () => {
           collection(db, STATIC_WORDS.TVSERIES),
           orderBy("created_at"),
           startAfter(startAfters),
-          limit("8")
+          limit("12")
         )
       );
     }
@@ -170,7 +170,7 @@ const TvSeriesLists = () => {
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-px-5 tw-pt-5 tw-bg-slate-100">
+    <div className="tw-flex tw-flex-col tw-px-5 tw-pt-5">
       {isLoading && (
         <div className="tw-m-auto tw-mt-56">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
@@ -208,7 +208,7 @@ const TvSeriesLists = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeIn" }}
-            className="tw-max-w-fit tw-flex tw-gap-4 tw-flex-wrap tw-m-auto"
+            className="tw-max-w-fit tw-flex tw-gap-4 tw-flex-wrap"
           >
             {data.map((item, id) => (
               <motion.div

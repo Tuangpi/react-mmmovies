@@ -7,7 +7,7 @@ import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutl
 
 const Featured = () => {
   return (
-    <div className="featured tw-p-3">
+    <div className="featured tw-p-3 tw-bg-white">
       <div className="tw-flex tw-items-center tw-justify-between tw-text-slate-700">
         <h1 className="tw-font-medium tw-text-base">Total Revenue</h1>
         <MoreVertIcon fontSize="small" />

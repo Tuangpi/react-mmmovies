@@ -1,16 +1,27 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  limit,
+  startAfter,
+  query,
+  orderBy,
+} from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import ImportCSV from "../../components/import/ImportCSV";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { motion } from "framer-motion";
 import Loading from "react-loading";
+import ReactPaginate from "react-paginate";
 
 const GenreLists = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [pageCount, setPageCount] = useState(1);
 
   const handleIsLoading = (data) => {
     setIsLoading(data);
@@ -21,9 +32,21 @@ const GenreLists = () => {
       setIsFetching(true);
       let list = [];
       try {
-        const querySnapshot = await getDocs(collection(db, "genres"));
+        const queryAll = await getDocs(
+          query(collection(db, STATIC_WORDS.GENRES))
+        );
+        setPageCount(Math.ceil(queryAll.docs.length / 16));
+
+        const querySnapshot = await getDocs(
+          query(
+            collection(db, STATIC_WORDS.GENRES),
+            orderBy("created_at"),
+            limit("1")
+          )
+        );
+
         querySnapshot.forEach((doc) => {
-          list.push(doc.data());
+          list.push({ data: doc.data(), id: doc.id });
         });
         setData(list);
       } catch (err) {
@@ -31,6 +54,7 @@ const GenreLists = () => {
       }
       setIsFetching(false);
     };
+
     fetchData();
   }, []);
 
@@ -41,6 +65,48 @@ const GenreLists = () => {
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const handlePageClick = async (data) => {
+    const perPage = 16;
+    console.log("onPageChange", data);
+    const selected = data.selected;
+    const limits = ((selected + 1) * perPage - perPage).toString();
+    let querySnapshot = null;
+
+    if (selected === 0) {
+      querySnapshot = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.GENRES),
+          orderBy("created_at"),
+          limit("16")
+        )
+      );
+    } else {
+      const next = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.GENRES),
+          orderBy("created_at"),
+          limit(limits)
+        )
+      );
+
+      const startAfters = next.docs[next.docs.length - 1];
+      querySnapshot = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.GENRES),
+          orderBy("created_at"),
+          startAfter(startAfters),
+          limit("16")
+        )
+      );
+    }
+
+    let list = [];
+    querySnapshot.forEach((doc) => {
+      list.push({ data: doc.data(), id: doc.id });
+    });
+    setData(list);
   };
 
   const actionColumn = [
@@ -67,13 +133,13 @@ const GenreLists = () => {
   ];
 
   return (
-    <div className="tw-bg-slate-100 tw-pt-5 tw-min-h-screen">
+    <div className="tw-pt-5 tw-px-5">
       {isLoading && (
         <div className="tw-m-auto tw-mt-56">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
-      <div className="tw-flex tw-justify-between tw-items-center">
+      <div className="tw-flex tw-justify-between tw-items-center tw-pl-3 tw-pr-5">
         <div className="tw-font-bold tw-text-slate-500">All Genres</div>
         <div className="tw-flex tw-justify-between">
           <div>
@@ -102,23 +168,54 @@ const GenreLists = () => {
             className="tw-m-auto tw-mt-56"
           />
         ) : data.length > 0 ? (
-          <div className="movie-card">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeIn" }}
+            className="tw-w-full tw-flex tw-gap-4 tw-flex-wrap tw-m-auto tw-pr-5 tw-pl-3"
+          >
             {data.map((item, id) => (
-              <div
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeIn" }}
                 className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-56 tw-bg-slate-300 tw-shadow-lg tw-rounded-md"
                 key={id}
               >
                 <img
-                  src={item.image}
+                  src={item.data.image}
                   alt="Genre Thumnail"
                   className="tw-w-full tw-rounded-tr-md tw-rounded-tl-md"
                 />
                 <div className="card-details">
-                  <h2 className="card-title">{item.name}</h2>
+                  <h2 className="card-title">{item.data.name}</h2>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+            <ReactPaginate
+              previousLabel="previous"
+              nextLabel="next"
+              breakLabel="..."
+              breakClassName="page-item"
+              breakLinkClassName="tw-mr-1"
+              pageCount={pageCount}
+              pageRangeDisplayed={4}
+              marginPagesDisplayed={3}
+              onPageChange={handlePageClick}
+              containerClassName="tw-flex tw-py-3 tw-justify-center tw-items-center tw-w-full"
+              pageClassName="tw-ml-3 tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1"
+              pageLinkClassName=""
+              previousClassName=""
+              previousLinkClassName="tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1 tw-capitalize"
+              nextClassName=""
+              nextLinkClassName="tw-ml-3 tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1 tw-capitalize"
+              activeClassName="tw-bg-slate-300"
+              activeLinkClassName=""
+              initialPage={0}
+            />
+          </motion.div>
         ) : (
           <motion.div
             initial={{ opacity: 0 }}

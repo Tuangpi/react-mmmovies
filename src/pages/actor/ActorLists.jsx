@@ -1,17 +1,28 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+} from "firebase/firestore";
 import { db } from "../../configs/firebase";
 import ImportCSV from "../../components/import/ImportCSV";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import Loading from "react-loading";
 import { motion } from "framer-motion";
 import ImageComponent from "../../components/widget/ImageComponent";
+import ReactPaginate from "react-paginate";
 
 const ActorLists = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [pageCount, setPageCount] = useState(1);
 
   const handleIsLoading = (data) => {
     setIsLoading(data);
@@ -22,9 +33,21 @@ const ActorLists = () => {
       setIsFetching(true);
       let list = [];
       try {
-        const querySnapshot = await getDocs(collection(db, "actors"));
+        const queryAll = await getDocs(
+          query(collection(db, STATIC_WORDS.ACTORS))
+        );
+        setPageCount(Math.ceil(queryAll.docs.length / 12));
+
+        const querySnapshot = await getDocs(
+          query(
+            collection(db, STATIC_WORDS.ACTORS),
+            orderBy("created_at"),
+            limit("1")
+          )
+        );
+
         querySnapshot.forEach((doc) => {
-          list.push(doc.data());
+          list.push({ data: doc.data(), id: doc.id });
         });
         setData(list);
       } catch (err) {
@@ -44,37 +67,56 @@ const ActorLists = () => {
     }
   };
 
-  const actionColumn = [
-    {
-      field: "action",
-      headerName: "Action",
-      width: 200,
-      renderCell: (params) => {
-        return (
-          <div className="cellAction">
-            <Link to="/products/test" style={{ textDecoration: "none" }}>
-              <div className="viewButton">View</div>
-            </Link>
-            <div
-              className="deleteButton"
-              onClick={() => handleDelete(params.row.id)}
-            >
-              Delete
-            </div>
-          </div>
-        );
-      },
-    },
-  ];
+  const handlePageClick = async (data) => {
+    const perPage = 12;
+    console.log("onPageChange", data);
+    const selected = data.selected;
+    const limits = ((selected + 1) * perPage - perPage).toString();
+    let querySnapshot = null;
 
+    if (selected === 0) {
+      querySnapshot = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.ACTORS),
+          orderBy("created_at"),
+          limit("12")
+        )
+      );
+    } else {
+      const next = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.ACTORS),
+          orderBy("created_at"),
+          limit(limits)
+        )
+      );
+
+      const startAfters = next.docs[next.docs.length - 1];
+      querySnapshot = await getDocs(
+        query(
+          collection(db, STATIC_WORDS.ACTORS),
+          orderBy("created_at"),
+          startAfter(startAfters),
+          limit("12")
+        )
+      );
+    }
+
+    let list = [];
+    querySnapshot.forEach((doc) => {
+      list.push({ data: doc.data(), id: doc.id });
+    });
+    setData(list);
+  };
+  console.log(data);
   return (
-    <div className="tw-bg-slate-100 tw-pt-5 tw-min-h-screen">
+    <div className="tw-pt-5 tw-px-5">
       {isLoading && (
         <div className="tw-m-auto tw-mt-56">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
-      <div className="tw-flex tw-justify-between tw-items-center">
+      <div className="tw-flex tw-justify-between tw-items-center tw-pl-3 tw-pr-5">
         <div className="tw-font-bold tw-text-slate-500">All Actor</div>
         <div className="tw-flex tw-justify-between">
           <div>
@@ -108,7 +150,7 @@ const ActorLists = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeIn" }}
-            className="tw-w-full tw-flex tw-gap-4 tw-flex-wrap tw-m-auto"
+            className="tw-w-full tw-flex tw-gap-4 tw-flex-wrap tw-m-auto tw-pl-3 tw-pr-5"
           >
             {data.map((item, id) => (
               <motion.div
@@ -121,38 +163,63 @@ const ActorLists = () => {
               >
                 <ImageComponent
                   alter="Actor Poster"
-                  src={item.image}
+                  src={item.data.image}
                   className="tw-w-full tw-rounded-tr-md tw-rounded-tl-md"
                 />
                 <div className="tw-flex tw-justify-end tw-flex-col tw-relative tw-w-full tw-px-4">
                   <h2 className="tw-my-4 tw-text-base tw-font-extrabold tw-cursor-default tw-text-slate-900">
-                    {item.name}
+                    {item.data.name}
                   </h2>
                   <div className="card-info">
                     <div className="card-year">
                       DOB
-                      <br />
-                      {item.DOB}
+                      <div className="tw-text-slate-700 tw-font-normal">
+                        {item.data.DOB}
+                      </div>
                     </div>
                   </div>
                   <div className="tw-text-sm tw-font-semibold tw-mb-1 tw-text-slate-700">
                     PLACE OF BIRTH
-                    <br />
-                    {item.place_of_birth}
+                    <div className="tw-text-slate-700 tw-font-normal">
+                      {item.data.place_of_birth}
+                    </div>
                   </div>
                   <div
                     className="tw-text-sm tw-font-semibold tw-mb-1 tw-text-slate-700"
-                    title={item.biography}
+                    title={item.data.biography}
                   >
                     BIOGRAPHY
-                    <br />
-                    {item.biography
-                      ? item.biography.split(" ").slice(0, 6).join(" ") + " ..."
-                      : item.biography}
+                    <div className="tw-text-slate-700 tw-font-normal">
+                      {item.data.biography
+                        ? item.data.biography.split(" ").slice(0, 6).join(" ") +
+                          " ..."
+                        : item.data.biography}
+                    </div>
                   </div>
                 </div>
               </motion.div>
             ))}
+            <ReactPaginate
+              previousLabel="previous"
+              nextLabel="next"
+              breakLabel="..."
+              breakClassName="page-item"
+              breakLinkClassName="tw-mr-1"
+              pageCount={pageCount}
+              pageRangeDisplayed={4}
+              marginPagesDisplayed={3}
+              onPageChange={handlePageClick}
+              containerClassName="tw-flex tw-py-3 tw-justify-center tw-items-center tw-w-full"
+              pageClassName="tw-ml-3 tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1"
+              pageLinkClassName=""
+              previousClassName=""
+              previousLinkClassName="tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1 tw-capitalize"
+              nextClassName=""
+              nextLinkClassName="tw-ml-3 tw-border-2 tw-border-slate-700 tw-rounded-sm tw-text-center tw-p-1 tw-capitalize"
+              activeClassName="tw-bg-slate-300"
+              activeLinkClassName=""
+              initialPage={0}
+            />
           </motion.div>
         ) : (
           <motion.div

@@ -158,26 +158,27 @@ const EditTvSeries = ({ title }) => {
     }
   };
   return (
-    <div className="tw-flex tw-bg-slate-100 tw-pt-5">
+    <div className="tw-flex tw-pt-5 tw-px-5">
       <div className="tw-mx-5">
         <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
         {isLoading ? (
-          <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-bg-slate-100 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
+          <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
             <Loading type="spokes" color="#3f51b5" height={"3%"} width={"3%"} />{" "}
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <div className="form-container">
-              <div className="form-header">
-                <div className="form-header-title">Edit TvSeries</div>
-                <Link to="/tvseries">
-                  <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
-                    Back
-                  </button>
+            <div className="tw-p-6 tw-bg-white">
+              <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+                <div className="tw-text-lg tw-font-bold">Edit TvSeries</div>
+                <Link
+                  to="/tvseries"
+                  className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+                >
+                  Back
                 </Link>
               </div>
-              <div className="form-block">
-                <div className="form-block-inside">
+              <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+                <div className="tw-flex tw-flex-col">
                   <div>Search TVSeries By TMDB ID</div>
                   <label className="toggle-switch">
                     <input
@@ -189,34 +190,34 @@ const EditTvSeries = ({ title }) => {
                   </label>
                 </div>
                 {searchByToggle ? (
-                  <div className="form-block-inside">
+                  <div className="tw-flex tw-flex-col">
                     <label htmlFor="movieName">Series Title:</label>
                     <input
                       type="text"
                       id="movieName"
                       value={movieTitle}
-                      className="p-2 text-sm"
+                      className="tw-p-2 tw-text-sm"
                       onChange={(e) => setMovieTitle(e.target.value)}
                     />
                   </div>
                 ) : (
-                  <div className="form-block-inside">
+                  <div className="tw-flex tw-flex-col">
                     <label htmlFor="movieTMDB">Tv Series ID:</label>
                     <input
                       id="movieTMDB"
                       type="text"
                       value={movieID}
-                      className="p-2 text-sm"
+                      className="tw-p-2 tw-text-sm"
                       onChange={(e) => setMovieID(e.target.value)}
                     />
                   </div>
                 )}
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="maturityRating">Maturity Rating:</label>
                   <select
                     id="maturityRating"
                     onChange={(e) => setSelectedMaturity(e.target.value)}
-                    className="p-2 text-sm cursor-pointer"
+                    className="tw-p-2 tw-text-sm cursor-pointer"
                     value={selectedMaturity}
                   >
                     <option value="all age">All Age</option>
@@ -229,14 +230,14 @@ const EditTvSeries = ({ title }) => {
                     <option value="2+">2+</option>
                   </select>
                 </div>
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="country">Country:</label>
                   <select
                     id="country"
                     multiple
                     // value={selectedCountry}
                     // onChange={(e) => setSelectedCountry(e.target.value)}
-                    className="p-2 text-sm cursor-pointer"
+                    className="tw-p-2 tw-text-sm cursor-pointer"
                   >
                     <option value=""></option>
                     {COUNTRY.map((country, key) => (
@@ -246,30 +247,30 @@ const EditTvSeries = ({ title }) => {
                     ))}
                   </select>
                 </div>
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="metaKeyword">Meta Keyword:</label>
                   <input
                     type="text"
                     id="metaKeyword"
                     value={metaKeyWord}
                     onChange={(e) => setMetaKeyWord(e.target.value)}
-                    className="p-2 text-sm"
+                    className="tw-p-2 tw-text-sm"
                   />
                 </div>
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="metaDescription">Meta Description:</label>
                   <textarea
                     name=""
                     id="metaDescription"
                     value={metaDesc}
                     onChange={(e) => setMetaDesc(e.target.value)}
-                    className="p-2 text-sm"
+                    className="tw-p-2 tw-text-sm"
                     cols="30"
                   ></textarea>
                 </div>
               </div>
-              <div className="form-block">
-                <div className="form-block-inside">
+              <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+                <div className="tw-flex tw-flex-col">
                   <div>Featured:</div>
                   <label htmlFor="featured" className="toggle-switch">
                     <input
@@ -281,7 +282,7 @@ const EditTvSeries = ({ title }) => {
                     <span className="slider"></span>
                   </label>
                 </div>
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="selectMenu">Select Menu*:</label>
                   <input
                     type="checkbox"
@@ -291,8 +292,8 @@ const EditTvSeries = ({ title }) => {
                 </div>
               </div>
 
-              <div className="form-block">
-                <div className="form-block-inside">
+              <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
+                <div className="tw-flex tw-flex-col">
                   <label>More Details: TMDB Or Custom?</label>
                   <div className="radio-group">
                     <div>
@@ -327,17 +328,17 @@ const EditTvSeries = ({ title }) => {
                 </div>
               </div>
               <div className="form-block-myanmar">
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="descriptionSource">
                     Get Description From:
                   </label>
                   <input
                     type="text"
-                    className="p-2 text-sm"
+                    className="tw-p-2 tw-text-sm"
                     id="descriptionSource"
                   />
                 </div>
-                <div className="form-block-inside">
+                <div className="tw-flex tw-flex-col">
                   <label htmlFor="descriptionMyanmar">
                     Description in Myanmar:
                   </label>
@@ -345,15 +346,15 @@ const EditTvSeries = ({ title }) => {
                     value={myanDesc}
                     id="descriptionMyanmar"
                     cols="30"
-                    className="p-2 text-sm"
+                    className="tw-p-2 tw-text-sm"
                     onChange={(e) => setMyanDesc(e.target.value)}
                   ></textarea>
                 </div>
               </div>
 
-              <div className="form-block">
+              <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
                 <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                  className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
                   type="submit"
                 >
                   Update

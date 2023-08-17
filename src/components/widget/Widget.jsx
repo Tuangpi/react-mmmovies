@@ -128,7 +128,7 @@ const Widget = ({ type }) => {
   }, [data]);
 
   return (
-    <div className="tw-flex tw-justify-between tw-border-2 tw-border-red-700 tw-p-3 tw-w-64 tw-h-28 tw-rounded-xl">
+    <div className="tw-flex tw-justify-between tw-border-2 tw-bg-white tw-shadow-md tw-shadow-slate-200 tw-p-3 tw-w-64 tw-h-28 tw-rounded-xl">
       <div className="tw-flex tw-flex-col tw-justify-between">
         <span className="tw-text-sm tw-font-bold tw-text-slate-700">
           {data.title}

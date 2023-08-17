@@ -45,7 +45,7 @@ const MovieLists = () => {
         const queryAll = await getDocs(
           query(collection(db, STATIC_WORDS.MOVIES))
         );
-        setPageCount(Math.ceil(queryAll.docs.length / 8));
+        setPageCount(Math.ceil(queryAll.docs.length / 12));
 
         const querySnapshot = await getDocs(
           query(
@@ -77,7 +77,7 @@ const MovieLists = () => {
   };
 
   const handlePageClick = async (data) => {
-    const perPage = 8;
+    const perPage = 12;
     console.log("onPageChange", data);
     const selected = data.selected;
     const limits = ((selected + 1) * perPage - perPage).toString();
@@ -88,7 +88,7 @@ const MovieLists = () => {
         query(
           collection(db, STATIC_WORDS.MOVIES),
           orderBy("created_at"),
-          limit("8")
+          limit("12")
         )
       );
     } else {
@@ -106,7 +106,7 @@ const MovieLists = () => {
           collection(db, STATIC_WORDS.MOVIES),
           orderBy("created_at"),
           startAfter(startAfters),
-          limit("8")
+          limit("12")
         )
       );
     }
@@ -119,7 +119,7 @@ const MovieLists = () => {
   };
 
   return (
-    <div className="tw-px-5 tw-pt-5 tw-bg-slate-100">
+    <div className="tw-px-5 tw-pt-5">
       {isLoading && (
         <div className="tw-m-auto tw-mt-56">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
@@ -164,7 +164,7 @@ const MovieLists = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeIn" }}
-            className="tw-max-w-fit tw-flex tw-gap-4 tw-flex-wrap tw-m-auto"
+            className="tw-max-w-fit tw-flex tw-gap-4 tw-flex-wrap"
           >
             {data.map((item, id) => (
               <motion.div
@@ -223,7 +223,7 @@ const MovieLists = () => {
                       <div className="tw-text-sm tw-font-semibold tw-mb-1 tw-text-slate-700">
                         YEAR
                       </div>
-                      <div className="tw-text-xs">{item.data.publish_year}</div>
+                      <div className="tw-text-sm">{item.data.publish_year}</div>
                     </div>
                     <div>
                       <div className="tw-text-sm tw-font-semibold tw-mb-1 tw-text-slate-700">
@@ -240,9 +240,9 @@ const MovieLists = () => {
                     </div>
                     {starRating(item.data.rating).map((i, key) =>
                       i === "full" ? (
-                        <Star htmlColor="#e3ba15" key={key} />
+                        <Star htmlColor="#bf9e17" key={key} />
                       ) : (
-                        <StarBorderOutlined htmlColor="#e3ba15" key={key} />
+                        <StarBorderOutlined htmlColor="#bf9e17" key={key} />
                       )
                     )}
                   </div>
@@ -250,14 +250,14 @@ const MovieLists = () => {
                     <div className="tw-text-sm tw-font-semibold tw-mb-1 tw-text-slate-700">
                       GENRE
                     </div>
-                    <div className="tw-text-xs">Action, Triller, Drama</div>
+                    <div className="tw-text-sm">Action, Triller, Drama</div>
                   </div>
                   <div className="tw-flex tw-justify-between tw-mb-5">
                     <div>
                       <div className="tw-text-xs tw-font-semibold tw-mb-1 tw-text-slate-700">
                         CREATED BY
                       </div>
-                      <div className="tw-text-xs">Admin</div>
+                      <div className="tw-text-xs tw-font-medium">Admin</div>
                     </div>
                     <div>
                       <div className="tw-text-xs tw-font-semibold tw-mb-1 tw-text-slate-700">

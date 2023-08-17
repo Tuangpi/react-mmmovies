@@ -83,7 +83,7 @@ const Datatable = () => {
     },
   ];
   return (
-    <div className="tw-px-5 tw-pt-5 tw-bg-slate-100 tw-min-h-screen">
+    <div className="tw-px-5 tw-pt-5">
       <div className="tw-flex tw-justify-between tw-items-center">
         <div className="tw-font-bold tw-text-slate-500">Add New User</div>
         <Link

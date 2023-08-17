@@ -5,8 +5,8 @@ import Table from "../../components/table/Table";
 
 const Home = () => {
   return (
-    <div className="tw-pt-5">
-      <div className="tw-flex tw-justify-between tw-flex-wrap tw-gap-1 tw-mx-5">
+    <div className="tw-pt-5 tw-px-5">
+      <div className="tw-flex tw-justify-between tw-flex-wrap tw-gap-1 tw-ml-3 tw-mr-5 ">
         <Widget type="user" />
         <Widget type="movies" />
         <Widget type="tvseries" />

@@ -19,7 +19,7 @@ const data = [
 
 const Chart = ({ aspect, title }) => {
   return (
-    <div className="chart">
+    <div className="chart tw-bg-white">
       <div className="tw-mb-5">{title}</div>
       <ResponsiveContainer width="100%" aspect={aspect}>
         <AreaChart
