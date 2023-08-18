@@ -20,6 +20,7 @@ const Widget = ({ type }) => {
         title: "USERS",
         isMoney: false,
         link: "See all users",
+        to: "/users",
         query: "users",
         icon: (
           <PersonOutlinedIcon
