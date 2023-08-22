@@ -1,6 +1,5 @@
 import Login from "./pages/login/Login";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { userInputs } from "./formSource";
 import { Suspense, lazy } from "react";
 import Navbar from "./components/navbar/Navbar";
 import Sidebar from "./components/sidebar/Sidebar";
@@ -51,14 +50,31 @@ const NewUser = lazy(() => import("./pages/user/NewUser"));
 function App() {
   const { user } = UserAuth();
 
+  console.log(user);
   const RequireAuth = ({ children }) => {
-    console.log(user);
     return user === null ? <Navigate to="/" /> : children;
   };
 
   const RequireAuthAndAdmin = ({ children }) => {
-    return user === null ? <Navigate to="/" /> : user.role === 'admin' ? children : <Navigate to="/dashboard" />;
+    return user === null ? (
+      <Navigate to="/" />
+    ) : user.role === "admin" ? (
+      children
+    ) : (
+      <Navigate to="/dashboard" />
+    );
   };
+
+  const RequireAuthEditor = ({ children }) => {
+    return user === null ? (
+      <Navigate to="/" />
+    ) : user.role === "editor" || user.role === 'admin' ? (
+      children
+    ) : (
+      <Navigate to="/dashboard" />
+    );
+  };
+
   const GotoDashboard = ({ children }) => {
     return user === null ? children : <Navigate to="/dashboard" />;
   };
@@ -149,7 +165,7 @@ function App() {
                     path="new"
                     element={
                       <RequireAuthAndAdmin>
-                        <NewUser inputs={userInputs} title="Add New User" />
+                        <NewUser title="Add New User" />
                       </RequireAuthAndAdmin>
                     }
                   />
@@ -167,7 +183,7 @@ function App() {
                     path="new"
                     element={
                       <RequireAuthAndAdmin>
-                        <NewMenu inputs={userInputs} title="Add New Menu" />
+                        <NewMenu title="Add New Menu" />
                       </RequireAuthAndAdmin>
                     }
                   />
@@ -185,10 +201,7 @@ function App() {
                     path="new"
                     element={
                       <RequireAuthAndAdmin>
-                        <NewPackage
-                          inputs={userInputs}
-                          title="Add New Package"
-                        />
+                        <NewPackage title="Add New Package" />
                       </RequireAuthAndAdmin>
                     }
                   />
@@ -205,17 +218,17 @@ function App() {
                   <Route
                     path="new"
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <NewMovie title="Add New Movie" />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                   <Route
                     path=":id/edit"
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <EditMovie title="Edit Movie" />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                 </Route>
@@ -223,41 +236,41 @@ function App() {
                   <Route
                     index
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <TvSeriesLists />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                   <Route
                     path="new"
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <NewTvSeries title="Add New TV Series" />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                   <Route
                     path=":id/edit"
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <EditTvSeries title="Edit TV Series" />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                   <Route
                     path=":id/season"
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <NewSeason title="Add New Season" />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                   <Route
                     path="season/:id/episode"
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <NewEpisode title="Add New Episode" />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                 </Route>
@@ -265,17 +278,17 @@ function App() {
                   <Route
                     index
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <ActorLists />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                   <Route
                     path="new"
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <NewActor title="Add New Actor" />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                 </Route>
@@ -283,17 +296,17 @@ function App() {
                   <Route
                     index
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <DirectorLists />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                   <Route
                     path="new"
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <NewDirector title="Add New Director" />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                 </Route>
@@ -301,17 +314,17 @@ function App() {
                   <Route
                     index
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <GenreLists />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                   <Route
                     path="new"
                     element={
-                      <RequireAuth>
+                      <RequireAuthEditor>
                         <NewGenre title="Add New Genre" />
-                      </RequireAuth>
+                      </RequireAuthEditor>
                     }
                   />
                 </Route>

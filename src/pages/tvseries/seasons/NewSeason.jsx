@@ -186,21 +186,21 @@ const NewSeason = ({ title }) => {
   };
 
   return (
-    <div className="tw-pt-5 tw-px-5">
+    <div className="tw-pt-5 tw-px-2">
       {isLoading && (
         <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
-      <div className="tw-mx-5">
+      <div className="tw-mx-2">
         <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
-        <div className="new-episode-container">
-          <div className="right-side">
-            <div className="right-header">
-              <div className="right-header-title">Manage Season Of Series</div>
+        <div className="tw-flex tw-justify-between tw-bg-white tw-p-1 tw-w-full">
+          <div className="tw-p-2 tw-w-[56%]">
+            <div className="tw-text-slate-600">Manage Season Of Series</div>
+            <div className="tw-flex tw-justify-between tw-mt-2 tw-flex-wrap">
               <Link
                 to="/tvseries"
-                className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+                className="tw-py-1 tw-px-2 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
               >
                 Back
               </Link>
@@ -208,167 +208,84 @@ const NewSeason = ({ title }) => {
                 docName={STATIC_WORDS.SEASONS}
                 isLoading={handleIsLoading}
               />
-              <button className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50">
+              <div className="tw-py-1 tw-px-2 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50">
                 Add Seasons
-              </button>
+              </div>
             </div>
             {edit ? (
-              <form onSubmit={handleSubmitEdit}>
-                <div className="season-no">
-                  <label htmlFor="seasonNo">Season No.</label>
+              <form
+                onSubmit={handleSubmitEdit}
+                className="tw-bg-slate-300 tw-p-2 tw-mt-2 tw-pt-1 tw-rounded-md"
+              >
+                <div className="tw-flex tw-flex-col">
+                  <label
+                    htmlFor="seasonNo"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Season No.
+                  </label>
                   <input
                     id="seasonNo"
                     type="number"
+                    placeholder="Enter Season Number"
                     value={seasonNumber}
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     onChange={(e) => setSeasonNumber(e.target.value)}
                   />
-                </div>
-                <div className="season-slug">
-                  <label htmlFor="seasonSlug">Season Slug</label>
+
+                  <label
+                    htmlFor="seasonSlug"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Season Slug
+                  </label>
                   <input
                     id="seasonSlug"
+                    placeholder="Enter Season Slug"
                     type="text"
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     value={seasonSlug}
                     onChange={(e) => setSeasonSlug(e.target.value)}
                   />
-                </div>
-                <div className="audio-languages">
-                  <label htmlFor="audioLanguages">Audio Languages</label>
+                  <label
+                    htmlFor="audioLanguages"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Audio Languages
+                  </label>
                   <input
                     id="audioLanguages"
                     type="text"
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     //   value={movieTitle}
                     //   onChange={handleMovieTitleChange}
                   />
                 </div>
-                <div className="custom-thumbnail">
-                  <div>Choose Custom Thumbnail and Poster</div>
-                  <label htmlFor="customThumbnail" className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      id="customThumbnail"
-                      //   onChange={() => setIsFeatured(!isFeatured)}
-                    />
-                    <span className="slider"></span>
-                  </label>
+                <div className="tw-text-slate-800 tw-pt-2">
+                  Choose Custom Thumbnail and Poster
                 </div>
-                <div className="protected">
-                  <div>Protected Video?</div>
-                  <label htmlFor="protected" className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      id="protected"
-                      value={isProtected}
-                      onChange={() => setIsProtected(!isProtected)}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                <div>Want IMDB Ratings And More Or Custom?</div>
-                <div style={{ display: "tw-flex" }}>
-                  <div>
-                    <input
-                      type="radio"
-                      id="tmdb"
-                      name="details"
-                      value="tmdb"
-                      className="hidden-radio"
-                      // onChange={(e) => setSelectTMDB(e.target.value)}
-                      // checked={selectTMDB === "tmdb"}
-                    />
-                    <label htmlFor="tmdb" className="button-style">
-                      TMDB
-                    </label>
-                  </div>
-                  <div>
-                    <input
-                      type="radio"
-                      id="custom"
-                      name="details"
-                      value="custom"
-                      className="hidden-radio"
-                      // onChange={(e) => setSelectTMDB(e.target.value)}
-                      // checked={selectTMDB === "custom"}
-                    />
-                    <label htmlFor="custom" className="button-style">
-                      Custom
-                    </label>
-                  </div>
-                </div>
-                <div className="bottom-create">
-                  <button
-                    type="reset"
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded mr-6"
-                  >
-                    Reset
-                  </button>
-                  <button
-                    type="submit"
-                    className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
-                  >
-                    Edit
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <form onSubmit={handleSubmit}>
-                <div className="season-no">
-                  <label htmlFor="seasonNo">Season No.</label>
+                <label htmlFor="customThumbnail" className="toggle-switch">
                   <input
-                    id="seasonNo"
-                    type="number"
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
-                    onChange={(e) => setSeasonNumber(e.target.value)}
-                    required
+                    type="checkbox"
+                    id="customThumbnail"
+                    //   onChange={() => setIsFeatured(!isFeatured)}
                   />
-                </div>
-                <div className="season-slug">
-                  <label htmlFor="seasonSlug">Season Slug</label>
+                  <span className="slider"></span>
+                </label>
+                <div className="tw-text-slate-800">Protected Video?</div>
+                <label htmlFor="protected" className="toggle-switch">
                   <input
-                    id="seasonSlug"
-                    type="text"
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
-                    onChange={(e) => setSeasonSlug(e.target.value)}
-                    required
+                    type="checkbox"
+                    id="protected"
+                    value={isProtected}
+                    onChange={() => setIsProtected(!isProtected)}
                   />
+                  <span className="slider"></span>
+                </label>
+                <div className="tw-text-slate-800 tw-pt-2">
+                  Want IMDB Ratings And More Or Custom?
                 </div>
-                <div className="audio-languages">
-                  <label htmlFor="audioLanguages">Audio Languages</label>
-                  <input
-                    id="audioLanguages"
-                    type="text"
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
-                    //   value={movieTitle}
-                    //   onChange={handleMovieTitleChange}
-                  />
-                </div>
-                <div className="custom-thumbnail">
-                  <div>Choose Custom Thumbnail and Poster</div>
-                  <label htmlFor="customThumbnail" className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      id="customThumbnail"
-                      onChange={() => setIsFeatured(!isFeatured)}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                <div className="protected">
-                  <div>Protected Video?</div>
-                  <label htmlFor="protected" className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      id="protected"
-                      onChange={() => setIsProtected(!isProtected)}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                <div>Want IMDB Ratings And More Or Custom?</div>
-                <div style={{ display: "tw-flex" }}>
+                <div className="tw-flex tw-gap-x-2 tw-pt-2">
                   <div>
                     <input
                       type="radio"
@@ -379,7 +296,14 @@ const NewSeason = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "tmdb"}
                     />
-                    <label htmlFor="tmdb" className="button-style">
+                    <label
+                      htmlFor="tmdb"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "tmdb"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       TMDB
                     </label>
                   </div>
@@ -393,21 +317,166 @@ const NewSeason = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "custom"}
                     />
-                    <label htmlFor="custom" className="button-style">
+                    <label
+                      htmlFor="custom"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "custom"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       Custom
                     </label>
                   </div>
                 </div>
-                <div className="bottom-create mt-6">
+                <div className="tw-flex tw-gap-x-2 tw-my-5">
                   <button
                     type="reset"
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded mr-6"
+                    className="tw-bg-red-500 hover:tw-bg-red-700 tw-text-white tw-font-bold tw-py-1 tw-px-4 tw-rounded-sm tw-w-full"
                   >
                     Reset
                   </button>
                   <button
                     type="submit"
-                    className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+                    className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-sm tw-w-full tw-text-slate-50"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form
+                onSubmit={handleSubmit}
+                className="tw-bg-slate-300 tw-p-2 tw-mt-2 tw-pt-1 tw-rounded-md"
+              >
+                <>
+                  <div className="tw-flex tw-flex-col">
+                    <label
+                      htmlFor="seasonNo"
+                      className="tw-text-slate-800 tw-pt-2"
+                    >
+                      Season No.
+                    </label>
+                    <input
+                      id="seasonNo"
+                      type="number"
+                      placeholder="Enter Season Number"
+                      className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                      onChange={(e) => setSeasonNumber(e.target.value)}
+                      required
+                    />
+
+                    <label
+                      htmlFor="seasonSlug"
+                      className="tw-text-slate-800 tw-pt-2"
+                    >
+                      Season Slug
+                    </label>
+                    <input
+                      id="seasonSlug"
+                      placeholder="Enter Season Slug"
+                      type="text"
+                      className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                      onChange={(e) => setSeasonSlug(e.target.value)}
+                      required
+                    />
+                    <label
+                      htmlFor="audioLanguages"
+                      className="tw-text-slate-800 tw-pt-2"
+                    >
+                      Audio Languages
+                    </label>
+                    <input
+                      id="audioLanguages"
+                      type="text"
+                      className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                      //   value={movieTitle}
+                      //   onChange={handleMovieTitleChange}
+                    />
+                  </div>
+
+                  <div className="tw-text-slate-800 tw-pt-2">
+                    Choose Custom Thumbnail and Poster
+                  </div>
+                  <label htmlFor="customThumbnail" className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="customThumbnail"
+                      onChange={() => setIsFeatured(!isFeatured)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+
+                  <div className="tw-text-slate-800 tw-pt-2">
+                    Protected Video?
+                  </div>
+                  <label htmlFor="protected" className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="protected"
+                      onChange={() => setIsProtected(!isProtected)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+
+                  <div className="tw-text-slate-800 tw-pt-2">
+                    Want IMDB Ratings And More Or Custom?
+                  </div>
+                  <div className="tw-flex tw-gap-x-2 tw-pt-2">
+                    <div>
+                      <input
+                        type="radio"
+                        id="tmdb"
+                        name="details"
+                        value="tmdb"
+                        className="hidden-radio"
+                        onChange={(e) => setSelectTMDB(e.target.value)}
+                        checked={selectTMDB === "tmdb"}
+                      />
+                      <label
+                        htmlFor="tmdb"
+                        className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                          selectTMDB === "tmdb"
+                            ? "tw-bg-blue-600"
+                            : "tw-bg-slate-400"
+                        }`}
+                      >
+                        TMDB
+                      </label>
+                    </div>
+                    <div>
+                      <input
+                        type="radio"
+                        id="custom"
+                        name="details"
+                        value="custom"
+                        className="hidden-radio"
+                        onChange={(e) => setSelectTMDB(e.target.value)}
+                        checked={selectTMDB === "custom"}
+                      />
+                      <label
+                        htmlFor="custom"
+                        className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                          selectTMDB === "custom"
+                            ? "tw-bg-blue-600"
+                            : "tw-bg-slate-400"
+                        }`}
+                      >
+                        Custom
+                      </label>
+                    </div>
+                  </div>
+                </>
+                <div className="tw-flex tw-gap-x-2 tw-my-5">
+                  <button
+                    type="reset"
+                    className="tw-bg-red-500 hover:tw-bg-red-700 tw-text-white tw-font-bold tw-py-1 tw-px-4 tw-rounded-sm tw-w-full"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="submit"
+                    className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-sm tw-text-slate-50 tw-w-full"
                   >
                     Create
                   </button>
@@ -415,29 +484,39 @@ const NewSeason = ({ title }) => {
               </form>
             )}
           </div>
-          <div className="left-side">
-            <div className="episode-list">
-              <table>
-                <thead>
+
+          <div className="tw-bg-slate-300 tw-rounded-md tw-w-[44%]">
+            <div className="tw-p-2">
+              <table className="tw-border-collapse tw-border-spacing-0 tw-w-full">
+                <thead className="tw-bg-slate-400">
                   <tr>
-                    <th>Thumbnail</th>
-                    <th>Season</th>
-                    <th>Episodes</th>
-                    <th>ByTMDB</th>
-                    <th>Actions</th>
+                    <th className="tw-text-center tw-px-2">Thumbnail</th>
+                    <th className="tw-text-center tw-px-2">Season</th>
+                    <th className="tw-text-center tw-px-2">Episodes</th>
+                    <th className="tw-text-center tw-px-2">ByTMDB</th>
+                    <th className="tw-text-center tw-px-2">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.length > 0 &&
                     data.map((doc) => (
                       <tr>
-                        <td className="cell">
+                        <td
+                          className="tw-text-center tw-align-middle tw-w-10
+                         tw-h-auto"
+                        >
                           <img src={doc.data.poster} alt="season-thumbnail" />
                         </td>
-                        <td className="cell">Season {doc.data.season_no}</td>
-                        <td className="cell">12 Episodes</td>
-                        <td className="cell">{doc.data.tmdb}</td>
-                        <td className="cell">
+                        <td className="tw-text-center tw-align-middle">
+                          Season {doc.data.season_no}
+                        </td>
+                        <td className="tw-text-center tw-align-middle">
+                          12 Episodes
+                        </td>
+                        <td className="tw-text-center tw-align-middle">
+                          {doc.data.tmdb}
+                        </td>
+                        <td className="tw-flex tw-flex-wrap tw-align-middle">
                           <Link
                             to={`/tvseries/season/${doc.id}/episode`}
                             state={{
@@ -446,18 +525,23 @@ const NewSeason = ({ title }) => {
                               season_number: doc.data.season_no,
                             }}
                           >
-                            <SettingsSuggest />
+                            <SettingsSuggest
+                              className="tw-cursor-pointer tw-px-1"
+                              style={{ fontSize: "28px" }}
+                            />
                           </Link>
                           <Edit
                             onClick={() => {
                               setEdit((preEdit) => !preEdit);
                               handleEdit(doc.id);
                             }}
-                            style={{ cursor: "pointer" }}
+                            className="tw-cursor-pointer tw-px-1"
+                            style={{ fontSize: "28px" }}
                           />
                           <Delete
-                            className="delete"
+                            className="tw-text-red-500 tw-cursor-pointer tw-px-1"
                             onClick={() => handleDelete(doc.id)}
+                            style={{ fontSize: "28px" }}
                           />
                         </td>
                       </tr>

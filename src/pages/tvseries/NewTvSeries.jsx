@@ -46,7 +46,7 @@ const NewTvSeries = ({ title }) => {
     if (!(await isDocumentEmpty(STATIC_WORDS.TVSERIES))) {
       const q = query(
         collection(db, STATIC_WORDS.TVSERIES),
-        where("tmdb_id", "==", movieTitle)
+        where("tmdb_id", "==", movieID)
       );
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
@@ -111,7 +111,7 @@ const NewTvSeries = ({ title }) => {
         keyword: metaKeyWord,
         description: metaDesc,
         title: data["name"],
-        tmdb_id: String(data["id"]),
+        tmdb_id: String(data["id"]) ?? "",
         thumbnail: thumbnailURL,
         poster: posterURL,
         tmdb: "Y",
@@ -158,16 +158,16 @@ const NewTvSeries = ({ title }) => {
   };
 
   return (
-    <div className="tw-pt-5 tw-px-5">
+    <div className="tw-pt-5 tw-px-2">
       {isLoading && (
         <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#3f51b5" height={"3%"} width={"3%"} />{" "}
         </div>
       )}
-      <div className="tw-mx-5">
-        <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
+      <div className="tw-mx-2">
+        <h1 className="tw-font-bold tw-text-slate-500 tw-mb-2">{title}</h1>
         <form onSubmit={handleSubmit}>
-          <div className="tw-p-6 tw-bg-white">
+          <div className="tw-p-4 tw-bg-white">
             <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
               <div className="tw-text-lg tw-font-bold">Create TvSeries</div>
               <Link
@@ -179,7 +179,9 @@ const NewTvSeries = ({ title }) => {
             </div>
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <div>Search TVSeries By TMDB ID</div>
+                <div className="tw-text-slate-800">
+                  Search TVSeries By TMDB ID
+                </div>
                 <label className="toggle-switch">
                   <input
                     type="checkbox"
@@ -191,31 +193,37 @@ const NewTvSeries = ({ title }) => {
               </div>
               {searchByToggle ? (
                 <div className="tw-flex tw-flex-col">
-                  <label htmlFor="movieName">Series Title:</label>
+                  <label htmlFor="movieName" className="tw-text-slate-800">
+                    Series Title:
+                  </label>
                   <input
                     type="text"
                     id="movieName"
                     onChange={(e) => setMovieTitle(e.target.value)}
-                    className="p-2 text-sm"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   />
                 </div>
               ) : (
                 <div className="tw-flex tw-flex-col">
-                  <label htmlFor="movieTMDB">Tv Series ID:</label>
+                  <label htmlFor="movieTMDB" className="tw-text-slate-800">
+                    Tv Series ID:
+                  </label>
                   <input
                     id="movieTMDB"
                     type="text"
                     onChange={(e) => setMovieID(e.target.value)}
-                    className="p-2 text-sm"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   />
                 </div>
               )}
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="maturityRating">Maturity Rating:</label>
+                <label htmlFor="maturityRating" className="tw-text-slate-800">
+                  Maturity Rating:
+                </label>
                 <select
                   id="maturityRating"
                   onChange={(e) => setSelectedMaturity(e.target.value)}
-                  className="p-2 text-sm cursor-pointer"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1 cursor-pointer"
                 >
                   <option value="all age">All Age</option>
                   <option value="18+">18+</option>
@@ -228,13 +236,15 @@ const NewTvSeries = ({ title }) => {
                 </select>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="country">Country:</label>
+                <label htmlFor="country" className="tw-text-slate-800">
+                  Country:
+                </label>
                 <select
                   id="country"
                   value={selectedCountry}
                   multiple
                   onChange={(e) => setSelectedCountry(e.target.value)}
-                  className="p-2 text-sm cursor-pointer"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1 cursor-pointer"
                 >
                   <option value=""></option>
                   {COUNTRY.map((country, key) => (
@@ -245,28 +255,33 @@ const NewTvSeries = ({ title }) => {
                 </select>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="metaKeyword">Meta Keyword:</label>
+                <label htmlFor="metaKeyword" className="tw-text-slate-800">
+                  Meta Keyword:
+                </label>
                 <input
                   type="text"
                   id="metaKeyword"
-                  className="p-2 text-sm"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   onChange={(e) => setMetaKeyWord(e.target.value)}
                 />
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="metaDescription">Meta Description:</label>
+                <label htmlFor="metaDescription" className="tw-text-slate-800">
+                  Meta Description:
+                </label>
                 <textarea
                   name=""
                   id="metaDescription"
                   onChange={(e) => setMetaDesc(e.target.value)}
                   cols="30"
-                  className="p-2 textsm"
+                  rows="3"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                 ></textarea>
               </div>
             </div>
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <div>Featured:</div>
+                <div className="tw-text-slate-800">Featured:</div>
                 <label htmlFor="featured" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -277,7 +292,9 @@ const NewTvSeries = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="selectMenu">Select Menu*:</label>
+                <label htmlFor="selectMenu" className="tw-text-slate-800">
+                  Select Menu*:
+                </label>
                 <input
                   type="checkbox"
                   id="selectMenu"
@@ -288,8 +305,10 @@ const NewTvSeries = ({ title }) => {
 
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <label>More Details: TMDB Or Custom?</label>
-                <div className="radio-group">
+                <label className="tw-text-slate-800">
+                  More Details: TMDB Or Custom?
+                </label>
+                <div className="tw-flex tw-mt-3">
                   <div>
                     <input
                       type="radio"
@@ -300,7 +319,14 @@ const NewTvSeries = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "tmdb"}
                     />
-                    <label htmlFor="tmdb" className="button-style">
+                    <label
+                      htmlFor="tmdb"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "tmdb"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       TMDB
                     </label>
                   </div>
@@ -314,7 +340,14 @@ const NewTvSeries = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "custom"}
                     />
-                    <label htmlFor="custom" className="button-style">
+                    <label
+                      htmlFor="custom"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "custom"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       Custom
                     </label>
                   </div>
@@ -323,23 +356,31 @@ const NewTvSeries = ({ title }) => {
             </div>
             <div className="tw-flex tw-flex-col tw-bg-slate-300 tw-mb-4 tw-p-7">
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="descriptionSource">Get Description From:</label>
-                <input
-                  type="text"
-                  id="descriptionSource"
-                  className="p-2 text-sm"
-                />
+                <label
+                  htmlFor="descriptionSource"
+                  className="tw-text-slate-800"
+                >
+                  Get Description From:
+                </label>
+                <select>
+                  <option selected>Select</option>
+                  <option>Channel Myanmar</option>
+                </select>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="descriptionMyanmar">
+                <label
+                  htmlFor="descriptionMyanmar"
+                  className="tw-text-slate-800"
+                >
                   Description in Myanmar:
                 </label>
                 <textarea
                   name=""
                   id="descriptionMyanmar"
                   cols="30"
+                  rows="3"
                   onChange={(e) => setMyanDesc(e.target.value)}
-                  className="p-2 text-sm"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                 ></textarea>
               </div>
             </div>

@@ -24,7 +24,6 @@ const MovieLists = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
-  const [editor, setEditor] = useState(false);
   const [showElement, setShowElement] = useState(null);
   const [pageCount, setPageCount] = useState(0);
 
@@ -119,7 +118,7 @@ const MovieLists = () => {
   };
 
   return (
-    <div className="tw-px-5 tw-pt-5">
+    <div className="tw-px-2 tw-pt-5">
       {isLoading && (
         <div className="tw-m-auto tw-mt-56">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
@@ -180,23 +179,23 @@ const MovieLists = () => {
                   src={item.data.thumbnail}
                   className="tw-w-full tw-rounded-tr-md tw-rounded-tl-md"
                 />
-
                 <div className="tw-flex tw-justify-end tw-flex-col tw-relative tw-w-full tw-px-4">
-                  {/* <div>
+                  <div>
                     {showElement === id && showElement !== null && (
-                      <div className="tw-absolute -tw-top-96 tw-z-10">
-                        <ul className="tw-flex tw-flex-col tw-bg-red-600 tw-rounded-sm tw-list-none tw-text-blue-800 tw-pt-2 tw-pr-0 tw-pb-1 tw-pl-0">
+                      <div className="tw-absolute -tw-top-[5.6rem] tw-z-10 tw-left-8">
+                        <ul className="tw-flex tw-flex-col tw-bg-slate-50 tw-rounded-sm tw-list-none tw-text-slate-800">
                           <Link to={`/movies/${item.id}/edit`}>
-                            <li className="tw-flex tw-text-xs tw-gap-x-2 tw-cursor-pointer tw-rounded-md tw-py-3 tw-px-4 hover:tw-text-green-700 hover:tw-bg-yellow-600">
-                              <Edit fontSize="12px" /> <span>Edit</span>
+                            <li className="tw-flex tw-text-sm tw-gap-x-2 tw-cursor-pointer tw-rounded-md tw-py-3 tw-px-4 hover:tw-text-slate-800 hover:tw-bg-slate-200">
+                              <Edit style={{ fontSize: "18px" }} />
+                              <div>Edit</div>
                             </li>
                           </Link>
                           <li
-                            className="tw-text-red-700 tw-cursor-pointer hover:tw-text-red-500"
+                            className="tw-flex tw-text-sm tw-gap-x-2 tw-cursor-pointer tw-rounded-md tw-py-3 tw-px-4 hover:tw-text-red-600 hover:tw-bg-slate-200 tw-text-red-500"
                             onClick={() => handleDelete(item.id)}
                           >
-                            <Delete fontSize="12px" />
-                            <span>Delete</span>
+                            <Delete style={{ fontSize: "18px" }} />
+                            <div>Delete</div>
                           </li>
                         </ul>
                       </div>
@@ -205,11 +204,11 @@ const MovieLists = () => {
                       className="tw-cursor-pointer tw-text-base tw-font-extrabold"
                       onClick={() => handleClick(id)}
                     >
-                      <div className="tw-bg-violet-900 tw-rounded-full tw-w-8 tw-h-8 tw-flex tw-justify-center tw-text-black tw-border-none tw-outline-none hover:tw-bg-lime-950">
+                      <div className="tw-bg-blue-700 tw-rounded-full tw-w-8 tw-h-8 tw-flex tw-justify-center tw-text-slate-100 tw-scale-110 tw-border-none tw-outline-none hover:tw-bg-blue-500 tw-rotate-90 -tw-mt-4">
                         ...
                       </div>
                     </div>
-                  </div> */}
+                  </div>
                   <h2
                     className="tw-my-4 tw-text-base tw-font-extrabold tw-cursor-default tw-text-slate-900"
                     title={item.data.title}

@@ -1,8 +1,9 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../configs/firebase";
+import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 
 const UserLists = () => {
   const [data, setData] = useState([]);
@@ -25,15 +26,20 @@ const UserLists = () => {
 
   const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, "users", id));
-      setData(data.filter((item) => item.id !== id));
+      const docRef = doc(db, STATIC_WORDS.USERS, id);
+      await updateDoc(docRef, { status: "deleted" });
+      setData(
+        data.map((item) =>
+          item.id === id ? { ...item, status: "deleted" } : item
+        )
+      );
     } catch (err) {
       console.log(err);
     }
   };
 
   return (
-    <div className="tw-px-5 tw-pt-5">
+    <div className="tw-px-2 tw-pt-5">
       <div className="tw-flex tw-justify-between tw-items-center">
         <div className="tw-font-bold tw-text-slate-500">Add New User</div>
         <Link
@@ -44,7 +50,7 @@ const UserLists = () => {
         </Link>
       </div>
       <DataGrid
-        className="tw-bg-white tw-border-none tw-outline-none"
+        className="tw-bg-white tw-border-none tw-outline-none tw-mt-2"
         rows={data}
         columns={[
           { field: "id", headerName: "ID", width: 70 },
@@ -68,8 +74,8 @@ const UserLists = () => {
           },
 
           {
-            field: "address",
-            headerName: "Address",
+            field: "role",
+            headerName: "Role",
             width: 100,
           },
           {
@@ -77,11 +83,13 @@ const UserLists = () => {
             headerName: "Status",
             width: 160,
             renderCell: (params) => {
-              return (
-                <div
-                  className={`tw-text-gray-500 tw-border-none tw-outline-none ${params.row.status}`}
-                >
-                  {params.row.status}
+              return params.row.status && params.row.status === "deleted" ? (
+                <div className="tw-text-red-500 tw-border-none tw-outline-none">
+                  Deleted
+                </div>
+              ) : (
+                <div className="tw-text-green-500 tw-border-none tw-outline-none">
+                  Active
                 </div>
               );
             },

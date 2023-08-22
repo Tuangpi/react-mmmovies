@@ -6,7 +6,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
 
-const NewUser = ({ inputs, title }) => {
+const NewUser = ({ title }) => {
   const [file, setFile] = useState("");
   const [data, setData] = useState({});
   const [per, setPerc] = useState(null);
@@ -108,7 +108,7 @@ const NewUser = ({ inputs, title }) => {
                   />
                 </div>
 
-                {inputs.map((input) => (
+                {/* {inputs.map((input) => (
                   <div className="formInput" key={input.id}>
                     <label>{input.label}</label>
                     <input
@@ -118,7 +118,7 @@ const NewUser = ({ inputs, title }) => {
                       onChange={handleInput}
                     />
                   </div>
-                ))}
+                ))} */}
                 <button disabled={per !== null && per < 100} type="submit">
                   Send
                 </button>

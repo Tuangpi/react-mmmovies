@@ -7,4 +7,5 @@ export const STATIC_WORDS = {
   DIRECTORS: "directors",
   GENRES: "genres",
   VIDEO_LINKS: "videolinks",
+  USERS: "users"
 };

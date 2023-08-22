@@ -1,21 +1,20 @@
-import Sidebar from "../../components/sidebar/Sidebar";
-import Navbar from "../../components/navbar/Navbar";
 import { useEffect, useState } from "react";
 import Loading from "react-loading";
 import {
-  addDoc,
+  Timestamp,
   collection,
   doc,
   getDoc,
   getDocs,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db, storage } from "../../configs/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import axios from "axios";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { GetData } from "../../helper/GetData";
 import { ForActors } from "../../helper/ForActors";
 import { ForDirectors } from "../../helper/ForDirectors";
@@ -29,32 +28,33 @@ import { COUNTRY } from "../../assets/COUNTRY";
 
 const EditMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
+  // const [customURL, setCustomURL] = useState(null);
   const [searchByToggle, setSearchByToggle] = useState(false);
   const [searchBy, setSearchBy] = useState("");
   const [movieTitle, setMovieTitle] = useState("");
-  const [movieTmdbId, setMovieTmdbId] = useState("");
+  const [movieID, setMovieID] = useState("");
+  const [movieSlug, setMovieSlug] = useState("");
   const [isUpcoming, setIsUpcoming] = useState(false);
+  const [upcomingDate, setUpcomingDate] = useState("");
+  const [selectedOption, setSelectedOption] = useState("upload");
   const [isSeries, setIsSeries] = useState(false);
   const [isFeatured, setIsFeatured] = useState(false);
   const [hasSubTitle, setHasSubTitle] = useState(false);
   const [isProtected, setIsProtected] = useState(false);
   const [checkMenuAll, setCheckMenuAll] = useState(false);
   const [hasCustomThumbnail, setHasCustomThumbnail] = useState(false);
-  const [upcomingDate, setUpcomingDate] = useState("");
-  const [videoUpload, setVideoUpload] = useState("");
-  const [selectedOption, setSelectedOption] = useState("upload");
-  const [movieSlug, setMovieSlug] = useState("");
-  const [showModal, setShowModal] = useState(false);
   const [selectKey, setSelectKey] = useState(null);
-  const [selectTMDB, setSelectTMDB] = useState("tmdb");
   const [selectedMaturity, setSelectedMaturity] = useState("all age");
   const [selectedCountry, setSelectedCountry] = useState([]);
   const [metaKeyWord, setMetaKeyWord] = useState("");
   const [metaDesc, setMetaDesc] = useState("");
   const [myanDesc, setMyanDesc] = useState("");
-  const [objects, setObjects] = useState([]);
-  const [continuationToken, setContinuationToken] = useState(null);
+  const [selectTMDB, setSelectTMDB] = useState("tmdb");
+
   const [objectKey, setObjectKey] = useState("movies_upload_wasabi");
+  const [objects, setObjects] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [continuationToken, setContinuationToken] = useState(null);
 
   const { id } = useParams();
 
@@ -63,27 +63,27 @@ const EditMovie = ({ title }) => {
     setObjects([]);
     setContinuationToken(null);
   };
+
   const handleSearch = async (e) => {
     if (e.key === "Enter") {
       const search = e.target.value;
       try {
-        const fetchObj = await SearchObjects(search);
+        const fetchObj = await SearchObjects(search, objectKey);
         setObjects(fetchObj);
       } catch (err) {
         console.log(err);
       }
     }
   };
+
   var handleSuccess = () => {
     console.log("success");
   };
 
-  const handleSelectChange = (event) => {
-    setSelectedOption(event.target.value);
-  };
   const handleSelect = (key) => {
     setSelectKey(key);
     setShowModal(false);
+    setObjects([]);
     setContinuationToken(null);
   };
 
@@ -135,7 +135,7 @@ const EditMovie = ({ title }) => {
         const data = querySnapshot.data();
         setMovieSlug(data.slug);
         setMovieTitle(data.title);
-        setMovieTmdbId(data.tmdb_id);
+        setMovieID(data.tmdb_id);
         setIsUpcoming(data.is_upcoming);
         setIsFeatured(data.featured);
         setIsSeries(data.series);
@@ -155,137 +155,152 @@ const EditMovie = ({ title }) => {
     if (id) fetchData(id);
   }, [id]);
 
-  //   async function fetchDataAndStore() {
-  //     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
+  async function fetchDataAndStore() {
+    const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
 
-  //     if (!(await isDocumentEmpty(STATIC_WORDS.MOVIES))) {
-  //       const q = query(
-  //         collection(db, STATIC_WORDS.MOVIES),
-  //         where("tmdb_id", "==", movieTitle)
-  //       );
-  //       const querySnapshot = await getDocs(q);
-  //       if (!querySnapshot.empty) {
-  //         console.log("already exist");
-  //         return;
-  //       }
-  //     }
+    if (!(await isDocumentEmpty(STATIC_WORDS.MOVIES))) {
+      const q = query(
+        collection(db, STATIC_WORDS.MOVIES),
+        where("tmdb_id", "==", movieID)
+      );
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        console.log("already exist");
+        return;
+      }
+    }
 
-  //     const data = await GetData(searchBy, TMDB_API_KEY, movieTitle);
-  //     let credits = null;
-  //     if (data["id"]) {
-  //       credits = await axios.get(
-  //         `https://api.themoviedb.org/3/movie/${data["id"]}/credits?api_key=${TMDB_API_KEY}`
-  //       );
-  //     } else {
-  //       console.log("movie does not found on TMDB Server");
-  //       return;
-  //     }
+    const data = movieID
+      ? await GetData(searchBy, TMDB_API_KEY, movieID, STATIC_WORDS.MOVIES)
+      : await GetData(searchBy, TMDB_API_KEY, movieTitle, STATIC_WORDS.MOVIES);
 
-  //     const [actor_id, director_id, genre_id] = await Promise.all([
-  //       ForActors(TMDB_API_KEY, credits),
-  //       ForDirectors(TMDB_API_KEY, credits),
-  //       ForGenres(data),
-  //     ]);
+    let credits = null;
+    if (data["id"]) {
+      credits = await axios.get(
+        `https://api.themoviedb.org/3/movie/${data["id"]}/credits?api_key=${TMDB_API_KEY}`
+      );
+    } else {
+      console.log("movie does not found on TMDB Server");
+      return;
+    }
 
-  //     const poster = `https://image.tmdb.org/t/p/original/${data["poster_path"]}`;
-  //     const thumnail = `https://image.tmdb.org/t/p/original/${data["backdrop_path"]}`;
-  //     let blob1 = null;
-  //     let blob2 = null;
-  //     try {
-  //       [blob1, blob2] = await Promise.all([
-  //         fromURL(poster, 1, 0, 0, "webp"),
-  //         fromURL(thumnail, 1, 0, 0, "webp"),
-  //       ]);
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //     const posterRef = ref(storage, `posters/${data["poster_path"]}`);
-  //     const thumbnailRef = ref(storage, `thumbnail/${data["backdrop_path"]}`);
+    const [actor_id, director_id, genre_id] = await Promise.all([
+      ForActors(TMDB_API_KEY, credits),
+      ForDirectors(TMDB_API_KEY, credits),
+      ForGenres(data),
+    ]);
 
-  //     let posterURL = null;
-  //     let thumbnailURL = null;
+    const poster = `https://image.tmdb.org/t/p/original/${data["poster_path"]}`;
+    const thumnail = `https://image.tmdb.org/t/p/original/${data["backdrop_path"]}`;
+    let blob1 = null;
+    let blob2 = null;
+    try {
+      [blob1, blob2] = await Promise.all([
+        fromURL(poster, 1, 0, 0, "webp"),
+        fromURL(thumnail, 1, 0, 0, "webp"),
+      ]);
+    } catch (err) {
+      console.log(err);
+    }
+    const posterRef = ref(storage, `posters/${data["poster_path"]}`);
+    const thumbnailRef = ref(storage, `thumbnail/${data["backdrop_path"]}`);
 
-  //     try {
-  //       await Promise.all([
-  //         uploadBytesResumable(thumbnailRef, blob1),
-  //         uploadBytesResumable(posterRef, blob2),
-  //       ]);
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //     try {
-  //       [posterURL, thumbnailURL] = await Promise.all([
-  //         getDownloadURL(posterRef),
-  //         getDownloadURL(thumbnailRef),
-  //       ]);
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
+    let posterURL = null;
+    let thumbnailURL = null;
 
-  //     let movieRef = null;
-  //     try {
-  //       const docRef = await addDoc(collection(db, STATIC_WORDS.MOVIES), {
-  //         tmdb_id: String(data["id"]),
-  //         title: data["title"],
-  //         slug: movieSlug,
-  //         duration: 'data["runtime"]',
-  //         thumbnail: thumbnailURL,
-  //         poster: posterURL,
-  //         tmdb: "Y",
-  //         fetch_by: searchBy,
-  //         director_id: director_id,
-  //         actor_id: actor_id,
-  //         genre_id: genre_id,
-  //         trailer_url: null,
-  //         detail: data["overview"],
-  //         views: null,
-  //         rating: data["vote_average"],
-  //         maturity_rating: "all age",
-  //         subtitle: null,
-  //         publish_year: null,
-  //         released: data["release_date"].split("-")[0],
-  //         upload_video: null,
-  //         featured: null,
-  //         series: null,
-  //         type: "M",
-  //         status: "1",
-  //         created_by: null,
-  //         created_at: serverTimestamp(),
-  //         updated_at: serverTimestamp(),
-  //         is_upcoming: 0,
-  //         upcoming_date: null,
-  //         is_kids: 0,
-  //         description_myanmar: null,
-  //         updated_by: null,
-  //         channel: 0,
-  //       });
-  //       movieRef = docRef;
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //     try {
-  //       await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
-  //         movie_id: movieRef,
-  //         episode_id: null,
-  //         type: "upload_video",
-  //         url_360: null,
-  //         url_480: null,
-  //         url_720: null,
-  //         url_1080: null,
-  //         created_at: serverTimestamp(),
-  //         updated_at: serverTimestamp(),
-  //         upload_video: selectKey,
-  //       });
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
+    try {
+      await Promise.all([
+        uploadBytesResumable(thumbnailRef, blob1),
+        uploadBytesResumable(posterRef, blob2),
+      ]);
+    } catch (err) {
+      console.log(err);
+    }
+    try {
+      [posterURL, thumbnailURL] = await Promise.all([
+        getDownloadURL(posterRef),
+        getDownloadURL(thumbnailRef),
+      ]);
+    } catch (err) {
+      console.log(err);
+    }
+
+    try {
+      const docRef = doc(db, STATIC_WORDS.MOVIES, id);
+
+      await updateDoc(docRef, {
+        tmdb_id: String(data["id"]) ?? "",
+        title: data["title"],
+        slug: movieSlug,
+        keyword: metaKeyWord,
+        description: metaDesc,
+        duration: String(data["runtime"]),
+        thumbnail: thumbnailURL,
+        poster: posterURL,
+        tmdb: "Y",
+        fetch_by: searchBy,
+        director_id: director_id,
+        actor_id: actor_id,
+        genre_id: genre_id,
+        trailer_url: "",
+        detail: data["overview"],
+        views: "",
+        rating: data["vote_average"],
+        maturity_rating: selectedMaturity,
+        subtitle: hasSubTitle,
+        publish_year: data["release_date"].split("-")[0],
+        released: "",
+        upload_video: "",
+        featured: isFeatured,
+        series: isSeries,
+        type: isSeries ? "S" : "M",
+        status: true,
+        is_protected: isProtected,
+        // created_by: null,
+        updated_at: serverTimestamp(),
+        is_upcoming: isUpcoming,
+        upcoming_date: isUpcoming
+          ? new Date(upcomingDate)
+          : new Timestamp(0, 0),
+        is_kids: false,
+        description_myanmar: myanDesc,
+        country: selectedCountry,
+        // updated_by: null,
+        channel: 0,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+    try {
+      const q = query(
+        collection(db, STATIC_WORDS.MOVIES),
+        where("movieId", "==", id)
+      );
+      const querySnapshot = await getDocs(q);
+      const docRef = doc(
+        db,
+        STATIC_WORDS.VIDEO_LINKS,
+        querySnapshot.docs[0].id
+      );
+      await updateDoc(docRef, {
+        //   type: "upload_video",
+        // url_360: await getPresignedUrlMovie("", "url_360"),
+        // url_480: await getPresignedUrlMovie("", "url_480"),
+        // url_720: await getPresignedUrlMovie("", "url_720"),
+        // url_1080: await getPresignedUrlMovie("", "url_1080"),
+        updated_at: serverTimestamp(),
+        // upload_video: await getPresignedUrlMovie(selectKey, "upload_video"),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      // await fetchDataAndStore();
+      await fetchDataAndStore();
       console.log("asdf");
     } catch (error) {
       console.error("Error:", error);
@@ -295,18 +310,18 @@ const EditMovie = ({ title }) => {
   };
 
   return (
-    <div className="tw-pt-5 tw-px-5">
+    <div className="tw-pt-5 tw-px-2">
       {isLoading && (
         <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
 
-      <div className="tw-mx-5">
-        <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
+      <div className="tw-mx-2">
+        <h1 className="tw-font-bold tw-text-slate-500 tw-mb-2">{title}</h1>
 
         <form onSubmit={handleSubmit}>
-          <div className="tw-p-6 tw-bg-white">
+          <div className="tw-p-4 tw-bg-white">
             <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
               <div className="tw-text-lg tw-font-bold">Create Movie</div>
               <Link
@@ -319,7 +334,7 @@ const EditMovie = ({ title }) => {
 
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <div>Search Movie By TMDB ID</div>
+                <div className="tw-text-slate-800">Search Movie By TMDB ID</div>
                 <label className="toggle-switch">
                   <input
                     type="checkbox"
@@ -332,36 +347,42 @@ const EditMovie = ({ title }) => {
               </div>
               {searchByToggle ? (
                 <div className="tw-flex tw-flex-col">
-                  <label htmlFor="movieName">Movie Name:</label>
+                  <label htmlFor="movieName" className="tw-text-slate-800">
+                    Movie Name:
+                  </label>
                   <input
                     type="text"
                     id="movieName"
                     value={movieTitle}
                     onChange={(e) => setMovieTitle(e.target.value)}
-                    className="tw-p-2 tw-text-sm"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     placeholder="Enter Movie Title"
                   />
                 </div>
               ) : (
                 <div className="tw-flex tw-flex-col">
-                  <label htmlFor="movieTMDB">Movie TMDB ID:</label>
+                  <label htmlFor="movieTMDB" className="tw-text-slate-800">
+                    Movie TMDB ID:
+                  </label>
                   <input
                     id="movieTMDB"
                     type="text"
-                    value={movieTmdbId}
-                    onChange={(e) => setMovieTmdbId(e.target.value)}
-                    className="tw-p-2 tw-text-sm"
+                    value={movieID}
+                    onChange={(e) => setMovieID(e.target.value)}
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     placeholder="Enter TMDB ID"
                   />
                 </div>
               )}
 
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="movieSlug">Movie Slug:</label>
+                <label htmlFor="movieSlug" className="tw-text-slate-800">
+                  Movie Slug:
+                </label>
                 <input
                   type="text"
                   id="movieSlug"
-                  className="tw-p-2 tw-text-sm"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   value={movieSlug}
                   onChange={(e) => setMovieSlug(e.target.value)}
                   placeholder="Enter Movie Slug"
@@ -370,7 +391,7 @@ const EditMovie = ({ title }) => {
             </div>
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <div>Upcoming Movie?:</div>
+                <div className="tw-text-slate-800">Upcoming Movie?:</div>
                 <label htmlFor="upcomingMovie" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -384,7 +405,7 @@ const EditMovie = ({ title }) => {
               </div>
               {isUpcoming ? (
                 <div className="tw-flex tw-flex-col">
-                  <label>Upcoming Date:</label>
+                  <label className="tw-text-slate-800">Upcoming Date:</label>
                   <input
                     type="date"
                     value={upcomingDate}
@@ -394,14 +415,14 @@ const EditMovie = ({ title }) => {
               ) : (
                 <>
                   <div className="tw-flex tw-flex-col">
-                    <label htmlFor="videoType">Video Type:</label>
+                    <label htmlFor="videoType" className="tw-text-slate-800">
+                      Video Type:
+                    </label>
                     <select
                       id="videoType"
-                      // value={videoUpload}
-                      // onChange={handleVideoUploadChange}
                       value={selectedOption}
-                      onChange={handleSelectChange}
-                      className="tw-p-2 tw-text-sm"
+                      onChange={(e) => setSelectedOption(e.target.value)}
+                      className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     >
                       <option value="url">
                         Customer URL/Youtube URL/Vimeo URL
@@ -414,25 +435,27 @@ const EditMovie = ({ title }) => {
                   </div>
                   {selectedOption === "url" ? (
                     <div className="tw-flex tw-flex-col">
-                      <label htmlFor="iframeUrl">
+                      <label htmlFor="iframeUrl" className="tw-text-slate-800">
                         Enter Custom URL or Vimeo or Youtube URL:
                       </label>
                       <input
                         type="text"
                         id="iframeUrl"
-                        className="tw-p-2 tw-text-sm"
+                        className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                         placeholder="Enter Custom URL or Vimeo or Youtube URL"
                       />
                     </div>
                   ) : selectedOption === "upload" ? (
                     <>
                       <div className="tw-flex tw-flex-col">
-                        <label htmlFor="upload">Upload Video:</label>
+                        <label htmlFor="upload" className="tw-text-slate-800">
+                          Upload Video:
+                        </label>
                         <input
                           type="text"
                           id="upload"
                           value={selectKey}
-                          className="tw-p-2 tw-text-sm"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                           placeholder="Choose A Video"
                         />
                       </div>
@@ -451,11 +474,13 @@ const EditMovie = ({ title }) => {
                   ) : (
                     <>
                       <div className="tw-flex tw-flex-col">
-                        <label htmlFor="url_360">Upload Video in 360p:</label>
+                        <label htmlFor="url_360" className="tw-text-slate-800">
+                          Upload Video in 360p:
+                        </label>
                         <input
                           type="text"
                           id="url_360"
-                          className="tw-p-2 tw-text-sm"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                           placeholder="Choose A Video"
                         />
                       </div>
@@ -471,11 +496,13 @@ const EditMovie = ({ title }) => {
                         </button>
                       </div>
                       <div className="tw-flex tw-flex-col">
-                        <label htmlFor="url_480">Upload Video in 480p:</label>
+                        <label htmlFor="url_480" className="tw-text-slate-800">
+                          Upload Video in 480p:
+                        </label>
                         <input
                           type="text"
                           id="url_480"
-                          className="tw-p-2 tw-text-sm"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                           placeholder="Choose A Video"
                         />
                       </div>
@@ -491,10 +518,12 @@ const EditMovie = ({ title }) => {
                         </button>
                       </div>
                       <div className="tw-flex tw-flex-col">
-                        <label htmlFor="url_720">Upload Video in 720p:</label>
+                        <label htmlFor="url_720" className="tw-text-slate-800">
+                          Upload Video in 720p:
+                        </label>
                         <input
                           type="text"
-                          className="tw-p-2 tw-text-sm"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                           id="url_720"
                           placeholder="Choose A Video"
                         />
@@ -511,11 +540,13 @@ const EditMovie = ({ title }) => {
                         </button>
                       </div>
                       <div className="tw-flex tw-flex-col">
-                        <label htmlFor="url_1080">Upload Video in 1080p:</label>
+                        <label htmlFor="url_1080" className="tw-text-slate-800">
+                          Upload Video in 1080p:
+                        </label>
                         <input
                           type="text"
                           id="url_1080"
-                          className="tw-p-2 tw-text-sm"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                           placeholder="Choose A Video"
                         />
                       </div>
@@ -541,12 +572,14 @@ const EditMovie = ({ title }) => {
                 <input type="text" id="audioLanguages" placeholder="" />
               </div> */}
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="maturityRating">Maturity Rating:</label>
+                <label htmlFor="maturityRating" className="tw-text-slate-800">
+                  Maturity Rating:
+                </label>
                 <select
                   id="maturityRating"
                   value={selectedMaturity}
                   onChange={(e) => setSelectedMaturity(e.target.value)}
-                  className="tw-p-2 tw-text-sm cursor-pointer"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1 cursor-pointer"
                 >
                   <option value="all age">All Age</option>
                   <option value="18+">18+</option>
@@ -559,13 +592,15 @@ const EditMovie = ({ title }) => {
                 </select>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="country">Country:</label>
+                <label htmlFor="country" className="tw-text-slate-800">
+                  Country:
+                </label>
                 <select
                   id="country"
                   value={selectedCountry}
                   multiple
                   onChange={(e) => setSelectedCountry(e.target.value)}
-                  className="tw-p-2 tw-text-sm cursor-pointer"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1 cursor-pointer"
                 >
                   <option value=""></option>
                   {COUNTRY.map((country, key) => (
@@ -576,30 +611,36 @@ const EditMovie = ({ title }) => {
                 </select>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="metaKeyword">Meta Keyword:</label>
+                <label htmlFor="metaKeyword" className="tw-text-slate-800">
+                  Meta Keyword:
+                </label>
                 <input
                   type="text"
                   id="metaKeyword"
+                  placeholder="Enter Meta Keyword"
                   value={metaKeyWord}
                   onChange={(e) => setMetaKeyWord(e.target.value)}
-                  className="tw-p-2 tw-text-sm"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                 />
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="metaDescription">Meta Description:</label>
+                <label htmlFor="metaDescription" className="tw-text-slate-800">
+                  Meta Description:
+                </label>
                 <textarea
                   name=""
                   id="metaDescription"
                   value={metaDesc}
                   onChange={(e) => setMetaDesc(e.target.value)}
-                  className="tw-p-2 tw-text-sm"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   cols="30"
+                  rows="3"
                 ></textarea>
               </div>
             </div>
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <div>Series:</div>
+                <div className="tw-text-slate-800">Series:</div>
                 <label htmlFor="series" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -611,7 +652,7 @@ const EditMovie = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <div>Featured:</div>
+                <div className="tw-text-slate-800">Featured:</div>
                 <label htmlFor="featured" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -623,7 +664,7 @@ const EditMovie = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <div>Subtitle:</div>
+                <div className="tw-text-slate-800">Subtitle:</div>
                 <label htmlFor="subtitle" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -635,7 +676,7 @@ const EditMovie = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <div>Protected Video?:</div>
+                <div className="tw-text-slate-800">Protected Video?:</div>
                 <label htmlFor="protectedVideo" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -647,7 +688,9 @@ const EditMovie = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <div>Choose Custom Thumbnail and Poster:</div>
+                <div className="tw-text-slate-800">
+                  Choose Custom Thumbnail and Poster:
+                </div>
                 <label htmlFor="customThumbnail" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -658,7 +701,9 @@ const EditMovie = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="selectMenu">Select Menu*:</label>
+                <label htmlFor="selectMenu" className="tw-text-slate-800">
+                  Select Menu*:
+                </label>
                 <input
                   type="checkbox"
                   id="selectMenu"
@@ -669,8 +714,10 @@ const EditMovie = ({ title }) => {
 
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <label>More Details: TMDB Or Custom?</label>
-                <div className="radio-group">
+                <label className="tw-text-slate-800">
+                  More Details: TMDB Or Custom?
+                </label>
+                <div className="tw-flex tw-mt-3">
                   <div>
                     <input
                       type="radio"
@@ -681,7 +728,14 @@ const EditMovie = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "tmdb"}
                     />
-                    <label htmlFor="tmdb" className="button-style">
+                    <label
+                      htmlFor="tmdb"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "tmdb"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       TMDB
                     </label>
                   </div>
@@ -695,31 +749,46 @@ const EditMovie = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "custom"}
                     />
-                    <label htmlFor="custom" className="button-style">
+                    <label
+                      htmlFor="custom"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "custom"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       Custom
                     </label>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="form-block-myanmar">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-col">
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="descriptionSource">Get Description From:</label>
-                <input
-                  type="text"
-                  id="descriptionSource"
-                  className="tw-p-2 tw-text-sm"
-                />
+                <label
+                  htmlFor="descriptionSource"
+                  className="tw-text-slate-800"
+                >
+                  Get Description From:
+                </label>
+                <select>
+                  <option selected>Select</option>
+                  <option>Channel Myanmar</option>
+                </select>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="descriptionMyanmar">
+                <label
+                  htmlFor="descriptionMyanmar"
+                  className="tw-text-slate-800"
+                >
                   Description in Myanmar:
                 </label>
                 <textarea
                   name=""
                   id="descriptionMyanmar"
-                  className="tw-p-2 tw-text-sm"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   cols="30"
+                  rows="3"
                   value={myanDesc}
                   onChange={(e) => setMyanDesc(e.target.value)}
                 ></textarea>

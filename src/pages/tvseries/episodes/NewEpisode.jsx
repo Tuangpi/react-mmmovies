@@ -254,21 +254,21 @@ const NewEpisode = ({ title }) => {
   };
 
   return (
-    <div className="tw-pt-5 tw-px-5">
+    <div className="tw-pt-5 tw-px-2">
       {isLoading && (
         <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
-      <div className="tw-mx-5">
+      <div className="tw-mx-2">
         <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
-        <div className="new-episode-container">
-          <div className="right-side">
-            <div className="right-header">
-              <div className="right-header-title">Manage Season Of Series</div>
+        <div className="tw-flex tw-justify-between tw-bg-white tw-p-1 tw-w-full">
+          <div className="tw-p-2 tw-w-[56%]">
+            <div className="tw-text-slate-600">Manage Season Of Series</div>
+            <div className="tw-flex tw-justify-between tw-mt-2 tw-flex-wrap">
               <Link
                 to={`/tvseries/${tvSeriesId}/season`}
-                className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+                className="tw-py-1 tw-px-2 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
               >
                 Back
               </Link>
@@ -276,44 +276,61 @@ const NewEpisode = ({ title }) => {
                 docName={STATIC_WORDS.EPISODES}
                 isLoading={handleIsLoading}
               />
-              <div className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50">
+              <div className="tw-py-1 tw-px-2 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50">
                 Add Episode
               </div>
             </div>
             {edit ? (
-              <form onSubmit={handleSubmitEdit}>
-                <div className="season-no">
-                  <label htmlFor="episodeTitle">Episode Title</label>
+              <form
+                onSubmit={handleSubmitEdit}
+                className="tw-bg-slate-300 tw-p-2 tw-mt-2 tw-pt-1 tw-rounded-md"
+              >
+                <div className="tw-flex tw-flex-col">
+                  <label
+                    htmlFor="episodeTitle"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Episode Title
+                  </label>
                   <input
                     id="episodeTitle"
                     type="text"
+                    placeholder="Enter Episode Title"
                     value={episodeTitle}
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     onChange={(e) => setEpisodeTitle(e.target.value)}
                   />
-                </div>
-                <div className="season-no">
-                  <label htmlFor="episodeNo">Episode No.</label>
+                  <label
+                    htmlFor="episodeNo"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Episode No.
+                  </label>
                   <input
                     id="episodeNo"
                     type="number"
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
+                    placeholder="Enter Episode Number"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     value={episodeNumber}
                     onChange={(e) => setEpisodeNumber(e.target.value)}
                   />
-                </div>
-                <div className="season-slug">
-                  <label htmlFor="duration">Duration</label>
+                  <label
+                    htmlFor="duration"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Duration
+                  </label>
                   <input
                     id="duration"
+                    placeholder="Enter Duration"
                     type="text"
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
                   />
-                </div>
-                <div className="custom-thumbnail">
-                  <div>Choose Custom Thumbnail and Poster</div>
+                  <div className="tw-text-slate-800 tw-pt-2">
+                    Choose Custom Thumbnail and Poster
+                  </div>
                   <label htmlFor="customThumbnail" className="toggle-switch">
                     <input
                       type="checkbox"
@@ -324,12 +341,17 @@ const NewEpisode = ({ title }) => {
                   </label>
                 </div>
 
-                <div className="form-block-inside">
-                  <label htmlFor="videoType">Video Type:</label>
+                <div className="tw-flex tw-flex-col">
+                  <label
+                    htmlFor="videoType"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Video Type:
+                  </label>
                   <select
                     id="videoType"
                     onChange={(e) => setSelectedOption(e.target.value)}
-                    className="p-2 text-sm cursor-pointer"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   >
                     <option value="url">
                       Customer URL/Youtube URL/Vimeo URL
@@ -341,59 +363,72 @@ const NewEpisode = ({ title }) => {
                   </select>
                 </div>
                 {selectedOption === "url" ? (
-                  <div className="form-block-inside">
-                    <label htmlFor="iframeUrl">
+                  <div className="tw-flex tw-flex-col">
+                    <label
+                      htmlFor="iframeUrl"
+                      className="tw-text-slate-800 tw-pt-2"
+                    >
                       Enter Custom URL or Vimeo or Youtube URL:
                     </label>
                     <input
                       type="text"
                       id="iframeUrl"
                       onChange={(e) => setCustomURL(e.target.value)}
-                      className="p-2 text-sm"
+                      className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                       placeholder="Enter Custom URL or Vimeo or Youtube URL"
                     />
                   </div>
                 ) : selectedOption === "upload" ? (
-                  <>
-                    <div className="form-block-inside">
-                      <label htmlFor="upload">Upload Video:</label>
+                  <div className="tw-flex tw-gap-x-4 tw-flex-wrap tw-items-center">
+                    <div className="tw-flex tw-flex-col">
+                      <label
+                        htmlFor="upload"
+                        className="tw-text-slate-800 tw-pt-2"
+                      >
+                        Upload Video:
+                      </label>
                       <input
                         type="text"
                         id="upload"
                         value={selectKey}
                         onChange={(e) => setSelectKey(e.target.value)}
                         placeholder="Choose A Video"
-                        className="p-2 text-sm"
+                        className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                       />
                     </div>
-                    <div className="form-block-inside">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowModal(true);
-                          setObjectKey("tvshow_upload_wasabi/");
-                        }}
-                      >
-                        Choose A Video
-                      </button>
-                    </div>
-                  </>
+                    <button
+                      type="button"
+                      className="tw-bg-slate-600 tw-text-slate-50 tw-px-2 tw-py-1 tw-border-none tw-outline-none"
+                      onClick={() => {
+                        setShowModal(true);
+                        setObjectKey("tvshow_upload_wasabi/");
+                      }}
+                    >
+                      Choose A Video
+                    </button>
+                  </div>
                 ) : (
                   <>
-                    <div className="form-block-inside">
-                      <label htmlFor="url_360">Upload Video in 360p:</label>
-                      <input
-                        type="text"
-                        value={selectKey}
-                        onChange={(e) => setSelectKey(e.target.value)}
-                        placeholder="Choose A Video"
-                        className="p-2 text-sm"
-                        id="url_360"
-                      />
-                    </div>
-                    <div className="form-block-inside">
+                    <div className="tw-flex tw-gap-x-4 tw-flex-wrap tw-items-center">
+                      <div className="tw-flex tw-flex-col">
+                        <label
+                          htmlFor="url_360"
+                          className="tw-text-slate-800 tw-pt-2"
+                        >
+                          Upload Video in 360p:
+                        </label>
+                        <input
+                          type="text"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
+                          placeholder="Choose A Video"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                          id="url_360"
+                        />
+                      </div>
                       <button
                         type="button"
+                        className="tw-bg-slate-600 tw-text-slate-50 tw-px-2 tw-py-1 tw-border-none tw-outline-none"
                         onClick={() => {
                           setShowModal(true);
                           setObjectKey("tvshow_upload_wasabi/url_360/");
@@ -402,20 +437,26 @@ const NewEpisode = ({ title }) => {
                         Choose A Video
                       </button>
                     </div>
-                    <div className="form-block-inside">
-                      <label htmlFor="url_480">Upload Video in 480p:</label>
-                      <input
-                        id="url_480"
-                        type="text"
-                        value={selectKey}
-                        onChange={(e) => setSelectKey(e.target.value)}
-                        placeholder="Choose A Video"
-                        className="p-2 text-sm"
-                      />
-                    </div>
-                    <div className="form-block-inside">
+                    <div className="tw-flex tw-gap-x-4 tw-flex-wrap tw-items-center">
+                      <div className="tw-flex tw-flex-col">
+                        <label
+                          htmlFor="url_480"
+                          className="tw-text-slate-800 tw-pt-2"
+                        >
+                          Upload Video in 480p:
+                        </label>
+                        <input
+                          id="url_480"
+                          type="text"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
+                          placeholder="Choose A Video"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                        />
+                      </div>
                       <button
                         type="button"
+                        className="tw-bg-slate-600 tw-text-slate-50 tw-px-2 tw-py-1 tw-border-none tw-outline-none"
                         onClick={() => {
                           setShowModal(true);
                           setObjectKey("tvshow_upload_wasabi/url_480/");
@@ -424,20 +465,26 @@ const NewEpisode = ({ title }) => {
                         Choose A Video
                       </button>
                     </div>
-                    <div className="form-block-inside">
-                      <label htmlFor="url_720">Upload Video in 720p:</label>
-                      <input
-                        type="text"
-                        value={selectKey}
-                        onChange={(e) => setSelectKey(e.target.value)}
-                        placeholder="Choose A Video"
-                        className="p-2 text-sm"
-                        id="url_720"
-                      />
-                    </div>
-                    <div className="form-block-inside">
+                    <div className="tw-flex tw-gap-x-4 tw-flex-wrap tw-items-center">
+                      <div className="tw-flex tw-flex-col">
+                        <label
+                          htmlFor="url_720"
+                          className="tw-text-slate-800 tw-pt-2"
+                        >
+                          Upload Video in 720p:
+                        </label>
+                        <input
+                          type="text"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
+                          placeholder="Choose A Video"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                          id="url_720"
+                        />
+                      </div>
                       <button
                         type="button"
+                        className="tw-bg-slate-600 tw-text-slate-50 tw-px-2 tw-py-1 tw-border-none tw-outline-none"
                         onClick={() => {
                           setShowModal(true);
                           setObjectKey("tvshow_upload_wasabi/url_720/");
@@ -446,20 +493,26 @@ const NewEpisode = ({ title }) => {
                         Choose A Video
                       </button>
                     </div>
-                    <div className="form-block-inside">
-                      <label htmlFor="url_1080">Upload Video in 1080p:</label>
-                      <input
-                        type="text"
-                        value={selectKey}
-                        onChange={(e) => setSelectKey(e.target.value)}
-                        placeholder="Choose A Video"
-                        className="p-2 text-sm"
-                        id="url_1080"
-                      />
-                    </div>
-                    <div className="form-block-inside">
+                    <div className="tw-flex tw-gap-x-4 tw-flex-wrap tw-items-center">
+                      <div className="tw-flex tw-flex-col">
+                        <label
+                          htmlFor="url_1080"
+                          className="tw-text-slate-800 tw-pt-2"
+                        >
+                          Upload Video in 1080p:
+                        </label>
+                        <input
+                          type="text"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
+                          placeholder="Choose A Video"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                          id="url_1080"
+                        />
+                      </div>
                       <button
                         type="button"
+                        className="tw-bg-slate-600 tw-text-slate-50 tw-px-2 tw-py-1 tw-border-none tw-outline-none"
                         onClick={() => {
                           setShowModal(true);
                           setObjectKey("tvshow_upload_wasabi/url_1080/");
@@ -472,7 +525,7 @@ const NewEpisode = ({ title }) => {
                 )}
 
                 <div className="protected">
-                  <div>Subtitle</div>
+                  <div className="tw-text-slate-800 tw-pt-2">Subtitle</div>
                   <label htmlFor="subtitle" className="toggle-switch">
                     <input
                       type="checkbox"
@@ -482,8 +535,10 @@ const NewEpisode = ({ title }) => {
                     <span className="slider"></span>
                   </label>
                 </div>
-                <div>Want IMDB Ratings And More Or Custom?</div>
-                <div style={{ display: "flex" }}>
+                <div className="tw-text-slate-800 tw-pt-2">
+                  Want IMDB Ratings And More Or Custom?
+                </div>
+                <div className="tw-flex tw-gap-x-2 tw-pt-2">
                   <div>
                     <input
                       type="radio"
@@ -494,7 +549,14 @@ const NewEpisode = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "tmdb"}
                     />
-                    <label htmlFor="tmdb" className="button-style">
+                    <label
+                      htmlFor="tmdb"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "tmdb"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       TMDB
                     </label>
                   </div>
@@ -508,57 +570,81 @@ const NewEpisode = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "custom"}
                     />
-                    <label htmlFor="custom" className="button-style">
+                    <label
+                      htmlFor="custom"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "custom"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       Custom
                     </label>
                   </div>
                 </div>
-                <div className="bottom-create">
+                <div className="tw-flex tw-gap-x-2 tw-my-5">
                   <button
                     type="reset"
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded mr-6"
+                    className="tw-bg-red-500 hover:tw-bg-red-700 tw-text-white tw-font-bold tw-py-1 tw-px-4 tw-rounded-sm tw-w-full"
                   >
                     Reset
                   </button>
                   <button
                     type="submit"
-                    className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+                    className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-sm tw-w-full tw-text-slate-50"
                   >
                     Edit
                   </button>
                 </div>
               </form>
             ) : (
-              <form onSubmit={handleSubmit}>
-                <div className="season-no">
-                  <label htmlFor="episodeTitle">Episode Title</label>
+              <form
+                onSubmit={handleSubmit}
+                className="tw-bg-slate-300 tw-p-2 tw-mt-2 tw-pt-1 tw-rounded-md"
+              >
+                <div className="tw-flex tw-flex-col">
+                  <label
+                    htmlFor="episodeTitle"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Episode Title
+                  </label>
                   <input
                     id="episodeTitle"
                     type="text"
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
+                    placeholder="Enter Episode Title"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     onChange={(e) => setEpisodeTitle(e.target.value)}
                   />
-                </div>
-                <div className="season-no">
-                  <label htmlFor="episodeNo">Episode No.</label>
+                  <label
+                    htmlFor="episodeNo"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Episode No.
+                  </label>
                   <input
                     id="episodeNo"
+                    placeholder="Enter Episode Number"
                     type="number"
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     onChange={(e) => setEpisodeNumber(e.target.value)}
                   />
-                </div>
-                <div className="season-slug">
-                  <label htmlFor="duration">Duration</label>
+                  <label
+                    htmlFor="duration"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Duration
+                  </label>
                   <input
                     id="duration"
                     type="text"
-                    className="tw-shadow tw-appearance-none tw-border tw-rounded tw-w-full tw-py-2 tw-px-3 tw-text-gray-700 tw-leading-tight focus:tw-outline-none focus:tw-shadow-outline"
+                    placeholder="Enter Episode Duration"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                     onChange={(e) => setDuration(e.target.value)}
                   />
-                </div>
-                <div className="custom-thumbnail">
-                  <div>Choose Custom Thumbnail and Poster</div>
+                  <div className="tw-text-slate-800 tw-pt-2">
+                    Choose Custom Thumbnail and Poster
+                  </div>
                   <label htmlFor="customThumbnail" className="toggle-switch">
                     <input
                       type="checkbox"
@@ -569,12 +655,17 @@ const NewEpisode = ({ title }) => {
                   </label>
                 </div>
 
-                <div className="form-block-inside">
-                  <label htmlFor="videoType">Video Type:</label>
+                <div className="tw-flex tw-flex-col">
+                  <label
+                    htmlFor="videoType"
+                    className="tw-text-slate-800 tw-pt-2"
+                  >
+                    Video Type:
+                  </label>
                   <select
                     id="videoType"
                     onChange={(e) => setSelectedOption(e.target.value)}
-                    className="p-2 text-sm cursor-pointer"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   >
                     <option value="url">
                       Customer URL/Youtube URL/Vimeo URL
@@ -586,34 +677,43 @@ const NewEpisode = ({ title }) => {
                   </select>
                 </div>
                 {selectedOption === "url" ? (
-                  <div className="form-block-inside">
-                    <label htmlFor="iframeUrl">
+                  <div className="tw-flex tw-flex-col">
+                    <label
+                      htmlFor="iframeUrl"
+                      className="tw-text-slate-800 tw-pt-2"
+                    >
                       Enter Custom URL or Vimeo or Youtube URL:
                     </label>
                     <input
                       type="text"
                       id="iframeUrl"
                       onChange={(e) => setCustomURL(e.target.value)}
-                      className="p-2 text-sm"
+                      className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                       placeholder="Enter Custom URL or Vimeo or Youtube URL"
                     />
                   </div>
                 ) : selectedOption === "upload" ? (
                   <>
-                    <div className="form-block-inside">
-                      <label htmlFor="upload">Upload Video:</label>
-                      <input
-                        type="text"
-                        id="upload"
-                        value={selectKey}
-                        onChange={(e) => setSelectKey(e.target.value)}
-                        placeholder="Choose A Video"
-                        className="p-2 text-sm"
-                      />
-                    </div>
-                    <div className="form-block-inside">
+                    <div className="tw-flex tw-gap-x-4 tw-flex-wrap tw-items-center">
+                      <div className="tw-flex tw-flex-col">
+                        <label
+                          htmlFor="upload"
+                          className="tw-text-slate-800 tw-pt-2"
+                        >
+                          Upload Video:
+                        </label>
+                        <input
+                          type="text"
+                          id="upload"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
+                          placeholder="Choose A Video"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                        />
+                      </div>
                       <button
                         type="button"
+                        className="tw-bg-slate-600 tw-text-slate-50 tw-px-2 tw-py-1 tw-border-none tw-outline-none"
                         onClick={() => {
                           setShowModal(true);
                           setObjectKey("tvshow_upload_wasabi/");
@@ -625,20 +725,26 @@ const NewEpisode = ({ title }) => {
                   </>
                 ) : (
                   <>
-                    <div className="form-block-inside">
-                      <label htmlFor="url_360">Upload Video in 360p:</label>
-                      <input
-                        type="text"
-                        value={selectKey}
-                        onChange={(e) => setSelectKey(e.target.value)}
-                        placeholder="Choose A Video"
-                        className="p-2 text-sm"
-                        id="url_360"
-                      />
-                    </div>
-                    <div className="form-block-inside">
+                    <div className="tw-flex tw-gap-x-4 tw-flex-wrap tw-items-center">
+                      <div className="tw-flex tw-flex-col">
+                        <label
+                          htmlFor="url_360"
+                          className="tw-text-slate-800 tw-pt-2"
+                        >
+                          Upload Video in 360p:
+                        </label>
+                        <input
+                          type="text"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
+                          placeholder="Choose A Video"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                          id="url_360"
+                        />
+                      </div>
                       <button
                         type="button"
+                        className="tw-bg-slate-600 tw-text-slate-50 tw-px-2 tw-py-1 tw-border-none tw-outline-none"
                         onClick={() => {
                           setShowModal(true);
                           setObjectKey("tvshow_upload_wasabi/url_360/");
@@ -647,20 +753,27 @@ const NewEpisode = ({ title }) => {
                         Choose A Video
                       </button>
                     </div>
-                    <div className="form-block-inside">
-                      <label htmlFor="url_480">Upload Video in 480p:</label>
-                      <input
-                        id="url_480"
-                        type="text"
-                        value={selectKey}
-                        onChange={(e) => setSelectKey(e.target.value)}
-                        placeholder="Choose A Video"
-                        className="p-2 text-sm"
-                      />
-                    </div>
-                    <div className="form-block-inside">
+
+                    <div className="tw-flex tw-gap-x-4 tw-flex-wrap tw-items-center">
+                      <div className="tw-flex tw-flex-col">
+                        <label
+                          htmlFor="url_480"
+                          className="tw-text-slate-800 tw-pt-2"
+                        >
+                          Upload Video in 480p:
+                        </label>
+                        <input
+                          id="url_480"
+                          type="text"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
+                          placeholder="Choose A Video"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                        />
+                      </div>
                       <button
                         type="button"
+                        className="tw-bg-slate-600 tw-text-slate-50 tw-px-2 tw-py-1 tw-border-none tw-outline-none"
                         onClick={() => {
                           setShowModal(true);
                           setObjectKey("tvshow_upload_wasabi/url_480/");
@@ -669,20 +782,28 @@ const NewEpisode = ({ title }) => {
                         Choose A Video
                       </button>
                     </div>
-                    <div className="form-block-inside">
-                      <label htmlFor="url_720">Upload Video in 720p:</label>
-                      <input
-                        type="text"
-                        value={selectKey}
-                        onChange={(e) => setSelectKey(e.target.value)}
-                        placeholder="Choose A Video"
-                        className="p-2 text-sm"
-                        id="url_720"
-                      />
-                    </div>
-                    <div className="form-block-inside">
+
+                    <div className="tw-flex tw-gap-x-4 tw-flex-wrap tw-items-center">
+                      <div className="tw-flex tw-flex-col">
+                        <label
+                          htmlFor="url_720"
+                          className="tw-text-slate-800 tw-pt-2"
+                        >
+                          Upload Video in 720p:
+                        </label>
+                        <input
+                          type="text"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
+                          placeholder="Choose A Video"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                          id="url_720"
+                        />
+                      </div>
+
                       <button
                         type="button"
+                        className="tw-bg-slate-600 tw-text-slate-50 tw-px-2 tw-py-1 tw-border-none tw-outline-none"
                         onClick={() => {
                           setShowModal(true);
                           setObjectKey("tvshow_upload_wasabi/url_720/");
@@ -691,20 +812,27 @@ const NewEpisode = ({ title }) => {
                         Choose A Video
                       </button>
                     </div>
-                    <div className="form-block-inside">
-                      <label htmlFor="url_1080">Upload Video in 1080p:</label>
-                      <input
-                        type="text"
-                        value={selectKey}
-                        onChange={(e) => setSelectKey(e.target.value)}
-                        placeholder="Choose A Video"
-                        className="p-2 text-sm"
-                        id="url_1080"
-                      />
-                    </div>
-                    <div className="form-block-inside">
+
+                    <div className="tw-flex tw-gap-x-4 tw-flex-wrap tw-items-center">
+                      <div className="tw-flex tw-flex-col">
+                        <label
+                          htmlFor="url_1080"
+                          className="tw-text-slate-800 tw-pt-2"
+                        >
+                          Upload Video in 1080p:
+                        </label>
+                        <input
+                          type="text"
+                          value={selectKey}
+                          onChange={(e) => setSelectKey(e.target.value)}
+                          placeholder="Choose A Video"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
+                          id="url_1080"
+                        />
+                      </div>
                       <button
                         type="button"
+                        className="tw-bg-slate-600 tw-text-slate-50 tw-px-2 tw-py-1 tw-border-none tw-outline-none"
                         onClick={() => {
                           setShowModal(true);
                           setObjectKey("tvshow_upload_wasabi/url_1080/");
@@ -717,7 +845,7 @@ const NewEpisode = ({ title }) => {
                 )}
 
                 <div className="protected">
-                  <div>Subtitle</div>
+                  <div className="tw-text-slate-800 tw-pt-2">Subtitle</div>
                   <label htmlFor="subtitle" className="toggle-switch">
                     <input
                       type="checkbox"
@@ -727,8 +855,10 @@ const NewEpisode = ({ title }) => {
                     <span className="slider"></span>
                   </label>
                 </div>
-                <div>Want IMDB Ratings And More Or Custom?</div>
-                <div style={{ display: "flex" }}>
+                <div className="tw-text-slate-800 tw-pt-2">
+                  Want IMDB Ratings And More Or Custom?
+                </div>
+                <div className="tw-flex tw-gap-x-2 tw-my-5">
                   <div>
                     <input
                       type="radio"
@@ -739,7 +869,14 @@ const NewEpisode = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "tmdb"}
                     />
-                    <label htmlFor="tmdb" className="button-style">
+                    <label
+                      htmlFor="tmdb"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "tmdb"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       TMDB
                     </label>
                   </div>
@@ -753,7 +890,14 @@ const NewEpisode = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "custom"}
                     />
-                    <label htmlFor="custom" className="button-style">
+                    <label
+                      htmlFor="custom"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "custom"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       Custom
                     </label>
                   </div>
@@ -766,16 +910,16 @@ const NewEpisode = ({ title }) => {
                   handleSearch={handleSearch}
                   objects={objects}
                 />
-                <div className="bottom-create">
+                <div className="tw-flex tw-gap-x-2 tw-my-5">
                   <button
                     type="reset"
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded mr-6"
+                    className="tw-bg-red-500 hover:tw-bg-red-700 tw-text-white tw-font-bold tw-py-1 tw-px-4 tw-rounded-sm tw-w-full"
                   >
                     Reset
                   </button>
                   <button
                     type="submit"
-                    className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
+                    className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-sm tw-w-full tw-text-slate-50"
                   >
                     Create
                   </button>
@@ -783,38 +927,48 @@ const NewEpisode = ({ title }) => {
               </form>
             )}
           </div>
-          <div className="left-side">
-            <div className="episode-list">
+          <div className="tw-bg-slate-300 tw-rounded-md tw-w-[44%]">
+            <div className="tw-p-2">
               <table>
-                <thead>
+                <thead className="tw-bg-slate-400">
                   <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>ByTMDB</th>
-                    <th>Duration</th>
-                    <th>Actions</th>
+                    <th className="tw-text-center tw-px-2">#</th>
+                    <th className="tw-text-center tw-px-2">Title</th>
+                    <th className="tw-text-center tw-px-2">ByTMDB</th>
+                    <th className="tw-text-center tw-px-2">Duration</th>
+                    <th className="tw-text-center tw-px-2">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.length > 0 &&
-                    data.map((doc) => (
+                    data.map((doc, id) => (
                       <>
                         <tr>
-                          <td className="cell">1</td>
-                          <td className="cell">{doc.data.title}</td>
-                          <td className="cell">{doc.data.tmdb}</td>
-                          <td className="cell">{doc.data.duration} mins</td>
-                          <td className="cell">
+                          <td className="tw-text-center tw-align-middle">
+                            {id + 1}
+                          </td>
+                          <td className="tw-text-center tw-align-middle">
+                            {doc.data.title}
+                          </td>
+                          <td className="tw-text-center tw-align-middle">
+                            {doc.data.tmdb}
+                          </td>
+                          <td className="tw-text-center tw-align-middle">
+                            {doc.data.duration} mins
+                          </td>
+                          <td className="tw-text-center tw-align-middle">
                             <Edit
                               onClick={() => {
                                 setEdit((preEdit) => !preEdit);
                                 handleEdit(doc.id);
                               }}
-                              style={{ cursor: "pointer" }}
+                              className="tw-cursor-pointer tw-px-1"
+                              style={{ fontSize: "28px" }}
                             />
                             <Delete
-                              className="delete"
                               onClick={() => handleDelete(doc.id)}
+                              className="tw-text-red-500 tw-cursor-pointer tw-px-1"
+                              style={{ fontSize: "28px" }}
                             />
                           </td>
                         </tr>

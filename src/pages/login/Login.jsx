@@ -82,9 +82,7 @@ const Login = () => {
                 Sign in
               </button>
             </div>
-            {error && (
-              <span className="tw-text-red-700">Wrong email or password!</span>
-            )}
+            {error && <span className="tw-text-red-700">{error}</span>}
           </form>
         </div>
       </div>

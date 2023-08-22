@@ -110,7 +110,7 @@ const ActorLists = () => {
   };
   console.log(data);
   return (
-    <div className="tw-pt-5 tw-px-5">
+    <div className="tw-pt-5 tw-px-2">
       {isLoading && (
         <div className="tw-m-auto tw-mt-56">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />

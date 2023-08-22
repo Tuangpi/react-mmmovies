@@ -274,16 +274,16 @@ const NewMovie = ({ title }) => {
   };
 
   return (
-    <div className="tw-pt-5 tw-px-5">
+    <div className="tw-pt-5 tw-px-2">
       {isLoading && (
         <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
-      <div className="tw-mx-5">
-        <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
+      <div className="tw-mx-2">
+        <h1 className="tw-font-bold tw-text-slate-500 tw-mb-2">{title}</h1>
         <form onSubmit={handleSubmit}>
-          <div className="tw-p-6 tw-bg-white">
+          <div className="tw-p-4 tw-bg-white">
             <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
               <div className="tw-text-lg tw-font-bold">Create Movie</div>
               <Link
@@ -296,13 +296,12 @@ const NewMovie = ({ title }) => {
 
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <div>Search Movie By TMDB ID</div>
+                <div className="tw-text-slate-800">Search Movie By TMDB ID</div>
                 <label className="toggle-switch">
                   <input
                     type="checkbox"
                     checked={searchByToggle}
                     onChange={handleSearchByToggle}
-                    className="p-2 text-sm"
                   />
 
                   <span className="slider"></span>
@@ -310,43 +309,49 @@ const NewMovie = ({ title }) => {
               </div>
               {searchByToggle ? (
                 <div className="tw-flex tw-flex-col">
-                  <label htmlFor="movieName">Movie Name:</label>
+                  <label htmlFor="movieName" className="tw-text-slate-800">
+                    Movie Name:
+                  </label>
                   <input
                     type="text"
                     id="movieName"
                     onChange={(e) => setMovieTitle(e.target.value)}
                     placeholder="Enter Movie Title"
-                    className="p-2 text-sm"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   />
                 </div>
               ) : (
                 <div className="tw-flex tw-flex-col">
-                  <label htmlFor="movieTMDB">Movie TMDB ID:</label>
+                  <label htmlFor="movieTMDB" className="tw-text-slate-800">
+                    Movie TMDB ID:
+                  </label>
                   <input
                     id="movieTMDB"
                     type="text"
                     onChange={(e) => setMovieID(e.target.value)}
                     placeholder="Enter TMDB ID"
-                    className="p-2 text-sm"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   />
                 </div>
               )}
 
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="movieSlug">Movie Slug:</label>
+                <label htmlFor="movieSlug" className="tw-text-slate-800">
+                  Movie Slug:
+                </label>
                 <input
                   type="text"
                   id="movieSlug"
                   onChange={(e) => setMovieSlug(e.target.value)}
                   placeholder="Enter Movie Slug"
-                  className="p-2 text-sm"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   required
                 />
               </div>
             </div>
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <div>Upcoming Movie?:</div>
+                <div className="tw-text-slate-800">Upcoming Movie?:</div>
                 <label htmlFor="upcomingMovie" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -360,21 +365,26 @@ const NewMovie = ({ title }) => {
               </div>
               {isUpcoming ? (
                 <div className="tw-flex tw-flex-col">
-                  <label>Upcoming Date:</label>
+                  <label htmlFor="upcoming" className="tw-text-slate-800">
+                    Upcoming Date:
+                  </label>
                   <input
+                    id="upcoming"
                     type="date"
                     onChange={(e) => setUpcomingDate(e.target.value)}
-                    className="p-2 text-sm"
+                    className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   />
                 </div>
               ) : (
                 <>
                   <div className="tw-flex tw-flex-col">
-                    <label htmlFor="videoType">Video Type:</label>
+                    <label htmlFor="videoType" className="tw-text-slate-800">
+                      Video Type:
+                    </label>
                     <select
                       id="videoType"
                       onChange={(e) => setSelectedOption(e.target.value)}
-                      className="p-2 text-sm cursor-pointer"
+                      className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1 cursor-pointer"
                     >
                       <option value="url">
                         Customer URL/Youtube URL/Vimeo URL
@@ -387,28 +397,30 @@ const NewMovie = ({ title }) => {
                   </div>
                   {selectedOption === "url" ? (
                     <div className="tw-flex tw-flex-col">
-                      <label htmlFor="iframeUrl">
+                      <label htmlFor="iframeUrl" className="tw-text-slate-800">
                         Enter Custom URL or Vimeo or Youtube URL:
                       </label>
                       <input
                         type="text"
                         id="iframeUrl"
                         onChange={(e) => setCustomURL(e.target.value)}
-                        className="p-2 text-sm"
+                        className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                         placeholder="Enter Custom URL or Vimeo or Youtube URL"
                       />
                     </div>
                   ) : selectedOption === "upload" ? (
                     <>
                       <div className="tw-flex tw-flex-col">
-                        <label htmlFor="upload">Upload Video:</label>
+                        <label htmlFor="upload" className="tw-text-slate-800">
+                          Upload Video:
+                        </label>
                         <input
                           type="text"
                           id="upload"
                           value={selectKey}
                           onChange={(e) => setSelectKey(e.target.value)}
                           placeholder="Choose A Video"
-                          className="p-2 text-sm"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                         />
                       </div>
                       <div className="tw-flex tw-flex-col">
@@ -426,13 +438,15 @@ const NewMovie = ({ title }) => {
                   ) : (
                     <>
                       <div className="tw-flex tw-flex-col">
-                        <label htmlFor="url_360">Upload Video in 360p:</label>
+                        <label htmlFor="url_360" className="tw-text-slate-800">
+                          Upload Video in 360p:
+                        </label>
                         <input
                           type="text"
                           value={selectKey}
                           onChange={(e) => setSelectKey(e.target.value)}
                           placeholder="Choose A Video"
-                          className="p-2 text-sm"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                           id="url_360"
                         />
                       </div>
@@ -448,14 +462,16 @@ const NewMovie = ({ title }) => {
                         </button>
                       </div>
                       <div className="tw-flex tw-flex-col">
-                        <label htmlFor="url_480">Upload Video in 480p:</label>
+                        <label htmlFor="url_480" className="tw-text-slate-800">
+                          Upload Video in 480p:
+                        </label>
                         <input
                           id="url_480"
                           type="text"
                           value={selectKey}
                           onChange={(e) => setSelectKey(e.target.value)}
                           placeholder="Choose A Video"
-                          className="p-2 text-sm"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                         />
                       </div>
                       <div className="tw-flex tw-flex-col">
@@ -470,13 +486,15 @@ const NewMovie = ({ title }) => {
                         </button>
                       </div>
                       <div className="tw-flex tw-flex-col">
-                        <label htmlFor="url_720">Upload Video in 720p:</label>
+                        <label htmlFor="url_720" className="tw-text-slate-800">
+                          Upload Video in 720p:
+                        </label>
                         <input
                           type="text"
                           value={selectKey}
                           onChange={(e) => setSelectKey(e.target.value)}
                           placeholder="Choose A Video"
-                          className="p-2 text-sm"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                           id="url_720"
                         />
                       </div>
@@ -492,13 +510,15 @@ const NewMovie = ({ title }) => {
                         </button>
                       </div>
                       <div className="tw-flex tw-flex-col">
-                        <label htmlFor="url_1080">Upload Video in 1080p:</label>
+                        <label htmlFor="url_1080" className="tw-text-slate-800">
+                          Upload Video in 1080p:
+                        </label>
                         <input
                           type="text"
                           value={selectKey}
                           onChange={(e) => setSelectKey(e.target.value)}
                           placeholder="Choose A Video"
-                          className="p-2 text-sm"
+                          className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                           id="url_1080"
                         />
                       </div>
@@ -520,11 +540,13 @@ const NewMovie = ({ title }) => {
             </div>
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="maturityRating">Maturity Rating:</label>
+                <label htmlFor="maturityRating" className="tw-text-slate-800">
+                  Maturity Rating:
+                </label>
                 <select
                   id="maturityRating"
                   onChange={(e) => setSelectedMaturity(e.target.value)}
-                  className="p-2 text-sm cursor-pointer"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1 cursor-pointer"
                 >
                   <option value="all age">All Age</option>
                   <option value="18+">18+</option>
@@ -537,13 +559,15 @@ const NewMovie = ({ title }) => {
                 </select>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="country">Country:</label>
+                <label htmlFor="country" className="tw-text-slate-800">
+                  Country:
+                </label>
                 <select
                   id="country"
                   value={selectedCountry}
                   multiple
                   onChange={(e) => setSelectedCountry(e.target.value)}
-                  className="p-2 text-sm cursor-pointer"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1 cursor-pointer"
                 >
                   <option value=""></option>
                   {COUNTRY.map((country, key) => (
@@ -554,29 +578,34 @@ const NewMovie = ({ title }) => {
                 </select>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="metaKeyword">Meta Keyword:</label>
+                <label htmlFor="metaKeyword" className="tw-text-slate-800">
+                  Meta Keyword:
+                </label>
                 <input
                   type="text"
+                  placeholder="Enter Meta Keyword"
                   id="metaKeyword"
-                  className="p-2 text-sm"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   onChange={(e) => setMetaKeyWord(e.target.value)}
                 />
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="metaDescription">Meta Description:</label>
+                <label htmlFor="metaDescription" className="tw-text-slate-800">
+                  Meta Description:
+                </label>
                 <textarea
                   name=""
                   id="metaDescription"
                   onChange={(e) => setMetaDesc(e.target.value)}
                   cols="30"
-                  rows="6"
-                  className="p-2 text-sm"
+                  rows="3"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                 ></textarea>
               </div>
             </div>
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <div>Series:</div>
+                <div className="tw-text-slate-800">Series:</div>
                 <label htmlFor="series" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -587,7 +616,7 @@ const NewMovie = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <div>Featured:</div>
+                <div className="tw-text-slate-800">Featured:</div>
                 <label htmlFor="featured" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -598,7 +627,7 @@ const NewMovie = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <div>Subtitle:</div>
+                <div className="tw-text-slate-800">Subtitle:</div>
                 <label htmlFor="subtitle" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -609,7 +638,7 @@ const NewMovie = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <div>Protected Video?:</div>
+                <div className="tw-text-slate-800">Protected Video?:</div>
                 <label htmlFor="protectedVideo" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -620,7 +649,9 @@ const NewMovie = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <div>Choose Custom Thumbnail and Poster:</div>
+                <div className="tw-text-slate-800">
+                  Choose Custom Thumbnail and Poster:
+                </div>
                 <label htmlFor="customThumbnail" className="toggle-switch">
                   <input
                     type="checkbox"
@@ -631,7 +662,9 @@ const NewMovie = ({ title }) => {
                 </label>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="selectMenu">Select Menu*:</label>
+                <label htmlFor="selectMenu" className="tw-text-slate-800">
+                  Select Menu*:
+                </label>
                 <input
                   type="checkbox"
                   id="selectMenu"
@@ -642,8 +675,10 @@ const NewMovie = ({ title }) => {
 
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <div className="tw-flex tw-flex-col">
-                <label>More Details: TMDB Or Custom?</label>
-                <div className="radio-group">
+                <label htmlFor="tmdb" className="tw-text-slate-800">
+                  More Details: TMDB Or Custom?
+                </label>
+                <div className="tw-flex tw-mt-3">
                   <div>
                     <input
                       type="radio"
@@ -654,7 +689,14 @@ const NewMovie = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "tmdb"}
                     />
-                    <label htmlFor="tmdb" className="button-style">
+                    <label
+                      htmlFor="tmdb"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "tmdb"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       TMDB
                     </label>
                   </div>
@@ -668,32 +710,46 @@ const NewMovie = ({ title }) => {
                       onChange={(e) => setSelectTMDB(e.target.value)}
                       checked={selectTMDB === "custom"}
                     />
-                    <label htmlFor="custom" className="button-style">
+                    <label
+                      htmlFor="custom"
+                      className={`tw-px-3 tw-py-2  tw-text-slate-50 tw-border-none tw-outline-none tw-cursor-pointer tw-rounded-md hover:tw-bg-blue-500 ${
+                        selectTMDB === "custom"
+                          ? "tw-bg-blue-600"
+                          : "tw-bg-slate-400"
+                      }`}
+                    >
                       Custom
                     </label>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap-myanmar">
+            <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-col">
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="descriptionSource">Get Description From:</label>
-                <input
-                  type="text"
-                  id="descriptionSource"
-                  className="p-2 text-sm"
-                />
+                <label
+                  htmlFor="descriptionSource"
+                  className="tw-text-slate-800"
+                >
+                  Get Description From:
+                </label>
+                <select>
+                  <option selected>Select</option>
+                  <option>Channel Myanmar</option>
+                </select>
               </div>
               <div className="tw-flex tw-flex-col">
-                <label htmlFor="descriptionMyanmar">
+                <label
+                  htmlFor="descriptionMyanmar"
+                  className="tw-text-slate-800"
+                >
                   Description in Myanmar:
                 </label>
                 <textarea
                   name=""
                   id="descriptionMyanmar"
                   cols="30"
-                  rows="6"
-                  className="p-2 text-sm"
+                  rows="3"
+                  className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   onChange={(e) => setMyanDesc(e.target.value)}
                 ></textarea>
               </div>
