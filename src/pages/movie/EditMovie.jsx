@@ -25,12 +25,14 @@ import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { isDocumentEmpty } from "../../helper/Helpers";
 import { COUNTRY } from "../../assets/COUNTRY";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const EditMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
   // const [customURL, setCustomURL] = useState(null);
   const [searchByToggle, setSearchByToggle] = useState(false);
-  const [searchBy, setSearchBy] = useState("");
+  const [searchBy, setSearchBy] = useState("byId");
   const [movieTitle, setMovieTitle] = useState("");
   const [movieID, setMovieID] = useState("");
   const [movieSlug, setMovieSlug] = useState("");
@@ -50,11 +52,13 @@ const EditMovie = ({ title }) => {
   const [metaDesc, setMetaDesc] = useState("");
   const [myanDesc, setMyanDesc] = useState("");
   const [selectTMDB, setSelectTMDB] = useState("tmdb");
+  const [oldMovieId, setOldMovieId] = useState("");
 
   const [objectKey, setObjectKey] = useState("movies_upload_wasabi");
   const [objects, setObjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [continuationToken, setContinuationToken] = useState(null);
+  const [loadingModal, setLoadingModal] = useState(false);
 
   const { id } = useParams();
 
@@ -68,8 +72,10 @@ const EditMovie = ({ title }) => {
     if (e.key === "Enter") {
       const search = e.target.value;
       try {
+        setLoadingModal(true);
         const fetchObj = await SearchObjects(search, objectKey);
         setObjects(fetchObj);
+        setLoadingModal(false);
       } catch (err) {
         console.log(err);
       }
@@ -95,10 +101,12 @@ const EditMovie = ({ title }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoadingModal(true);
         const { objects: fetchedObjects, continuationToken: nextToken } =
           await ListObjects(continuationToken);
         setObjects((prevObjects) => [...prevObjects, ...fetchedObjects]);
         setContinuationToken(nextToken);
+        setLoadingModal(false);
       } catch (error) {
         console.error("Error fetching objects:", error);
       }
@@ -136,6 +144,7 @@ const EditMovie = ({ title }) => {
         setMovieSlug(data.slug);
         setMovieTitle(data.title);
         setMovieID(data.tmdb_id);
+        setOldMovieId(data.tmdb_id);
         setIsUpcoming(data.is_upcoming);
         setIsFeatured(data.featured);
         setIsSeries(data.series);
@@ -158,15 +167,17 @@ const EditMovie = ({ title }) => {
   async function fetchDataAndStore() {
     const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
 
-    if (!(await isDocumentEmpty(STATIC_WORDS.MOVIES))) {
-      const q = query(
-        collection(db, STATIC_WORDS.MOVIES),
-        where("tmdb_id", "==", movieID)
-      );
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        console.log("already exist");
-        return;
+    if (oldMovieId !== movieID) {
+      if (!(await isDocumentEmpty(STATIC_WORDS.MOVIES))) {
+        const q = query(
+          collection(db, STATIC_WORDS.MOVIES),
+          where("tmdb_id", "==", movieID)
+        );
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          console.log("already exist");
+          return;
+        }
       }
     }
 
@@ -227,7 +238,6 @@ const EditMovie = ({ title }) => {
 
     try {
       const docRef = doc(db, STATIC_WORDS.MOVIES, id);
-
       await updateDoc(docRef, {
         tmdb_id: String(data["id"]) ?? "",
         title: data["title"],
@@ -273,10 +283,11 @@ const EditMovie = ({ title }) => {
     }
     try {
       const q = query(
-        collection(db, STATIC_WORDS.MOVIES),
-        where("movieId", "==", id)
+        collection(db, STATIC_WORDS.VIDEO_LINKS),
+        where("movieId", "==", "/movies/" + id)
       );
       const querySnapshot = await getDocs(q);
+      console.log(querySnapshot, id);
       const docRef = doc(
         db,
         STATIC_WORDS.VIDEO_LINKS,
@@ -307,16 +318,18 @@ const EditMovie = ({ title }) => {
     } finally {
       setIsLoading(false);
     }
+    toast("Movie Updated Successfully!");
   };
 
   return (
     <div className="tw-pt-5 tw-px-2">
       {isLoading && (
-        <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
+        <div className="tw-absolute tw-bg-black tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
 
+      <ToastContainer />
       <div className="tw-mx-2">
         <h1 className="tw-font-bold tw-text-slate-500 tw-mb-2">{title}</h1>
 
@@ -599,7 +612,14 @@ const EditMovie = ({ title }) => {
                   id="country"
                   value={selectedCountry}
                   multiple
-                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  onChange={(e) =>
+                    setSelectedCountry(
+                      Array.from(
+                        e.target.selectedOptions,
+                        (option) => option.value
+                      )
+                    )
+                  }
                   className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1 cursor-pointer"
                 >
                   <option value=""></option>
@@ -635,6 +655,7 @@ const EditMovie = ({ title }) => {
                   className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   cols="30"
                   rows="3"
+                  placeholder="Enter Meta Description"
                 ></textarea>
               </div>
             </div>
@@ -789,6 +810,7 @@ const EditMovie = ({ title }) => {
                   className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   cols="30"
                   rows="3"
+                  placeholder="Enter Myanmar Description"
                   value={myanDesc}
                   onChange={(e) => setMyanDesc(e.target.value)}
                 ></textarea>
@@ -801,11 +823,12 @@ const EditMovie = ({ title }) => {
               handleSelect={handleSelect}
               handleSearch={handleSearch}
               objects={objects}
+              loadingModal={loadingModal}
             />
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
               >
                 Update
               </button>

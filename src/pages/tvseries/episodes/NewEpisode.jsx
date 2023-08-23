@@ -11,6 +11,7 @@ import {
   getDocs,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import axios from "axios";
@@ -22,6 +23,8 @@ import Loading from "react-loading";
 import { CustomModal } from "../../../components/widget/CustomModal";
 import { ListObjects, SearchObjects } from "../../../helper/FetchObjects";
 import { getPresignedUrlSeries } from "../../../helper/Helpers";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const NewEpisode = ({ title }) => {
   const { id } = useParams();
@@ -36,18 +39,22 @@ const NewEpisode = ({ title }) => {
   const [selectedOption, setSelectedOption] = useState("url");
   const { tmdb_id, tvSeriesId, season_number } = location.state;
   const [customURL, setCustomURL] = useState(null);
+
   const [selectKey, setSelectKey] = useState("");
   const [objectKey, setObjectKey] = useState("tvshow_upload_wasabi");
   const [showModal, setShowModal] = useState(false);
   const [objects, setObjects] = useState([]);
   const [continuationToken, setContinuationToken] = useState(null);
+  const [loadingModal, setLoadingModal] = useState(false);
 
   const handleSearch = async (e) => {
     if (e.key === "Enter") {
       const search = e.target.value;
       try {
+        setLoadingModal(true);
         const fetchObj = await SearchObjects(search, objectKey);
         setObjects(fetchObj);
+        setLoadingModal(false);
       } catch (err) {
         console.log(err);
       }
@@ -75,11 +82,12 @@ const NewEpisode = ({ title }) => {
   useEffect(() => {
     const fetchData = async (key) => {
       try {
-        console.log(key);
+        setLoadingModal(true);
         const { objects: fetchedObjects, continuationToken: nextToken } =
           await ListObjects(continuationToken, key);
         setObjects((prevObjects) => [...prevObjects, ...fetchedObjects]);
         setContinuationToken(nextToken);
+        setLoadingModal(false);
       } catch (error) {
         console.error("Error fetching objects:", error);
       }
@@ -217,6 +225,70 @@ const NewEpisode = ({ title }) => {
     }
   }
 
+  async function fetchDataAndEdit() {
+    const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
+    const episode_data = await axios.get(
+      `https://api.themoviedb.org/3/tv/${tmdb_id}/season/${season_number}/episode/${episodeNumber}?api_key=${TMDB_API_KEY}`
+    );
+
+    let thumbnailUrl = null;
+    if (episode_data["data"]["still_path"]) {
+      const thumbnail = await fromURL(
+        `https://image.tmdb.org/t/p/original/${episode_data["data"]["still_path"]}`,
+        1,
+        0,
+        0,
+        "webp"
+      );
+      const thumbnailRef = ref(
+        storage,
+        `tvseries/episode/poster/${episode_data["data"]["still_path"]}`
+      );
+
+      await uploadBytesResumable(thumbnailRef, thumbnail);
+      thumbnailUrl = await getDownloadURL(thumbnailRef);
+    }
+
+    try {
+      const obj = {
+        seasonsId: id,
+        tmdb_id: String(episode_data["data"]["id"]),
+        thumbnail: thumbnailUrl ?? "",
+        episode_no: episodeNumber,
+        title: episodeTitle,
+        tmdb: "Y",
+        duration: duration,
+        detail: episode_data["data"]["overview"],
+        a_language: "",
+        subtitle: "",
+        release: "",
+        type: "E",
+        // created_by: "",
+        updated_at: serverTimestamp(),
+      };
+      const docRef = doc(db, STATIC_WORDS.EP, id);
+      await updateDoc(docRef, obj);
+      setData([...data, { id: docRef.id, data: obj }]);
+    } catch (error) {
+      console.log(error);
+    }
+
+    // try {
+    //   await addDoc(collection(db, STATIC_WORDS.VIDEO_LINKS), {
+    //     episodeId: episodeRef,
+    //     type: "upload_video",
+    //     url_360: await getPresignedUrlSeries(selectKey, "url_360"),
+    //     url_480: await getPresignedUrlSeries(selectKey, "url_480"),
+    //     url_720: await getPresignedUrlSeries(selectKey, "url_720"),
+    //     url_1080: await getPresignedUrlSeries(selectKey, "url_1080"),
+    //     created_at: serverTimestamp(),
+    //     updated_at: serverTimestamp(),
+    //   });
+    // } catch (error) {
+    //   console.log(error);
+    // }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -227,19 +299,21 @@ const NewEpisode = ({ title }) => {
     } finally {
       setIsLoading(false);
     }
+    toast("Create Episode Success!");
   };
 
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     console.log("asdf");
-    // setIsLoading(true);
-    // try {
-    //   await fetchDataAndStore();
-    // } catch (error) {
-    //   console.error("Error:", error);
-    // } finally {
-    //   setIsLoading(false);
-    // }
+    setIsLoading(true);
+    try {
+      await fetchDataAndEdit();
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+    toast("Update Episode Success!");
   };
 
   const handleDelete = async (id) => {
@@ -251,15 +325,17 @@ const NewEpisode = ({ title }) => {
     } catch (err) {
       console.log(err);
     }
+    toast("Episode Delete Success!");
   };
 
   return (
     <div className="tw-pt-5 tw-px-2">
       {isLoading && (
-        <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
+        <div className="tw-absolute tw-bg-black tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
+      <ToastContainer />
       <div className="tw-mx-2">
         <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
         <div className="tw-flex tw-justify-between tw-bg-white tw-p-1 tw-w-full">
@@ -909,6 +985,7 @@ const NewEpisode = ({ title }) => {
                   handleSelect={handleSelect}
                   handleSearch={handleSearch}
                   objects={objects}
+                  loadingModal={loadingModal}
                 />
                 <div className="tw-flex tw-gap-x-2 tw-my-5">
                   <button
@@ -929,7 +1006,7 @@ const NewEpisode = ({ title }) => {
           </div>
           <div className="tw-bg-slate-300 tw-rounded-md tw-w-[44%]">
             <div className="tw-p-2">
-              <table>
+              <table className="tw-border-collapse tw-border-spacing-0 tw-w-full">
                 <thead className="tw-bg-slate-400">
                   <tr>
                     <th className="tw-text-center tw-px-2">#</th>

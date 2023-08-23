@@ -9,6 +9,7 @@ import {
   getDocs,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db, storage } from "../../../configs/firebase";
@@ -20,6 +21,8 @@ import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { Delete, Edit, SettingsSuggest } from "@mui/icons-material";
 import ImportCSV from "../../../components/import/ImportCSV";
 import Loading from "react-loading";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const NewSeason = ({ title }) => {
   const { id } = useParams();
@@ -131,6 +134,76 @@ const NewSeason = ({ title }) => {
     }
   }
 
+  async function fetchDataAndEdit() {
+    const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
+
+    const trailer_url = await axios.get(
+      `https://api.themoviedb.org/3/tv/${tmdb_id}/season/${seasonNumber}/videos?api_key=${TMDB_API_KEY}`
+    );
+
+    let trailerUrl = null;
+    if (trailer_url && trailer_url["data"]["results"].length > 0) {
+      trailerUrl = `https://youtu.be/${trailer_url["results"][0]["key"]}`;
+    }
+    const season_data = await axios.get(
+      `https://api.themoviedb.org/3/tv/${tmdb_id}/season/${seasonNumber}?api_key=${TMDB_API_KEY}`
+    );
+
+    const credits = await axios.get(
+      `https://api.themoviedb.org/3/tv/${tmdb_id}/season/${seasonNumber}/credits?api_key=${TMDB_API_KEY}`
+    );
+
+    const actor_id = await ForActors(TMDB_API_KEY, credits);
+
+    let posterURL = null;
+    if (season_data["data"]["poster_path"]) {
+      const poster = await fromURL(
+        `https://image.tmdb.org/t/p/original/${season_data["data"]["poster_path"]}`,
+        1,
+        0,
+        0,
+        "webp"
+      );
+      const posterRef = ref(
+        storage,
+        `tvseries/poster/${season_data["data"]["poster_path"]}`
+      );
+
+      await uploadBytesResumable(posterRef, poster);
+      posterURL = await getDownloadURL(posterRef);
+    }
+
+    try {
+      const obj = {
+        tvSeriesId: id,
+        tmdb_id: String(season_data["data"]["id"]),
+        season_no: seasonNumber,
+        season_slug: seasonSlug,
+        tmdb: "Y",
+        poster: posterURL ?? "",
+        publish_year: season_data["data"]["air_date"].substring(0, 4),
+        thumbnail: "",
+        actorsId: actor_id,
+        a_language: "",
+        detail: season_data["data"]["overview"],
+        views: "",
+        featured: isFeatured,
+        type: "S",
+        is_protected: isProtected,
+        password: "",
+        trailer_url: trailerUrl ?? "",
+        // created_by: "",
+        tv_tmdb_id: tmdb_id,
+        updated_at: serverTimestamp(),
+      };
+      const docRef = doc(db, STATIC_WORDS.SEASONS, id);
+      await updateDoc(docRef, obj);
+      setData([...data, { id: docRef.id, data: obj }]);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const handleEdit = (id) => {
     const fetchData = async (docRef) => {
       try {
@@ -159,19 +232,21 @@ const NewSeason = ({ title }) => {
     } finally {
       setIsLoading(false);
     }
+    toast("Create Season Successful!");
   };
 
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     console.log("asdf");
-    // setIsLoading(true);
-    // try {
-    //   await fetchDataAndStore();
-    // } catch (error) {
-    //   console.error("Error:", error);
-    // } finally {
-    //   setIsLoading(false);
-    // }
+    setIsLoading(true);
+    try {
+      await fetchDataAndEdit();
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+    toast("Updated Season Successfully!");
   };
 
   const handleDelete = async (id) => {
@@ -183,15 +258,17 @@ const NewSeason = ({ title }) => {
     } catch (err) {
       console.log(err);
     }
+    toast("Season Deleted!");
   };
 
   return (
     <div className="tw-pt-5 tw-px-2">
       {isLoading && (
-        <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
+        <div className="tw-absolute tw-bg-black tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
+      <ToastContainer />
       <div className="tw-mx-2">
         <h1 className="tw-font-bold tw-text-slate-500">{title}</h1>
         <div className="tw-flex tw-justify-between tw-bg-white tw-p-1 tw-w-full">

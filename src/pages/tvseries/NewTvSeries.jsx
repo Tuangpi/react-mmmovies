@@ -19,6 +19,8 @@ import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { isDocumentEmpty } from "../../helper/Helpers";
 import { COUNTRY } from "../../assets/COUNTRY";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const NewTvSeries = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -155,15 +157,17 @@ const NewTvSeries = ({ title }) => {
     } finally {
       setIsLoading(false);
     }
+    toast("Create TV Series Success!");
   };
 
   return (
     <div className="tw-pt-5 tw-px-2">
       {isLoading && (
-        <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
+        <div className="tw-absolute tw-bg-black tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#3f51b5" height={"3%"} width={"3%"} />{" "}
         </div>
       )}
+      <ToastContainer />
       <div className="tw-mx-2">
         <h1 className="tw-font-bold tw-text-slate-500 tw-mb-2">{title}</h1>
         <form onSubmit={handleSubmit}>
@@ -198,6 +202,7 @@ const NewTvSeries = ({ title }) => {
                   </label>
                   <input
                     type="text"
+                    placeholder="Enter Movie Title"
                     id="movieName"
                     onChange={(e) => setMovieTitle(e.target.value)}
                     className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
@@ -211,6 +216,7 @@ const NewTvSeries = ({ title }) => {
                   <input
                     id="movieTMDB"
                     type="text"
+                    placeholder="Enter Movie ID"
                     onChange={(e) => setMovieID(e.target.value)}
                     className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   />
@@ -243,7 +249,14 @@ const NewTvSeries = ({ title }) => {
                   id="country"
                   value={selectedCountry}
                   multiple
-                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  onChange={(e) =>
+                    setSelectedCountry(
+                      Array.from(
+                        e.target.selectedOptions,
+                        (option) => option.value
+                      )
+                    )
+                  }
                   className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1 cursor-pointer"
                 >
                   <option value=""></option>
@@ -261,6 +274,7 @@ const NewTvSeries = ({ title }) => {
                 <input
                   type="text"
                   id="metaKeyword"
+                  placeholder="Enter Meta Keyword"
                   className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   onChange={(e) => setMetaKeyWord(e.target.value)}
                 />
@@ -275,6 +289,7 @@ const NewTvSeries = ({ title }) => {
                   onChange={(e) => setMetaDesc(e.target.value)}
                   cols="30"
                   rows="3"
+                  placeholder="Enter Meta Description"
                   className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                 ></textarea>
               </div>
@@ -379,6 +394,7 @@ const NewTvSeries = ({ title }) => {
                   id="descriptionMyanmar"
                   cols="30"
                   rows="3"
+                  placeholder="Enter Myanmar Description"
                   onChange={(e) => setMyanDesc(e.target.value)}
                   className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                 ></textarea>

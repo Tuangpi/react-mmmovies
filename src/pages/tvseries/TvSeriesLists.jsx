@@ -26,6 +26,8 @@ import {
 } from "@mui/icons-material";
 import { starRating } from "../../helper/Helpers";
 import ReactPaginate from "react-paginate";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 
 const TvSeriesLists = () => {
   const [data, setData] = useState([]);
@@ -125,6 +127,7 @@ const TvSeriesLists = () => {
     } catch (err) {
       console.log(err);
     }
+    toast("Tv Series Delete Success!");
   };
 
   const handlePageClick = async (data) => {
@@ -176,9 +179,10 @@ const TvSeriesLists = () => {
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
+      <ToastContainer />
       <div className="tw-flex tw-justify-between tw-items-center">
         <div className="tw-font-bold tw-text-slate-500">All TV Series</div>
-        <div className="tw-flex tw-justify-between">
+        <div className="tw-flex tw-items-center tw-justify-between">
           <div>
             <ImportCSV
               docName={STATIC_WORDS.TVSERIES}

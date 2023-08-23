@@ -10,13 +10,16 @@ const MediaManager = () => {
   const [continuationToken, setContinuationToken] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectKey, setSelectKey] = useState("");
+  const [loadingModal, setLoadingModal] = useState(false);
 
   const handleSearch = async (e) => {
     if (e.key === "Enter") {
       const search = e.target.value;
       try {
+        setLoadingModal(true);
         const fetchObj = await SearchObjects(search, objectKey);
         setObjects(fetchObj);
+        setLoadingModal(false);
       } catch (err) {
         console.log(err);
       }
@@ -26,10 +29,12 @@ const MediaManager = () => {
   useEffect(() => {
     const fetchData = async (key) => {
       try {
+        setLoadingModal(true);
         const { objects: fetchedObjects, continuationToken: nextToken } =
           await ListObjects(continuationToken, key);
         setObjects((prevObjects) => [...prevObjects, ...fetchedObjects]);
         setContinuationToken(nextToken);
+        setLoadingModal(false);
       } catch (error) {
         console.error("Error fetching objects:", error);
       }
@@ -219,6 +224,7 @@ const MediaManager = () => {
         handleSelect={handleSelect}
         handleSearch={handleSearch}
         objects={objects}
+        loadingModal={loadingModal}
       />
     </div>
   );

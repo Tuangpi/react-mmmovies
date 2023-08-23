@@ -19,6 +19,8 @@ import Loading from "react-loading";
 import { Delete, Edit, Star, StarBorderOutlined } from "@mui/icons-material";
 import { starRating } from "../../helper/Helpers";
 import ReactPaginate from "react-paginate";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 
 const MovieLists = () => {
   const [data, setData] = useState([]);
@@ -49,7 +51,7 @@ const MovieLists = () => {
         const querySnapshot = await getDocs(
           query(
             collection(db, STATIC_WORDS.MOVIES),
-            orderBy("created_at"),
+            orderBy("created_at", "desc"),
             limit("1")
           )
         );
@@ -73,6 +75,7 @@ const MovieLists = () => {
     } catch (err) {
       console.log(err);
     }
+    toast("Movie Delete Success!");
   };
 
   const handlePageClick = async (data) => {
@@ -86,7 +89,7 @@ const MovieLists = () => {
       querySnapshot = await getDocs(
         query(
           collection(db, STATIC_WORDS.MOVIES),
-          orderBy("created_at"),
+          orderBy("created_at", "desc"),
           limit("12")
         )
       );
@@ -94,7 +97,7 @@ const MovieLists = () => {
       const next = await getDocs(
         query(
           collection(db, STATIC_WORDS.MOVIES),
-          orderBy("created_at"),
+          orderBy("created_at", "desc"),
           limit(limits)
         )
       );
@@ -103,7 +106,7 @@ const MovieLists = () => {
       querySnapshot = await getDocs(
         query(
           collection(db, STATIC_WORDS.MOVIES),
-          orderBy("created_at"),
+          orderBy("created_at", "desc"),
           startAfter(startAfters),
           limit("12")
         )
@@ -124,10 +127,11 @@ const MovieLists = () => {
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
+      <ToastContainer />
       <div className="tw-flex tw-justify-between tw-items-center">
         <div className="tw-font-bold tw-text-slate-500">All Movie</div>
       </div>
-      <div className="tw-flex tw-justify-between">
+      <div className="tw-flex tw-items-center tw-justify-between">
         <div>
           <ImportCSV
             docName={STATIC_WORDS.MOVIES}

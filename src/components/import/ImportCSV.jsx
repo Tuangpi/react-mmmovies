@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { ChangeCSVtoJson } from "../../helper/Helpers";
 import { MakeTableRelation } from "../../helper/MakeTableRelation";
 import { uploadData } from "../../helper/uploadData";
@@ -21,12 +22,22 @@ const ImportCSV = ({ docName, isLoading }) => {
     } catch (err) {
       console.log(err);
     }
+    toast("Import Finished. Refresh Page!");
   };
 
   return (
     <>
-      Import {docName}
-      <input type="file" onChange={handleFileUpload} accept=".csv" />
+      <label htmlFor="file-input">Import {docName}</label>
+      <input
+        type="file"
+        id="file-input"
+        className="tw-cursor-pointer tw-block tw-w-full tw-border tw-border-none tw-shadow-sm tw-rounded-md tw-text-sm focus:tw-z-10 focus:tw-border-blue-500
+    file:tw-bg-transparent file:tw-border-0
+    file:tw-bg-slate-300 file:tw-mr-2
+    file:tw-py-1 file:tw-px-2"
+        onChange={handleFileUpload}
+        accept=".csv"
+      ></input>
     </>
   );
 };

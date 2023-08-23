@@ -1,5 +1,6 @@
 import { Modal } from "react-overlays";
 import { motion } from "framer-motion";
+import Loading from "react-loading";
 
 export const CustomModal = ({
   showModal,
@@ -8,6 +9,7 @@ export const CustomModal = ({
   handleSelect,
   handleSearch,
   objects,
+  loadingModal,
 }) => {
   const renderBackdrop = (props) => (
     <div
@@ -18,7 +20,7 @@ export const CustomModal = ({
 
   return (
     <Modal
-      className="tw-font-sans tw-fixed tw-w-7/12 tw-z-30 tw-top-14 tw-left-1/4 tw-bg-slate-50 tw-rounded-md tw-shadow-md"
+      className="tw-font-sans tw-fixed tw-w-7/12 tw-z-30 tw-top-14 tw-left-[20%] tw-bg-slate-100 tw-rounded-md tw-shadow-md"
       show={showModal}
       onHide={handleClose}
       renderBackdrop={renderBackdrop}
@@ -40,9 +42,12 @@ export const CustomModal = ({
             </span>
           </div>
         </div>
-        <div className="tw-self-end tw-mt-2 tw-mr-6">
-          Search
+        <div className="tw-self-end tw-mt-4 tw-mr-6 tw-flex tw-items-center tw-gap-x-5">
+          <label htmlFor="search" className="tw-text-slate-800">
+            Search:
+          </label>
           <input
+            id="search"
             type="text"
             onKeyDown={handleSearch}
             className="tw-p-2 tw-text-sm tw-outline-none"
@@ -60,7 +65,7 @@ export const CustomModal = ({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="tw-relative tw-w-40 tw-bg-slate-200 tw-shadow-md hover:tw-scale-105 tw-cursor-pointer"
+                className="tw-relative tw-w-40 tw-bg-slate-300 tw-shadow-md hover:tw-scale-105 tw-cursor-pointer"
                 key={key}
                 onClick={() => handleSelect(d.path)}
               >
@@ -78,17 +83,38 @@ export const CustomModal = ({
                 </div>
               </motion.div>
             ))}
+          {loadingModal ? (
+            <Loading
+              className="tw-ml-20 tw-mt-20"
+              type="spokes"
+              color="#017BFE"
+              height={"4%"}
+              width={"4%"}
+            />
+          ) : (
+            objects.length < 1 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="tw-relative tw-w-full"
+              >
+                No Data
+              </motion.div>
+            )
+          )}
         </div>
 
-        <div className="tw-p-3">
+        <div className="tw-p-3 tw-flex tw-gap-x-2">
           <button
-            className="tw-cursor-pointer tw-text-base tw-py-3 tw-px-3 tw-rounded-md tw-border-none tw-outline-none tw-text-white tw-bg-slate-600"
+            className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-red-600 tw-rounded-md tw-text-slate-50"
             onClick={handleClose}
           >
             Close
           </button>
           <button
-            className="tw-cursor-pointer tw-text-base tw-py-3 tw-px-3 tw-rounded-md tw-border-none tw-outline-none tw-text-white tw-bg-slate-600"
+            className="tw-py-1 tw-px-4 tw-border-none tw-outline-none tw-bg-sky-800 tw-rounded-md tw-text-slate-50"
             onClick={handleSuccess}
           >
             Save Changes

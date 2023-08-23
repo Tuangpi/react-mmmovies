@@ -25,6 +25,8 @@ import { fromURL } from "image-resize-compress";
 import { STATIC_WORDS } from "../../assets/STATIC_WORDS";
 import { getPresignedUrlMovie, isDocumentEmpty } from "../../helper/Helpers";
 import { COUNTRY } from "../../assets/COUNTRY";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const NewMovie = ({ title }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -55,13 +57,16 @@ const NewMovie = ({ title }) => {
   const [objects, setObjects] = useState([]);
   const [continuationToken, setContinuationToken] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [loadingModal, setLoadingModal] = useState(false);
 
   const handleSearch = async (e) => {
     if (e.key === "Enter") {
       const search = e.target.value;
       try {
+        setLoadingModal(true);
         const fetchObj = await SearchObjects(search, objectKey);
         setObjects(fetchObj);
+        setLoadingModal(false);
       } catch (err) {
         console.log(err);
       }
@@ -71,10 +76,12 @@ const NewMovie = ({ title }) => {
   useEffect(() => {
     const fetchData = async (key) => {
       try {
+        setLoadingModal(true);
         const { objects: fetchedObjects, continuationToken: nextToken } =
           await ListObjects(continuationToken, key);
         setObjects((prevObjects) => [...prevObjects, ...fetchedObjects]);
         setContinuationToken(nextToken);
+        setLoadingModal(false);
       } catch (error) {
         console.error("Error fetching objects:", error);
       }
@@ -271,15 +278,17 @@ const NewMovie = ({ title }) => {
     } finally {
       setIsLoading(false);
     }
+    toast("Movies Created Successfully!");
   };
 
   return (
     <div className="tw-pt-5 tw-px-2">
       {isLoading && (
-        <div className="tw-absolute tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
+        <div className="tw-absolute tw-bg-black tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
+      <ToastContainer />
       <div className="tw-mx-2">
         <h1 className="tw-font-bold tw-text-slate-500 tw-mb-2">{title}</h1>
         <form onSubmit={handleSubmit}>
@@ -566,7 +575,14 @@ const NewMovie = ({ title }) => {
                   id="country"
                   value={selectedCountry}
                   multiple
-                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  onChange={(e) =>
+                    setSelectedCountry(
+                      Array.from(
+                        e.target.selectedOptions,
+                        (option) => option.value
+                      )
+                    )
+                  }
                   className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1 cursor-pointer"
                 >
                   <option value=""></option>
@@ -599,6 +615,7 @@ const NewMovie = ({ title }) => {
                   onChange={(e) => setMetaDesc(e.target.value)}
                   cols="30"
                   rows="3"
+                  placeholder="Enter Meta Description"
                   className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                 ></textarea>
               </div>
@@ -749,6 +766,7 @@ const NewMovie = ({ title }) => {
                   id="descriptionMyanmar"
                   cols="30"
                   rows="3"
+                  placeholder="Enter Myanmar Description"
                   className="tw-p-2 tw-text-sm tw-border-none tw-outline-none tw-mt-1"
                   onChange={(e) => setMyanDesc(e.target.value)}
                 ></textarea>
@@ -761,6 +779,7 @@ const NewMovie = ({ title }) => {
               handleSelect={handleSelect}
               handleSearch={handleSearch}
               objects={objects}
+              loadingModal={loadingModal}
             />
             <div className="tw-bg-slate-300 tw-rounded-md tw-mb-4 tw-p-7 tw-flex tw-gap-x-4 tw-flex-wrap">
               <button
