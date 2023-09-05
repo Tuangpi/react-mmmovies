@@ -112,7 +112,7 @@ const ActorLists = () => {
   return (
     <div className="tw-pt-5 tw-px-2">
       {isLoading && (
-        <div className="tw-m-auto tw-mt-56">
+        <div className="tw-absolute tw-bg-black tw-z-50 tw-top-0 tw-bottom-0 tw-left-0 tw-right-0 tw-opacity-50 tw-flex tw-justify-center tw-items-center">
           <Loading type="spokes" color="#fff" height={"4%"} width={"4%"} />
         </div>
       )}
